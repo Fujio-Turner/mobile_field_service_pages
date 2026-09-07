@@ -162,8 +162,41 @@
     padding: 16px 16px; display: flex; align-items: center; gap: 12px;
     box-shadow: 0 10px 28px rgba(15,23,42,0.06);
   }
-  .card-sg { top: 170px; left: 940px; }
-  .card-office { top: 700px; left: 940px; }
+  .card-sg { top: 170px; left: 1008px; }
+  .card-office { top: 700px; left: 1008px; }
+
+  .db-node {
+    position: absolute;
+    left: 808px;
+    top: 318px;
+    width: 124px;
+    z-index: 3;
+    text-align: center;
+  }
+  .db-cyl { width: 70px; height: 78px; margin: 0 auto 6px; display: block; }
+  .db-node strong {
+    display: block;
+    font: 600 12px/1.2 "IBM Plex Sans", Inter, sans-serif;
+    color: var(--ink);
+  }
+  .db-node span {
+    display: block;
+    font: 400 11px/1.3 "IBM Plex Sans", Inter, sans-serif;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .db-ring {
+    position: absolute;
+    left: 18px; right: 18px; top: -2px; height: 84px;
+    border-radius: 40px;
+    pointer-events: none;
+    opacity: 0;
+  }
+  .db-node.is-write .db-ring {
+    opacity: 1;
+    box-shadow: 0 0 0 2px var(--pkt), 0 0 16px rgba(45, 212, 191, 0.4);
+  }
+  .db-node.is-write .db-cyl { transform: scale(1.06); transform-origin: 50% 40%; }
   .card-title { font: 600 16px/1.2 "IBM Plex Sans", Inter, sans-serif; color: var(--ink); }
   .card-status { font: 400 13px/1.3 "IBM Plex Sans", Inter, sans-serif; color: var(--muted); margin-top: 2px; }
   .card-icon {
@@ -188,7 +221,7 @@
   .packet-sm { width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px; }
 
   .caption {
-    position: absolute; left: 420px; width: 820px; top: 880px; z-index: 5;
+    position: absolute; left: 420px; width: 890px; top: 880px; z-index: 5;
     text-align: center; font: 400 14px/1.4 "IBM Plex Sans", Inter, sans-serif; color: var(--muted);
   }
 
@@ -203,9 +236,15 @@
 <div class="viewport">
 <div class="stage" id="stage">
   <svg class="net" viewBox="0 0 1920 1080" preserveAspectRatio="none" aria-hidden="true">
+    <defs>
+      <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+        <path d="M0,0 L9,4.5 L0,9 z" fill="#0f766e"/>
+      </marker>
+    </defs>
     <g id="dotField"></g>
-    <path id="pathCurve" class="path-line" d="M 800 372 C 860 360, 900 200, 940 206" fill="none"/>
-    <path id="pathDown" class="path-line" d="M 1090 248 L 1090 700" fill="none"/>
+    <path id="pathIn" class="path-line" d="M 788 372 L 830 360" fill="none" marker-end="url(#arrow)"/>
+    <path id="pathCurve" class="path-line" d="M 920 348 C 955 300, 980 230, 1008 206" fill="none" marker-end="url(#arrow)"/>
+    <path id="pathDown" class="path-line" d="M 1158 248 L 1158 700" fill="none" marker-end="url(#arrow)"/>
   </svg>
 
   <div class="phone" id="phone">
@@ -244,6 +283,19 @@
     <rect x="26" y="68" width="24" height="18" rx="7"/>
   </svg>
 
+  <div class="db-node" id="localDb">
+    <div class="db-ring"></div>
+    <svg class="db-cyl" viewBox="0 0 64 72" aria-hidden="true">
+      <path d="M6 16 v34 c0 8 11.6 14 26 14 s26-6 26-14 V16" fill="#ccfbf1" stroke="#0f766e" stroke-width="2"/>
+      <ellipse cx="32" cy="16" rx="26" ry="11" fill="#5eead4" stroke="#0f766e" stroke-width="2"/>
+      <path d="M6 30 c0 6 11.6 11 26 11 s26-5 26-11" fill="none" stroke="#0f766e" stroke-width="1.5" opacity="0.45"/>
+      <path d="M6 42 c0 6 11.6 11 26 11 s26-5 26-11" fill="none" stroke="#0f766e" stroke-width="1.5" opacity="0.45"/>
+      <ellipse cx="32" cy="50" rx="26" ry="11" fill="#99f6e4" stroke="#0f766e" stroke-width="2"/>
+    </svg>
+    <strong>Couchbase Lite</strong>
+    <span id="dbStatus">On this phone</span>
+  </div>
+
   <div class="card card-sg" id="cardSg">
     <div class="card-ring" data-ring="teal"></div>
     <div class="card-icon" aria-hidden="true">
@@ -274,6 +326,7 @@
     </div>
   </div>
 
+  <div class="packet" id="pktLocal"></div>
   <div class="packet" id="pkt1"></div>
   <div class="packet packet-sm" id="pkt2"></div>
   <div class="packet" id="pkt3"></div>
@@ -286,16 +339,18 @@ const NOTE = "Replaced gasket on P-12. Pressure OK.";
 const PAUSE_AFTER = 15;
 const CHAR_MS = 90;
 const LOOP_S = 13.20;
-const PATH_CURVE = "M 800 372 C 860 360, 900 200, 940 206";
-const PATH_DOWN  = "M 1090 248 L 1090 700";
-const T = { idleEnd:0.70, typeEnd:4.70, holdEnd:5.18, aimEnd:5.88, tapEnd:6.26, pushEnd:8.46, syncEnd:12.26, resetEnd:13.20 };
+const PATH_IN = "M 788 372 L 830 360";
+const PATH_CURVE = "M 920 348 C 955 300, 980 230, 1008 206";
+const PATH_DOWN  = "M 1158 248 L 1158 700";
+const T = { idleEnd:0.70, typeEnd:4.70, holdEnd:5.18, aimEnd:5.88, tapEnd:6.26, localEnd:7.15, pushEnd:8.70, syncEnd:12.26, resetEnd:13.20 };
 const CAPTION = {
   idle: "A note starts empty on the phone.",
   typing: "Typing the job note.",
   aim: "Reach for Save.",
   tap: "Saved on the device.",
+  local: "Written to Couchbase Lite on the phone.",
   push: "Pushing across the internet.",
-  synced: "Saved on the phone, then across the internet.",
+  synced: "On the phone, then across the internet.",
 };
 
 function typedCountAt(t) {
@@ -313,6 +368,7 @@ function phaseAt(t) {
   if (t < T.holdEnd) return "hold";
   if (t < T.aimEnd) return "aim";
   if (t < T.tapEnd) return "tap";
+  if (t < T.localEnd) return "local";
   if (t < T.pushEnd) return "push";
   if (t < T.syncEnd) return "synced";
   return "idle";
@@ -327,29 +383,35 @@ function snapshot(t) {
     caretOn: phase === "typing" || phase === "hold",
     keyboard: phase === "typing" || phase === "hold" || phase === "aim",
     keyHit: (phase === "typing" && n > 0) ? (n - 1) % 20 : -1,
-    button: (phase === "tap" || phase === "push" || phase === "synced") ? "saved" : "save",
+    button: (phase === "tap" || phase === "local" || phase === "push" || phase === "synced") ? "saved" : "save",
     ripple: phase === "tap",
     hand: phase === "typing" || phase === "hold" ? "type"
         : phase === "aim" ? "aim"
         : phase === "tap" ? "press" : "hidden",
     handBob: phase === "typing" || phase === "hold",
     hud: phase === "push" ? "pushing" : (phase === "synced" ? "synced" : "idle"),
+    db: (phase === "local" || phase === "push" || phase === "synced") ? "write" : "idle",
     sg: phase === "push" ? "receiving" : (phase === "synced" ? "forwarded" : "idle"),
     office: phase === "push" ? "waiting" : (phase === "synced" ? "note" : "idle"),
-    pathBright: phase === "push" || phase === "synced",
+    pathIn: phase === "local" || phase === "push" || phase === "synced",
+    pathOut: phase === "push" || phase === "synced",
+    pathDown: phase === "push" || phase === "synced",
     packets: {
-      p1: t >= 6.26 && t < 6.26 + 1.35,
-      p2: t >= 6.48 && t < 6.48 + 1.35,
-      p3: t >= 7.16 && t < 7.16 + 1.05,
-      p1u: clamp((t - 6.26) / 1.35),
-      p2u: clamp((t - 6.48) / 1.35),
-      p3u: clamp((t - 7.16) / 1.05),
+      local: t >= 6.26 && t < 6.26 + 0.72,
+      localU: clamp((t - 6.26) / 0.72),
+      p1: t >= 7.15 && t < 7.15 + 1.10,
+      p2: t >= 7.32 && t < 7.32 + 1.10,
+      p3: t >= 8.20 && t < 8.20 + 0.95,
+      p1u: clamp((t - 7.15) / 1.10),
+      p2u: clamp((t - 7.32) / 1.10),
+      p3u: clamp((t - 8.20) / 0.95),
     },
     caption:
       phase === "idle" ? CAPTION.idle :
       phase === "typing" || phase === "hold" ? CAPTION.typing :
       phase === "aim" ? CAPTION.aim :
       phase === "tap" ? CAPTION.tap :
+      phase === "local" ? CAPTION.local :
       phase === "push" ? CAPTION.push : CAPTION.synced,
   };
 }
@@ -366,7 +428,16 @@ const Scene = {
     document.getElementById("officeStatus").textContent = map[state];
     document.querySelector("#cardOffice .card-ring").classList.toggle("on", state === "note");
   },
-  setPath(live){ document.querySelectorAll(".path-line").forEach(p => p.classList.toggle("is-live", live)); },
+  setDb(state){
+    const node = document.getElementById("localDb");
+    node.classList.toggle("is-write", state === "write");
+    document.getElementById("dbStatus").textContent = state === "write" ? "1 note in" : "On this phone";
+  },
+  setPath(s){
+    document.getElementById("pathIn").classList.toggle("is-live", s.pathIn);
+    document.getElementById("pathCurve").classList.toggle("is-live", s.pathOut);
+    document.getElementById("pathDown").classList.toggle("is-live", s.pathDown);
+  },
   setCaption(text){ document.getElementById("caption").textContent = text; },
   placePacket(id, pathEl, progress, visible){
     const el = document.getElementById(id);
@@ -406,16 +477,17 @@ function apply(s){
   hand.classList.toggle("press", s.hand === "press");
 
   Scene.setHud(s.hud);
+  Scene.setDb(s.db);
   Scene.setSg(s.sg);
   Scene.setOffice(s.office);
-  Scene.setPath(s.pathBright);
+  Scene.setPath(s);
   Scene.setCaption(s.caption);
-  Scene.crawlDash(s.pathBright ? Math.max(0, (Math.min(s.t, 8.46) - 6.26) * 48) : 0);
-  const curve = document.getElementById("pathCurve");
-  const down = document.getElementById("pathDown");
-  Scene.placePacket("pkt1", curve, s.packets.p1u, s.packets.p1);
-  Scene.placePacket("pkt2", curve, s.packets.p2u, s.packets.p2);
-  Scene.placePacket("pkt3", down,  s.packets.p3u, s.packets.p3);
+  const liveFrom = s.pathIn ? 6.26 : (s.pathOut ? 7.15 : 0);
+  Scene.crawlDash((s.pathIn || s.pathOut) ? Math.max(0, (Math.min(s.t, 8.70) - liveFrom) * 48) : 0);
+  Scene.placePacket("pktLocal", document.getElementById("pathIn"), s.packets.localU, s.packets.local);
+  Scene.placePacket("pkt1", document.getElementById("pathCurve"), s.packets.p1u, s.packets.p1);
+  Scene.placePacket("pkt2", document.getElementById("pathCurve"), s.packets.p2u, s.packets.p2);
+  Scene.placePacket("pkt3", document.getElementById("pathDown"),  s.packets.p3u, s.packets.p3);
 }
 
 function paintDots(){
@@ -438,7 +510,7 @@ function fit(){
   const stage = document.getElementById("stage");
   if (params.has("embed")) {
     document.querySelector(".viewport").classList.add("is-embed");
-    const cx = 380, cy = 90, cw = 900, ch = 840;
+    const cx = 380, cy = 90, cw = 960, ch = 840;
     const k = Math.max(innerWidth / cw, innerHeight / ch);
     const visW = innerWidth / k;
     const visH = innerHeight / k;
