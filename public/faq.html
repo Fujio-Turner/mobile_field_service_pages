@@ -114,7 +114,7 @@
       <details class="faq-item">
         <summary>Does the app track me all day?</summary>
         <div class="faq-a">
-          <p>Foreground / while-using GPS only. Crumbs go to <code>track:{day}:{employeeId}</code> when you move about 100 m. TTL 30 days. Never logged as a map dump. You can deny location; saves still work without lat/lon.</p>
+          <p>Only while the app is in the foreground and location is allowed. It is not an always-on trail. A crumb is stored after you move the threshold (default 100 m / ~328 ft), not on a timer. Deny location to turn it off. Field edits still save. See <a href="#data">tracking collection</a> below for enable / disable / distance.</p>
         </div>
       </details>
     </div>
@@ -239,6 +239,27 @@
     <h2 id="data" class="mt-xl">Data</h2>
     <div class="faq-list">
       <details class="faq-item">
+        <summary>How can I track the changes the user made?</summary>
+        <div class="faq-a">
+          <p>That is <code>history[]</code> on documents the tech creates or edits — not the <code>tracking</code> collection. Each save appends a row: JSON path, previous value, new value, time, who, optional GPS. Newest last. Cap 100.</p>
+          <p>Example: on a job they used 10 fittings, then changed it to 5 on site:</p>
+          <pre><code>{
+  "dt": 1788526100,
+  "lat": 41.7659,
+  "lon": -72.6735,
+  "accuracyM": 8,
+  "by": "tech.jon",
+  "ver": "0.1.0+12",
+  "op": "UpdateWorkOrderOutFields",
+  "changes": [
+    { "path": "materials.0.qtyUsed", "from": 10, "to": 5 }
+  ]
+}</code></pre>
+          <p>Status changes are a row with <code>path: "status"</code>. There is no <code>lastAction</code> object. Sync bookkeeping (<code>SetSyncState</code>) does not append history. Pull catalogs (assets, products, rates, taxes, dispatch inbound) omit <code>history[]</code>.</p>
+          <p>Schema: <a href="docs/schema/common.html">shared envelope</a>. You read it off the outbound (or field-created) document in Couchbase Lite — same JSON Schema 2020-12 as the rest of the body.</p>
+        </div>
+      </details>
+      <details class="faq-item">
         <summary>Where does the data live on the phone?</summary>
         <div class="faq-a">
           <p>One Couchbase Lite file per employee: <code>mfs_{employeeId}_{sha8}.cblite2</code>. Scope <code>field</code> has fourteen collections; scope <code>local</code> has <code>tmp</code>. Open the <a href="docs/index.html">database tree</a> and click a collection for its schema.</p>
@@ -257,9 +278,28 @@
         </div>
       </details>
       <details class="faq-item">
-        <summary>What is tracking?</summary>
+        <summary>What is the tracking collection? Can I turn movement crumbs off?</summary>
         <div class="faq-a">
-          <p>Movement crumbs for the signed-in employee, document id <code>track:{YYYY-MM-DD}:{employeeId}</code>. TTL is 30 calendar days. Never log the <code>tracking</code> map. Schema: <a href="docs/schema/tracking.html">tracking</a>.</p>
+          <p><code>field.tracking</code> is optional <strong>where was the device</strong>, not “what fields did they edit.” One document per day: id <code>track:{YYYY-MM-DD}:{employeeId}</code>. A new point is stored only after the phone has moved at least the threshold (haversine). Default <strong>100 m (~328 ft)</strong>. Still / sitting still does not write. Foreground / “while using” only — not a background trail. Cap 4000 points/day. TTL 30 days. Never log the <code>tracking</code> map.</p>
+          <p><strong>Enable:</strong> sign in and allow <em>While Using</em> location when the OS asks. Crumbs start while the app is in the foreground.</p>
+          <p><strong>Disable:</strong> deny or revoke location (iOS Settings → Field Service → Location → Never / Ask Next Time). Signing out also stops the watcher. There is no Profile toggle yet — permission is the switch.</p>
+          <p><strong>Change the distance that triggers a record</strong> in <code>.env</code> (restart Expo after a change; Metro inlines <code>EXPO_PUBLIC_*</code>):</p>
+          <pre><code># meters of movement before a crumb is stored
+# OS distanceInterval uses the same value
+EXPO_PUBLIC_TRACK_MIN_MOVE_M=100</code></pre>
+          <ul>
+            <li><code>30</code> ≈ 100 ft (noisier)</li>
+            <li><code>100</code> ≈ 328 ft (default)</li>
+            <li><code>152</code> ≈ 500 ft</li>
+            <li><code>305</code> ≈ 1000 ft</li>
+          </ul>
+          <p>Fixes less accurate than that threshold are skipped. Schema: <a href="docs/schema/tracking.html">tracking</a>. Settings catalog: <a href="docs/settings.html">Settings</a>.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>How do I change how many feet or meters trigger a tracking point?</summary>
+        <div class="faq-a">
+          <p>Set <code>EXPO_PUBLIC_TRACK_MIN_MOVE_M</code> to meters, then restart Expo. The same number is the OS <code>distanceInterval</code>, so the radio is not sampled on a timer while the tech is still. Example: <code>152</code> for about 500 feet. Profile → Crumbs today still shows a <em>count</em> only, never the map.</p>
         </div>
       </details>
       <details class="faq-item">
@@ -281,9 +321,13 @@
         </div>
       </details>
       <details class="faq-item">
-        <summary>What is history[]?</summary>
+        <summary>Is history[] the same as the tracking collection?</summary>
         <div class="faq-a">
-          <p>A field-level trail on user/device docs: path, from, to, time, optional GPS. Cap 100. There is no <code>lastAction</code> object. Sync-state bookkeeping does not append history.</p>
+          <p>No. Two different things that both say “track”:</p>
+          <ul>
+            <li><code>history[]</code> — field diffs on a work order, order, note, etc. (“qtyUsed 10 → 5”).</li>
+            <li><code>field.tracking</code> — optional GPS crumbs when the device moves a set distance. One doc per employee per day. No <code>history[]</code> on those docs.</li>
+          </ul>
         </div>
       </details>
     </div>
