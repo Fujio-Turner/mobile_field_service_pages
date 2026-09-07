@@ -17,6 +17,7 @@ python3 -m http.server 4173 --directory public
 | Path | What |
 | --- | --- |
 | `public/` | **CloudFront origin.** `index.html`, `css/`, `js/`, `images/`, `docs/` |
+| `public/docs/schema/*.json` | JSON Schema 2020-12 files (`$schema` → json-schema.org) |
 | `content/` | Markdown copied from the app (`docs/`, `guides/`) |
 | `templates/doc.html` | Pandoc wrapper for doc pages |
 | `scripts/build.py` | `content/*.md` → `public/docs/*.html` |

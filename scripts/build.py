@@ -124,9 +124,31 @@ def rewrite_md_links(text: str, out_rel: str) -> str:
     return re.sub(r"\[([^\]]+)\]\(([^)]+)\)", repl, text)
 
 
+def extract_schema_json(md: str) -> str | None:
+    found = None
+    for block in re.finditer(r"```json\n(.*?)```", md, re.S):
+        body = block.group(1).strip()
+        if '"$schema"' in body and "json-schema.org" in body:
+            found = body
+    return found
+
+
+def inject_schema_bar(html: str, json_href: str) -> str:
+    bar = (
+        '<p class="schema-bar">'
+        '<a href="https://json-schema.org/draft/2020-12/schema">JSON Schema 2020-12</a>'
+        f' · <a href="{json_href}">Download {json_href}</a>'
+        ' · <a href="https://json-schema.org/learn/getting-started-step-by-step">How JSON Schema works</a>'
+        "</p>\n"
+    )
+    return html.replace('<article class="prose">', '<article class="prose">\n' + bar, 1)
+
+
 def render(src: Path, dest: Path, title: str, prefix: str) -> None:
     dest.parent.mkdir(parents=True, exist_ok=True)
-    md = rewrite_md_links(src.read_text(encoding="utf-8"), str(dest.relative_to(PUBLIC / "docs")))
+    raw = src.read_text(encoding="utf-8")
+    schema_json = extract_schema_json(raw)
+    md = rewrite_md_links(raw, str(dest.relative_to(PUBLIC / "docs")))
     tmp = dest.with_suffix(".tmp.md")
     tmp.write_text(md, encoding="utf-8")
     cmd = [
@@ -157,6 +179,10 @@ def render(src: Path, dest: Path, title: str, prefix: str) -> None:
         raise
     finally:
         tmp.unlink(missing_ok=True)
+    if schema_json and dest.parent.name == "schema" and dest.name != "index.html":
+        json_name = dest.with_suffix(".json").name
+        dest.with_suffix(".json").write_text(schema_json + "\n", encoding="utf-8")
+        dest.write_text(inject_schema_bar(dest.read_text(encoding="utf-8"), json_name), encoding="utf-8")
 
 
 def main() -> int:

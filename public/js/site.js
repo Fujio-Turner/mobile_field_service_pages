@@ -18,6 +18,27 @@
   const year = document.getElementById("year");
   if (year) year.textContent = String(new Date().getFullYear());
 
+  document.querySelectorAll("pre").forEach(function (pre) {
+    if (pre.closest(".code-block")) return;
+    if (pre.classList.contains("mermaid") || pre.querySelector("code.language-mermaid")) return;
+    const wrap = document.createElement("div");
+    wrap.className = "code-block";
+    pre.parentNode.insertBefore(wrap, pre);
+    wrap.appendChild(pre);
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "code-copy";
+    btn.textContent = "Copy";
+    btn.addEventListener("click", function () {
+      const text = pre.textContent || "";
+      navigator.clipboard.writeText(text).then(function () {
+        btn.textContent = "Copied";
+        setTimeout(function () { btn.textContent = "Copy"; }, 1600);
+      });
+    });
+    wrap.appendChild(btn);
+  });
+
   const mermaidNodes = document.querySelectorAll("pre code.language-mermaid, pre.mermaid, code.mermaid");
   if (mermaidNodes.length && window.mermaid) {
     window.mermaid.initialize({
