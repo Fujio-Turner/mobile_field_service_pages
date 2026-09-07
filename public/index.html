@@ -124,7 +124,7 @@
             <a class="btn btn-ghost btn-lg" href="https://github.com/Fujio-Turner/mobile_field_service" rel="noopener noreferrer">View on GitHub</a>
           </div>
           <div class="tech-badges" aria-label="Built with">
-            <a class="tech-badge react" href="https://reactnative.dev/" rel="noopener noreferrer">
+            <a class="tech-badge react" href="https://cbl-reactnative.dev/" rel="noopener noreferrer">
               <img src="images/badge-react.svg" alt="" width="22" height="22" />
               React Native
             </a>
@@ -133,13 +133,25 @@
               Couchbase Mobile
             </a>
           </div>
-          <p class="hero-note">iOS and Android development builds · Demo personas Jon, Maya, Priya · No credit card payment in this version</p>
+          <p class="hero-note">iOS and Android development builds</p>
         </div>
         <div class="hero-visual">
-          <p class="visually-hidden">Demo: a technician types a job note, taps Save, writes it to Couchbase Lite on the phone, then syncs it to the office.</p>
+          <p class="visually-hidden">Demo: a technician saves a JSON document to Couchbase Lite on the phone, then it syncs through Sync Gateway to a laptop, ERP, and tablet.</p>
           <div class="hero-film">
-            <img class="hero-still" src="images/hero-sync-idle.png" alt="Job note on the phone with a Couchbase Lite database on the device, then Sync Gateway and the office" width="820" height="840" />
-            <iframe class="hero-film-live" src="hero-sync.html?embed=1" title="Type a job note, save to Couchbase Lite, sync to the office" loading="eager"></iframe>
+            <video
+              class="hero-video"
+              autoplay
+              muted
+              loop
+              playsinline
+              preload="metadata"
+              poster="images/hero-sync-poster.jpg"
+              width="688"
+              height="464"
+              title="Save to Couchbase Lite, then sync to the office"
+            >
+              <source src="videos/hero-sync.mp4" type="video/mp4" />
+            </video>
           </div>
         </div>
       </div>

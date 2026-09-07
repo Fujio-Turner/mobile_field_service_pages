@@ -222,25 +222,18 @@ pre code { font-size: inherit; color: inherit; }
 .hero-film {
   position: relative;
   width: 100%;
-  aspect-ratio: 820 / 840;
-  background: var(--bg);
+  aspect-ratio: 688 / 464;
+  background: #1a2744;
   border-radius: 16px;
   overflow: hidden;
+  box-shadow: var(--shadow-lg);
 }
-.hero-film-live {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
-  background: var(--bg);
-}
-.hero-still {
-  display: none;
+.hero-video {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
+  vertical-align: top;
 }
 
 /* Sections */
@@ -679,6 +672,5 @@ mark.faq-hit {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-film-live { display: none; }
-  .hero-still { display: block; }
+  .hero-video { pointer-events: none; }
 }
