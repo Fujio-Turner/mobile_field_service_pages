@@ -162,41 +162,64 @@
     padding: 16px 16px; display: flex; align-items: center; gap: 12px;
     box-shadow: 0 10px 28px rgba(15,23,42,0.06);
   }
-  .card-sg { top: 170px; left: 1008px; }
-  .card-office { top: 700px; left: 1008px; }
+  .card-sg { top: 170px; left: 860px; }
+  .card-office { top: 700px; left: 860px; }
 
-  .db-node {
-    position: absolute;
-    left: 808px;
-    top: 318px;
-    width: 124px;
-    z-index: 3;
-    text-align: center;
+  .save-to-db {
+    position: relative;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--teal);
+    opacity: 0.35;
   }
-  .db-cyl { width: 70px; height: 78px; margin: 0 auto 6px; display: block; }
-  .db-node strong {
+  .save-to-db.is-live { opacity: 1; }
+  .save-to-db svg { width: 20px; height: 28px; display: block; }
+  .pkt-in {
+    position: absolute;
+    left: 50%;
+    top: 2px;
+    width: 10px;
+    height: 10px;
+    margin-left: -5px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #fff, var(--pkt2) 38%, var(--pkt) 72%);
+    box-shadow: 0 0 8px 2px rgba(45, 212, 191, 0.7);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .pkt-in.is-fly { animation: pktIn 0.72s ease-in forwards; }
+  @keyframes pktIn {
+    0% { top: 0; opacity: 1; }
+    75% { opacity: 1; }
+    100% { top: 22px; opacity: 0; }
+  }
+  .local-db {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+  .local-db .db-cyl { width: 40px; height: 46px; flex-shrink: 0; display: block; }
+  .local-db strong {
     display: block;
-    font: 600 12px/1.2 "IBM Plex Sans", Inter, sans-serif;
+    font: 600 13px/1.25 "IBM Plex Sans", Inter, sans-serif;
     color: var(--ink);
   }
-  .db-node span {
+  .local-db span {
     display: block;
     font: 400 11px/1.3 "IBM Plex Sans", Inter, sans-serif;
     color: var(--muted);
     margin-top: 2px;
   }
-  .db-ring {
-    position: absolute;
-    left: 18px; right: 18px; top: -2px; height: 84px;
-    border-radius: 40px;
-    pointer-events: none;
-    opacity: 0;
+  .local-db.is-write {
+    border-color: #5eead4;
+    box-shadow: 0 0 0 2px var(--pkt), 0 0 12px rgba(45, 212, 191, 0.35);
   }
-  .db-node.is-write .db-ring {
-    opacity: 1;
-    box-shadow: 0 0 0 2px var(--pkt), 0 0 16px rgba(45, 212, 191, 0.4);
-  }
-  .db-node.is-write .db-cyl { transform: scale(1.06); transform-origin: 50% 40%; }
   .card-title { font: 600 16px/1.2 "IBM Plex Sans", Inter, sans-serif; color: var(--ink); }
   .card-status { font: 400 13px/1.3 "IBM Plex Sans", Inter, sans-serif; color: var(--muted); margin-top: 2px; }
   .card-icon {
@@ -221,12 +244,12 @@
   .packet-sm { width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px; }
 
   .caption {
-    position: absolute; left: 420px; width: 890px; top: 880px; z-index: 5;
+    position: absolute; left: 420px; width: 740px; top: 880px; z-index: 5;
     text-align: center; font: 400 14px/1.4 "IBM Plex Sans", Inter, sans-serif; color: var(--muted);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .caret, .hand.bob, .save.rippling .ripple { animation: none; }
+    .caret, .hand.bob, .save.rippling .ripple, .pkt-in.is-fly { animation: none; }
     .keyboard { transition: none; }
     .hand { transition: none !important; }
   }
@@ -242,9 +265,8 @@
       </marker>
     </defs>
     <g id="dotField"></g>
-    <path id="pathIn" class="path-line" d="M 788 372 L 830 360" fill="none" marker-end="url(#arrow)"/>
-    <path id="pathCurve" class="path-line" d="M 920 348 C 955 300, 980 230, 1008 206" fill="none" marker-end="url(#arrow)"/>
-    <path id="pathDown" class="path-line" d="M 1158 248 L 1158 700" fill="none" marker-end="url(#arrow)"/>
+    <path id="pathCurve" class="path-line" d="M 800 468 C 830 400, 848 250, 860 206" fill="none" marker-end="url(#arrow)"/>
+    <path id="pathDown" class="path-line" d="M 1010 248 L 1010 700" fill="none" marker-end="url(#arrow)"/>
   </svg>
 
   <div class="phone" id="phone">
@@ -266,6 +288,26 @@
         <span class="save-label" id="saveLabel">Save</span>
         <span class="ripple" id="ripple"></span>
       </button>
+      <div class="save-to-db" id="saveToDb" aria-hidden="true">
+        <span class="pkt-in" id="pktLocal"></span>
+        <svg viewBox="0 0 24 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2 v18"/>
+          <path d="M6 16 l6 6 6-6"/>
+        </svg>
+      </div>
+      <div class="local-db" id="localDb">
+        <svg class="db-cyl" viewBox="0 0 64 72" aria-hidden="true">
+          <path d="M6 16 v34 c0 8 11.6 14 26 14 s26-6 26-14 V16" fill="#ccfbf1" stroke="#0f766e" stroke-width="2"/>
+          <ellipse cx="32" cy="16" rx="26" ry="11" fill="#5eead4" stroke="#0f766e" stroke-width="2"/>
+          <path d="M6 30 c0 6 11.6 11 26 11 s26-5 26-11" fill="none" stroke="#0f766e" stroke-width="1.5" opacity="0.45"/>
+          <path d="M6 42 c0 6 11.6 11 26 11 s26-5 26-11" fill="none" stroke="#0f766e" stroke-width="1.5" opacity="0.45"/>
+          <ellipse cx="32" cy="50" rx="26" ry="11" fill="#99f6e4" stroke="#0f766e" stroke-width="2"/>
+        </svg>
+        <div>
+          <strong>Couchbase Lite database</strong>
+          <span id="dbStatus">On this phone</span>
+        </div>
+      </div>
       <div class="keyboard" id="keyboard" aria-hidden="true">
         <div class="kb-row"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
         <div class="kb-row row9"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
@@ -282,19 +324,6 @@
     <rect x="18" y="38" width="40" height="34" rx="12"/>
     <rect x="26" y="68" width="24" height="18" rx="7"/>
   </svg>
-
-  <div class="db-node" id="localDb">
-    <div class="db-ring"></div>
-    <svg class="db-cyl" viewBox="0 0 64 72" aria-hidden="true">
-      <path d="M6 16 v34 c0 8 11.6 14 26 14 s26-6 26-14 V16" fill="#ccfbf1" stroke="#0f766e" stroke-width="2"/>
-      <ellipse cx="32" cy="16" rx="26" ry="11" fill="#5eead4" stroke="#0f766e" stroke-width="2"/>
-      <path d="M6 30 c0 6 11.6 11 26 11 s26-5 26-11" fill="none" stroke="#0f766e" stroke-width="1.5" opacity="0.45"/>
-      <path d="M6 42 c0 6 11.6 11 26 11 s26-5 26-11" fill="none" stroke="#0f766e" stroke-width="1.5" opacity="0.45"/>
-      <ellipse cx="32" cy="50" rx="26" ry="11" fill="#99f6e4" stroke="#0f766e" stroke-width="2"/>
-    </svg>
-    <strong>Couchbase Lite</strong>
-    <span id="dbStatus">On this phone</span>
-  </div>
 
   <div class="card card-sg" id="cardSg">
     <div class="card-ring" data-ring="teal"></div>
@@ -326,7 +355,6 @@
     </div>
   </div>
 
-  <div class="packet" id="pktLocal"></div>
   <div class="packet" id="pkt1"></div>
   <div class="packet packet-sm" id="pkt2"></div>
   <div class="packet" id="pkt3"></div>
@@ -339,16 +367,15 @@ const NOTE = "Replaced gasket on P-12. Pressure OK.";
 const PAUSE_AFTER = 15;
 const CHAR_MS = 90;
 const LOOP_S = 13.20;
-const PATH_IN = "M 788 372 L 830 360";
-const PATH_CURVE = "M 920 348 C 955 300, 980 230, 1008 206";
-const PATH_DOWN  = "M 1158 248 L 1158 700";
+const PATH_CURVE = "M 800 468 C 830 400, 848 250, 860 206";
+const PATH_DOWN  = "M 1010 248 L 1010 700";
 const T = { idleEnd:0.70, typeEnd:4.70, holdEnd:5.18, aimEnd:5.88, tapEnd:6.26, localEnd:7.15, pushEnd:8.70, syncEnd:12.26, resetEnd:13.20 };
 const CAPTION = {
   idle: "A note starts empty on the phone.",
   typing: "Typing the job note.",
   aim: "Reach for Save.",
   tap: "Saved on the device.",
-  local: "Written to Couchbase Lite on the phone.",
+  local: "Written to the Couchbase Lite database on the phone.",
   push: "Pushing across the internet.",
   synced: "On the phone, then across the internet.",
 };
@@ -434,7 +461,7 @@ const Scene = {
     document.getElementById("dbStatus").textContent = state === "write" ? "1 note in" : "On this phone";
   },
   setPath(s){
-    document.getElementById("pathIn").classList.toggle("is-live", s.pathIn);
+    document.getElementById("saveToDb").classList.toggle("is-live", s.pathIn);
     document.getElementById("pathCurve").classList.toggle("is-live", s.pathOut);
     document.getElementById("pathDown").classList.toggle("is-live", s.pathDown);
   },
@@ -484,7 +511,7 @@ function apply(s){
   Scene.setCaption(s.caption);
   const liveFrom = s.pathIn ? 6.26 : (s.pathOut ? 7.15 : 0);
   Scene.crawlDash((s.pathIn || s.pathOut) ? Math.max(0, (Math.min(s.t, 8.70) - liveFrom) * 48) : 0);
-  Scene.placePacket("pktLocal", document.getElementById("pathIn"), s.packets.localU, s.packets.local);
+  document.getElementById("pktLocal").classList.toggle("is-fly", s.packets.local);
   Scene.placePacket("pkt1", document.getElementById("pathCurve"), s.packets.p1u, s.packets.p1);
   Scene.placePacket("pkt2", document.getElementById("pathCurve"), s.packets.p2u, s.packets.p2);
   Scene.placePacket("pkt3", document.getElementById("pathDown"),  s.packets.p3u, s.packets.p3);
@@ -510,7 +537,7 @@ function fit(){
   const stage = document.getElementById("stage");
   if (params.has("embed")) {
     document.querySelector(".viewport").classList.add("is-embed");
-    const cx = 380, cy = 90, cw = 960, ch = 840;
+    const cx = 380, cy = 90, cw = 820, ch = 840;
     const k = Math.max(innerWidth / cw, innerHeight / ch);
     const visW = innerWidth / k;
     const visH = innerHeight / k;
