@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FAQ — Mobile Field Service</title>
+  <meta name="description" content="FAQ for Mobile Field Service: offline work, copy-on-write, sync HUD, three modes, Couchbase Lite, JSON Schema." />
+  <meta name="theme-color" content="#0f766e" />
+  <link rel="icon" type="image/svg+xml" href="images/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/site.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="index.html">
+        <img src="images/favicon.svg" alt="" width="32" height="32" />
+        Mobile Field Service
+      </a>
+      <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="index.html#product">Product</a></li>
+        <li><a href="index.html#screens">Screens</a></li>
+        <li><a href="docs/index.html">Docs</a></li>
+        <li><a href="faq.html" aria-current="page">FAQ</a></li>
+        <li><a href="https://github.com/Fujio-Turner/mobile_field_service">App repo</a></li>
+      </ul>
+      <a class="btn btn-primary" href="https://github.com/Fujio-Turner/mobile_field_service">GitHub</a>
+    </div>
+  </header>
+
+  <main class="wrap section">
+    <p class="crumb"><a href="index.html">Home</a> · FAQ</p>
+    <p class="eyebrow">FAQ</p>
+    <h1>Common questions</h1>
+    <p class="lede">Short answers. Deeper detail lives in <a href="docs/index.html">Docs</a> and the <a href="https://github.com/Fujio-Turner/mobile_field_service">app repo</a>.</p>
+    <nav class="faq-jump" aria-label="FAQ sections">
+      <a href="#using">Using the app</a>
+      <a href="#sync">Sync</a>
+      <a href="#data">Data</a>
+      <a href="#build">Building</a>
+    </nav>
+
+    <h2 id="using">Using the app</h2>
+    <div class="faq-list">
+      <details class="faq-item" open>
+        <summary>What is Mobile Field Service?</summary>
+        <div class="faq-a">
+          <p>A phone app for people who inspect pumps, deliver parts, and take orders on a doorstep — including with no signal. When the radio comes back, Couchbase Lite syncs to Sync Gateway. The office sees <strong>your copy</strong> of the work, not an edit war on the dispatch ticket.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>Does it work offline?</summary>
+        <div class="faq-a">
+          <p>Yes. Jobs, photos, notes, stock txs, and employee chat save locally. Asset pins on the map come from local <code>field.assets</code> (the basemap still needs network). Sync runs when you are connected.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>Why can’t I edit the ticket the office sent?</summary>
+        <div class="faq-a">
+          <p>Dispatch inbound is read-only. <strong>Start work</strong> copies it to your outbound document. You edit the copy. Completing <strong>freezes</strong> that copy; forgotten facts go on a new amendment that points at the original. See <a href="docs/architecture.html">Architecture</a>.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>What does Reassigned mean?</summary>
+        <div class="faq-a">
+          <p>Inbound went to someone else, and you already have a local copy. Keep the row. Your paper still completes and pushes. Chat still works. Job rules in Settings / debug choose keep-editing vs lock.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>What are the three modes?</summary>
+        <div class="faq-a">
+          <p><code>users.workModes[]</code> changes Today and which collections you write — not a second binary.</p>
+          <ul>
+            <li><strong>Assets</strong> (Jon Hale) — inspect / repair / move company kit. <a href="docs/day-assets.html">Walkthrough</a></li>
+            <li><strong>Customer</strong> (Maya Chen) — finish a job, then a new order. <a href="docs/day-customer.html">Walkthrough</a></li>
+            <li><strong>Sales</strong> (Priya Shah) — catalog, deliver, next stop. Map tab hidden. <a href="docs/day-sales.html">Walkthrough</a></li>
+          </ul>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>Can customers chat or pay by card?</summary>
+        <div class="faq-a">
+          <p>No. Chat is employees only. Orders snapshot catalog prices. There is <strong>no credit card payment</strong> in this version. Proof of delivery is a photo for now.</p>
+        </div>
+      </details>
+    </div>
+
+    <h2 id="sync" class="mt-xl">Sync</h2>
+    <div class="faq-list">
+      <details class="faq-item">
+        <summary>What is the dot next to the clock?</summary>
+        <div class="faq-a">
+          <p>Today’s sync HUD, on the same row as the time — not a second card.</p>
+          <ul>
+            <li><strong>Green</strong> — connected</li>
+            <li><strong>Yellow</strong> + <code>12m</code> / <code>2h</code> — not connected; last successful sync</li>
+            <li><strong>Number</strong> — documents waiting to push</li>
+            <li><strong>Red</strong> — sync error</li>
+          </ul>
+          <p>Demo has no replicator, so you get a yellow dot and no elapsed/count. Other tabs use a one-line bar.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>Demo vs a real Sync Gateway?</summary>
+        <div class="faq-a">
+          <p><code>EXPO_PUBLIC_AUTH_STRATEGY=demo</code> never starts the replicator. Local work stays on the device. Basic or OIDC mint a session cookie and the replicator uses <code>SessionAuthenticator</code>. See <a href="docs/auth.html">Auth</a> and <a href="docs/replication.html">Replication</a>.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>What gets pushed?</summary>
+        <div class="faq-a">
+          <p>An explicit allow-list of <code>field.*</code> collections. <code>local.tmp</code> is never replicated. Push filters are per collection (for example outbound only when <code>syncState</code> is ready / pushed / error). Tracking crumbs push without waiting for Submit.</p>
+        </div>
+      </details>
+    </div>
+
+    <h2 id="data" class="mt-xl">Data</h2>
+    <div class="faq-list">
+      <details class="faq-item">
+        <summary>Where does the data live on the phone?</summary>
+        <div class="faq-a">
+          <p>One Couchbase Lite file per employee: <code>mfs_{employeeId}_{sha8}.cblite2</code>. Scope <code>field</code> has fourteen collections; scope <code>local</code> has <code>tmp</code>. Open the <a href="docs/index.html">database tree</a> and click a collection for its schema.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>How are documents described?</summary>
+        <div class="faq-a">
+          <p>Each collection has a <a href="https://json-schema.org/draft/2020-12/schema">JSON Schema 2020-12</a> document (<code>$schema</code>, <code>$id</code>, <code>$defs</code>). Schema pages have a Copy button and a downloadable <code>.json</code> file. Start at <a href="docs/schema/workordersin.html">workordersin</a> or the <a href="docs/schema/index.html">schema index</a>.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>Is the database encrypted?</summary>
+        <div class="faq-a">
+          <p>Lab default is <strong>off</strong>. Settings / debug can turn encryption on (AES-256, key in Keychain as a string CBL can read — not a non-exportable Secure Enclave key). Switching wipes and reseeds the local file.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>What is tracking?</summary>
+        <div class="faq-a">
+          <p>Movement crumbs for the signed-in employee, document id <code>track:{YYYY-MM-DD}:{employeeId}</code>. TTL is 30 calendar days. Never log the <code>tracking</code> map. Schema: <a href="docs/schema/tracking.html">tracking</a>.</p>
+        </div>
+      </details>
+    </div>
+
+    <h2 id="build" class="mt-xl">Building</h2>
+    <div class="faq-list">
+      <details class="faq-item">
+        <summary>Can I run this in Expo Go?</summary>
+        <div class="faq-a">
+          <p>No. Couchbase Lite and MapLibre need a <strong>development build</strong> (<code>npx expo run:ios</code> / Android). Expo Go cannot open the local database.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>How do I run the demo?</summary>
+        <div class="faq-a">
+          <p>Node ≥ 20. Copy <code>.env.example</code>, <code>npm install</code>, <code>npx expo run:ios -d "iPhone 16 Pro"</code>. Sign in as Jon (<code>jon.hale@example.com</code>), Maya, or Priya. Details: <a href="https://github.com/Fujio-Turner/mobile_field_service">app README</a>.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>Is vector search in this version?</summary>
+        <div class="faq-a">
+          <p>No. CLIP / vector (S15) is skipped until the native model and index land. Do not scaffold embed code in the app repo.</p>
+        </div>
+      </details>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>© <span id="year">2026</span> Fujio-Turner. Apache License 2.0.</p>
+      <p><a href="docs/index.html">Docs</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service">Application</a></p>
+    </div>
+  </footer>
+  <script src="js/site.js"></script>
+</body>
+</html>
