@@ -4,10 +4,386 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>FAQ — Mobile Field Service</title>
-  <meta name="description" content="Searchable FAQ for Mobile Field Service: offline work, copy-on-write, sync HUD, three modes, Couchbase Lite, JSON Schema." />
+  <meta name="description" content="Answers for Mobile Field Service: offline jobs, copy-on-write, three modes, Couchbase Lite sync, GPS crumbs, and JSON Schema." />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <meta name="author" content="Fujio-Turner" />
   <meta name="theme-color" content="#0f766e" />
   <link rel="canonical" href="https://mobile.fuj.io/faq.html" />
+  <link rel="sitemap" type="application/xml" title="Sitemap" href="https://mobile.fuj.io/sitemap.xml" />
+  <meta property="og:title" content="FAQ — Mobile Field Service" />
+  <meta property="og:description" content="Answers for Mobile Field Service: offline jobs, copy-on-write, three modes, Couchbase Lite sync, GPS crumbs, and JSON Schema." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://mobile.fuj.io/faq.html" />
+  <meta property="og:image" content="https://mobile.fuj.io/images/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Mobile Field Service: Today list of field jobs on a phone" />
+  <meta property="og:site_name" content="Mobile Field Service" />
+  <meta property="og:locale" content="en_US" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="FAQ — Mobile Field Service" />
+  <meta name="twitter:description" content="Answers for Mobile Field Service: offline jobs, copy-on-write, three modes, Couchbase Lite sync, GPS crumbs, and JSON Schema." />
+  <meta name="twitter:image" content="https://mobile.fuj.io/images/og.png" />
+  <meta name="twitter:image:alt" content="Mobile Field Service: Today list of field jobs on a phone" />
   <link rel="icon" type="image/svg+xml" href="images/favicon.svg" />
+  <link rel="manifest" href="site.webmanifest" />
+  <script type="application/ld+json" id="ld-faq">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "FAQPage",
+      "@id": "https://mobile.fuj.io/faq.html#faq",
+      "url": "https://mobile.fuj.io/faq.html",
+      "name": "FAQ — Mobile Field Service",
+      "inLanguage": "en-US",
+      "isPartOf": {
+        "@id": "https://mobile.fuj.io/#site"
+      },
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is Mobile Field Service?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A phone app for people who inspect pumps, deliver parts, and take orders on a doorstep — including with no signal. When the radio comes back, Couchbase Lite syncs to Sync Gateway. The office sees your copy of the work, not an edit war on the dispatch ticket."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does it work offline?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Jobs, photos, notes, stock txs, and employee chat save locally. Asset pins on the map come from local field.assets (the basemap still needs network). Sync runs when you are connected."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I sign in?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Work email (or company IdP). Demo: Jon Hale jon.hale@example.com, Maya Chen maya.chen@example.com, Priya Shah priya.shah@example.com. Any other non-empty id in demo is treated as Jon."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can two phones share one login?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Not in this version. One person, one device. Two active outbound copies for the same inbound are reconciled by keeping the oldest audit.cr.dt."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What are the three modes?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "users.workModes[] changes Today and which collections you write — not a second binary. Assets (Jon Hale) — inspect / repair / move company kit. Walkthrough Customer (Maya Chen) — finish a job, then a new order. Walkthrough Sales (Priya Shah) — catalog, deliver, next stop. Map tab hidden. Walkthrough"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can customers chat or pay by card?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Chat is employees only. Orders snapshot catalog prices. There is no credit card payment in this version. Proof of delivery is a photo for now."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is Large screen optimize and Left hand?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Profile toggles. Large screen optimize moves primary buttons into the thumb zone (off by default = full width). Left hand mirrors that zone when optimize is on."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does the app track me all day?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Only while the app is in the foreground and location is allowed. It is not an always-on trail. A crumb is stored after you move the threshold (default 100 m / ~328 ft), not on a timer. Deny location to turn it off. Field edits still save. See tracking collection below for enable / disable / distance."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why can’t I edit the ticket the office sent?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Dispatch inbound is read-only. Start work copies it to your outbound document. You edit the copy. Completing freezes that copy; forgotten facts go on a new amendment that points at the original. See Architecture."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the difference between a work order and an order?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A work order is labor on a site or asset (inspect, repair, move, deliver, service). An order is commercial: lines, rates, taxes, customer, money in integer cents. Customer-mode days often have both."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Start work vs Complete vs Submit?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Start work copies inbound → outbound. Complete (or Cancel) freezes the body. Submit is required to push that frozen copy. Submit is not a mid-job checkpoint."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "I forgot a photo after Complete. Can I edit it?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Use Add follow-up (amendment). That is a new workordersout with amends.id. You do not reopen the frozen document."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What does Reassigned mean?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Inbound went to someone else, and you already have a local copy. Keep the row. Your paper still completes and pushes. Chat still works. Job rules in Settings / debug choose keep-editing vs lock."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What are job rules?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Lab policy on Profile → Settings / debug. Reassign: keep editing (default) or forbid further edits. Inbound after you have edited: local wins, remote wins, or prompt per field. Untouched copies still take new inbound (or hide if dispatch cancelled)."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do walk-up jobs work?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Today’s Walk-up job creates a field inbound ticket (origin: field) assigned to you. It is still a ticket, not labor. Labor starts after Start work on that inbound screen."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Will overnight jobs disappear at midnight?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Active outbound (assigned / in progress / blocked) is listed without a scheduled.day filter, so overnight work stays on Today until you complete it."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I change the asset master from a job?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Asset documents are pull-only. You link an asset to your outbound copy. Completing a job does not write the asset master. Moves copy from/to onto the working copy only."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I tag a job in chat?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Type WO-10482 or ORD-3301 in the message, or @employeeId. Job-screen chat is a separate thread (thr:wo:{inbound id}). Completing a job does not freeze threads."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the dot next to the clock?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Today’s sync HUD, on the same row as the time — not a second card. Green — connected Yellow + 12m / 2h — not connected; last successful sync Number — documents waiting to push Red — sync error Demo has no replicator, so you get a yellow dot and no elapsed/count. Other tabs use a one-line bar."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Demo vs a real Sync Gateway?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "EXPO_PUBLIC_AUTH_STRATEGY=demo never starts the replicator. Local work stays on the device. Basic or OIDC mint a session cookie and the replicator uses SessionAuthenticator. See Auth and Replication."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What gets pushed?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "An explicit allow-list of field.* collections. local.tmp is never replicated. Push filters are per collection (for example outbound only when syncState is ready / pushed / error). Tracking crumbs push without waiting for Submit."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is simple vs oneshot replication?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Build-time EXPO_PUBLIC_REPL_SCHEMA. simple (default) is one continuous replicator. oneshot pulls work orders and orders first, then one-shots all field collections on an interval and when the app comes to the foreground. Not a Profile toggle."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What happens when my session expires?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The app honors sessionExpiresAt. On replicator 401/404/10401 it stops, tries one refresh, then asks you to sign in again. Local work stays on the device."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Sign out vs wipe?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sign out drops auth keys (session, password, tokens) and keeps the database key. LogoutAndWipe is explicit and deletes the local DB too. Offline re-entry after Logout is not supported; RestoreSession is process death with a still-valid session."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How can I track the changes the user made?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "That is history[] on documents the tech creates or edits — not the tracking collection. Each save appends a row: JSON path, previous value, new value, time, who, optional GPS. Newest last. Cap 100. Example: on a job they used 10 fittings, then changed it to 5 on site: { \"dt\": 1788526100, \"lat\": 41.7659, \"lon\": -72.6735, \"accuracyM\": 8, \"by\": \"tech.jon\", \"ver\": \"0.1.0+12\", \"op\": \"UpdateWorkOrderOutFields\", \"changes\": [ { \"path\": \"materials.0.qtyUsed\", \"from\": 10, \"to\": 5 } ] } Status changes are a row with path: \"status\". There is no lastAction object. Sync bookkeeping (SetSyncState) does not append history. Pull catalogs (assets, products, rates, taxes, dispatch inbound) omit history[]. Schema: shared envelope. You read it off the outbound (or field-created) document in Couchbase Lite — same JSON Schema 2020-12 as the rest of the body."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Where does the data live on the phone?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "One Couchbase Lite file per employee: mfs_{employeeId}_{sha8}.cblite2. Scope field has fourteen collections; scope local has tmp. Open the database tree and click a collection for its schema."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How are documents described?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Each collection has a JSON Schema 2020-12 document ($schema, $id, $defs). Schema pages have a Copy button and a downloadable .json file. Start at workordersin or the schema index."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is the database encrypted?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Lab default is off. Settings / debug can turn encryption on (AES-256, key in Keychain as a string CBL can read — not a non-exportable Secure Enclave key). Switching wipes and reseeds the local file. Opening unencrypted over a leftover encrypted file is recovered by wipe + reseed."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the tracking collection? Can I turn movement crumbs off?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "field.tracking is optional where was the device, not “what fields did they edit.” One document per day: id track:{YYYY-MM-DD}:{employeeId}. A new point is stored only after the phone has moved at least the threshold (haversine). Default 100 m (~328 ft). Still / sitting still does not write. Foreground / “while using” only — not a background trail. Cap 4000 points/day. TTL 30 days. Never log the tracking map. Enable: sign in and allow While Using location when the OS asks. Crumbs start while the app is in the foreground. Disable: deny or revoke location (iOS Settings → Field Service → Location → Never / Ask Next Time). Signing out also stops the watcher. There is no Profile toggle yet — permission is the switch. Change the distance that triggers a record in .env (restart Expo after a change; Metro inlines EXPO_PUBLIC_*): # meters of movement before a crumb is stored # OS distanceInterval uses the same value EXPO_PUBLIC_TRACK_MIN_MOVE_M=100 30 ≈ 100 ft (noisier) 100 ≈ 328 ft (default) 152 ≈ 500 ft 305 ≈ 1000 ft Fixes less accurate than that threshold are skipped. Schema: tracking. Settings catalog: Settings."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I change how many feet or meters trigger a tracking point?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Set EXPO_PUBLIC_TRACK_MIN_MOVE_M to meters, then restart Expo. The same number is the OS distanceInterval, so the radio is not sampled on a timer while the tech is still. Example: 152 for about 500 feet. Profile → Crumbs today still shows a count only, never the map."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why is money in cents?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Integer cents only. No floating-point prices on orders or catalog snapshots. No card capture in v1."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What timezone is “today”?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Device local calendar day YYYY-MM-DD. scheduled.day on documents uses that same convention from scheduled.startDt."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How big can a photo be?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Captured photos compress to about 200–800 KB JPEG, EXIF stripped. Capture above 8 MB pre-compress is rejected. Blobs live as top-level keys on the outbound doc (not nested arrays)."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is history[] the same as the tracking collection?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Two different things that both say “track”: history[] — field diffs on a work order, order, note, etc. (“qtyUsed 10 → 5”). field.tracking — optional GPS crumbs when the device moves a set distance. One doc per employee per day. No history[] on those docs."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I run this in Expo Go?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Couchbase Lite and MapLibre need a development build (npx expo run:ios / Android). Expo Go cannot open the local database."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I run the demo?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Node ≥ 20. Copy .env.example, npm install, npx expo run:ios -d \"iPhone 16 Pro\". Sign in as Jon, Maya, or Priya. Details: app README."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which Couchbase Lite plugin?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The Fujio-Turner cbl-reactnative fork (4.x + vector index on that fork), not official plugin 1.1 as source of truth. Lab/testing the module does not require an Enterprise license; shipping encryption + vector still does."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is vector search in this version?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. CLIP / vector (S15) is skipped until the native model and index land. Do not scaffold embed code in the app repo."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why do Today queries avoid SQL++ IN lists?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "CBL SQL++ for Mobile does not parse IN ['a','b'] or parameterized LIMIT $limit. Use equality / OR and bake integer LIMIT/OFFSET into the SQL string."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Where is the official website?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "https://mobile.fuj.io — this static site. Source: mobile_field_service_pages. The app repo keeps markdown for engineers."
+          }
+        }
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://mobile.fuj.io/faq.html#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://mobile.fuj.io/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "FAQ",
+          "item": "https://mobile.fuj.io/faq.html"
+        }
+      ]
+    }
+  ]
+}
+</script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -35,7 +411,7 @@
   <main class="wrap section">
     <p class="crumb"><a href="index.html">Home</a> · FAQ</p>
     <p class="eyebrow">FAQ</p>
-    <h1>Common questions</h1>
+    <h1>Questions about field work, sync, and Couchbase Lite</h1>
     <p class="lede">Type to filter. Matches highlight in yellow. Deeper detail: <a href="docs/index.html">Docs</a>.</p>
 
     <form id="faq-search-form" class="faq-search" role="search">

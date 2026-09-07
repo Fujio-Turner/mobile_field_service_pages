@@ -22,7 +22,9 @@ python3 -m http.server 4173 --directory public
 | `content/` | Markdown copied from the app (`docs/`, `guides/`) |
 | `templates/doc.html` | Pandoc wrapper for doc pages |
 | `templates/db-tree.html` | Couchbase Lite collection tree injected at the top of Architecture |
-| `scripts/build.py` | `content/*.md` → `public/docs/*.html` |
+| `scripts/build.py` | `content/*.md` → `public/docs/*.html`; writes `sitemap.xml`, FAQ JSON-LD |
+| `public/sitemap.xml` | Indexable HTML pages (home, FAQ, docs). Not the hero film. |
+| `public/images/og.png` | 1200×630 Open Graph / Twitter card |
 | `deploy/s3-cloudfront.sh` | `s3 sync` + invalidation |
 
 ## Live site

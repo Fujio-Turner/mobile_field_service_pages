@@ -64,11 +64,36 @@
     });
   }
 
-  input.addEventListener("input", run);
-  input.addEventListener("search", run);
+  function syncUrl(q) {
+    try {
+      const url = new URL(window.location.href);
+      if (q) url.searchParams.set("q", q);
+      else url.searchParams.delete("q");
+      const next = url.pathname + url.search + url.hash;
+      if (next !== window.location.pathname + window.location.search + window.location.hash) {
+        history.replaceState(null, "", next);
+      }
+    } catch (err) {
+      /* ignore */
+    }
+  }
+
+  input.addEventListener("input", function () {
+    run();
+    syncUrl(input.value.trim());
+  });
+  input.addEventListener("search", function () {
+    run();
+    syncUrl(input.value.trim());
+  });
   document.getElementById("faq-search-form").addEventListener("submit", function (e) {
     e.preventDefault();
     run();
+    syncUrl(input.value.trim());
   });
+
+  const initial = new URLSearchParams(window.location.search).get("q");
+  if (initial) input.value = initial;
   setCount(total);
+  if (initial) run();
 })();

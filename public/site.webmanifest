@@ -1,0 +1,19 @@
+{
+  "name": "Mobile Field Service",
+  "short_name": "Field Service",
+  "description": "Field work on the phone: sync today’s jobs or orders, team chat, notes, maps, and a local catalog. Works without a signal.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "browser",
+  "lang": "en",
+  "background_color": "#f1f5f9",
+  "theme_color": "#0f766e",
+  "icons": [
+    {
+      "src": "/images/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

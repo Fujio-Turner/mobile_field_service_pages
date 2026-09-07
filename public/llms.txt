@@ -1,0 +1,27 @@
+# Mobile Field Service
+
+> Offline-first phone app for field work (React Native + Couchbase Lite). Official site.
+
+Live: https://mobile.fuj.io/
+Application: https://github.com/Fujio-Turner/mobile_field_service
+Site source: https://github.com/Fujio-Turner/mobile_field_service_pages
+License: Apache-2.0
+
+## Product
+
+Sync today’s jobs or orders, chat with the team, write notes, find assets or customers on a map, and search a local catalog — including with no signal. Copy-on-write: inbound dispatch tickets are never patched; the field app writes outbound copies. No credit card payment in this version.
+
+Three modes (`users.workModes[]`): assets (Jon Hale), customer (Maya Chen), sales (Priya Shah).
+
+## Docs
+
+- Home: https://mobile.fuj.io/
+- FAQ: https://mobile.fuj.io/faq.html
+- Docs hub: https://mobile.fuj.io/docs/index.html
+- Architecture: https://mobile.fuj.io/docs/architecture.html
+- Day in the life: https://mobile.fuj.io/docs/day-in-the-life.html
+- Replication: https://mobile.fuj.io/docs/replication.html
+- Auth: https://mobile.fuj.io/docs/auth.html
+- Settings: https://mobile.fuj.io/docs/settings.html
+- JSON Schema: https://mobile.fuj.io/docs/schema/index.html
+- Roadmap: https://mobile.fuj.io/docs/roadmap.html

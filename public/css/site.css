@@ -520,6 +520,7 @@ mark.faq-hit {
   gap: 8px;
   margin: 0 0 28px;
 }
+.faq-jump[hidden] { display: none !important; }
 .faq-jump a {
   display: inline-flex;
   align-items: center;
