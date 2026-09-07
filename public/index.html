@@ -40,7 +40,6 @@
     <section class="hero">
       <div class="wrap hero-grid">
         <div>
-          <p class="pill"><span class="dot" aria-hidden="true"></span> Official site · Expo + Couchbase Lite</p>
           <h1>Work in the field. Even when there is no signal.</h1>
           <p class="sub">
             Sync today’s jobs or orders fast. Chat with your team about work and customers.
@@ -64,8 +63,90 @@
           <p class="hero-note">iOS and Android development builds · Demo personas Jon, Maya, Priya · No credit card payment in this version</p>
         </div>
         <div class="hero-visual">
-          <div class="phone">
-            <img src="images/Home-Jobs-Workorders-Today.png" alt="Today screen: live clock, yellow sync dot after the time, walk-up job, work orders" width="536" height="1165" />
+          <p class="visually-hidden">Demo: a technician types a job note, taps Save, and the note syncs across the internet to the office.</p>
+          <div class="sync-scene" id="sync-demo" data-stage="synced" data-note="Replaced gasket on P-12. Pressure OK." aria-hidden="true">
+            <svg class="sync-wires" viewBox="0 0 460 440" preserveAspectRatio="none">
+              <defs>
+                <filter id="sync-glow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="2.2" result="b"/>
+                  <feMerge>
+                    <feMergeNode in="b"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
+              <g class="net-dots" fill="#94a3b8">
+                <circle cx="250" cy="70" r="1.4"/><circle cx="290" cy="48" r="1.2"/><circle cx="340" cy="86" r="1.3"/>
+                <circle cx="270" cy="120" r="1.2"/><circle cx="320" cy="140" r="1.4"/><circle cx="380" cy="110" r="1.2"/>
+                <circle cx="240" cy="180" r="1.3"/><circle cx="300" cy="200" r="1.2"/><circle cx="360" cy="176" r="1.4"/>
+                <circle cx="260" cy="240" r="1.2"/><circle cx="330" cy="260" r="1.3"/><circle cx="400" cy="228" r="1.2"/>
+                <circle cx="250" cy="300" r="1.4"/><circle cx="310" cy="320" r="1.2"/><circle cx="370" cy="290" r="1.3"/>
+                <circle cx="280" cy="360" r="1.2"/><circle cx="340" cy="380" r="1.4"/><circle cx="410" cy="348" r="1.2"/>
+              </g>
+              <path class="wire wire-a" d="M200 318 C 280 312, 330 110, 412 82" fill="none" stroke="#0f766e" stroke-width="2" stroke-dasharray="5 9" stroke-linecap="round"/>
+              <path class="wire wire-b" d="M412 158 C 412 230, 412 300, 412 368" fill="none" stroke="#0f766e" stroke-width="2" stroke-dasharray="5 9" stroke-linecap="round"/>
+              <g class="pkt">
+                <circle r="7" fill="#2dd4bf" filter="url(#sync-glow)" opacity="0">
+                  <animateMotion path="M200,318 C280,312 330,110 412,82" dur="1.35s" begin="indefinite" fill="freeze"/>
+                  <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.08;0.84;1" dur="1.35s" begin="indefinite" fill="freeze"/>
+                </circle>
+              </g>
+              <g class="pkt">
+                <circle r="6" fill="#5eead4" filter="url(#sync-glow)" opacity="0">
+                  <animateMotion path="M200,318 C280,312 330,110 412,82" dur="1.35s" begin="indefinite" fill="freeze"/>
+                  <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.08;0.84;1" dur="1.35s" begin="indefinite" fill="freeze"/>
+                </circle>
+              </g>
+              <g class="pkt pkt-down">
+                <circle r="7" fill="#2dd4bf" filter="url(#sync-glow)" opacity="0">
+                  <animateMotion path="M412,158 C412,230 412,300 412,368" dur="1.05s" begin="indefinite" fill="freeze"/>
+                  <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.12;0.8;1" dur="1.05s" begin="indefinite" fill="freeze"/>
+                </circle>
+              </g>
+            </svg>
+            <div class="phone phone-demo">
+              <div class="demo-screen">
+                <div class="demo-status">
+                  <span class="demo-time">9:41 AM</span>
+                  <span class="demo-hud"><span class="demo-dot"></span><span class="demo-hud-n">1</span></span>
+                </div>
+                <div class="demo-head">
+                  <p class="demo-kicker">Job note</p>
+                  <p class="demo-title">WO-1042 · North pump</p>
+                </div>
+                <div class="demo-card">
+                  <p class="demo-typed"><span class="demo-text">Replaced gasket on P-12. Pressure OK.</span><span class="demo-caret"></span></p>
+                </div>
+                <button type="button" class="demo-save" tabindex="-1">Saved</button>
+                <div class="demo-keys"></div>
+              </div>
+              <div class="demo-hand">
+                <div class="demo-hand-inner">
+                  <svg viewBox="0 0 72 92" width="72" height="92" fill="none" aria-hidden="true">
+                    <path fill="#fde7d4" stroke="#0f172a" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" d="M29 5.5c4.2 0 7.5 3.2 7.5 7.2V34h5.2c3.2 0 5.8 2.4 5.8 5.4S44.9 45 41.7 45H36.5v3.2h7.2c3.4 0 6 2.5 6 5.6s-2.6 5.6-6 5.6H36.5V62h8.4c3.8 0 6.8 3 6.8 6.6 0 2.4-1.2 4.6-3.2 5.8l-7.4 4.6H20.5c-6.4 0-11.5-5-11.5-11.2V52c0-7.4 5.8-13.4 13.2-13.8V12.7c0-4 3.3-7.2 7.3-7.2Z"/>
+                    <path fill="#fde7d4" stroke="#0f172a" stroke-width="1.8" stroke-linejoin="round" d="M22 42c-7.2 1.6-11 8.4-8.4 14.2 1.8 4 6.4 5.6 10.4 4.2"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+            <div class="sync-net">
+              <div class="sync-bar"><span class="sync-bar-pkt"></span></div>
+              <div class="sync-node sg">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 18h16M4 12h16M4 6h16"/><path d="M8 6v12M16 6v12"/></svg>
+                <div>
+                  <strong>Sync Gateway</strong>
+                  <span class="sync-node-st">On the internet</span>
+                </div>
+              </div>
+              <div class="sync-node office">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 20V8l8-4 8 4v12"/><path d="M9 20v-6h6v6"/></svg>
+                <div>
+                  <strong>Office</strong>
+                  <span class="sync-node-st">Couchbase Server</span>
+                </div>
+              </div>
+              <p class="sync-caption">Saved on the phone, then across the internet.</p>
+            </div>
           </div>
         </div>
       </div>
