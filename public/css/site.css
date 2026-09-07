@@ -191,7 +191,37 @@ pre code { font-size: inherit; color: inherit; }
   max-width: 34em;
 }
 .hero-cta { display: flex; flex-wrap: wrap; gap: 12px; }
-.hero-note { margin-top: 16px; color: var(--muted); font-size: 14px; }
+.tech-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+  align-items: center;
+}
+.tech-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 12px 0 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: var(--shadow);
+}
+.tech-badge:hover { color: var(--text); border-color: var(--accent); }
+.tech-badge img {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+.tech-badge.react { color: #0f172a; }
+.tech-badge.couchbase { color: #0f172a; }
+.hero-note { margin-top: 12px; color: var(--muted); font-size: 14px; }
 
 .hero-visual {
   display: flex;
