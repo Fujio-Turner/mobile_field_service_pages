@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Mobile Field Service — type, save, sync</title>
+<!-- 1920×1080, 13.2s silent loop. ?embed=1 crop-fits a parent iframe. ?t=6.9 freeze. ?noscale=1 record. -->
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --wash: #f1f5f9;
+    --teal: #0f766e;
+    --teal-soft: #ccfbf1;
+    --ink: #0f172a;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --ok: #15803d;
+    --hud-y: #facc15;
+    --hud-g: #4ade80;
+    --pkt: #2dd4bf;
+    --pkt2: #5eead4;
+    --hand: #fde7d4;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    background: var(--wash);
+    font-family: "IBM Plex Sans", Inter, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .viewport { width: 100vw; height: 100vh; display: grid; place-items: center; overflow: hidden; background: var(--wash); }
+  .stage {
+    width: 1920px; height: 1080px;
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse 58% 62% at 62% 42%, rgba(204,251,241,0.50), transparent 70%),
+      var(--wash);
+    transform-origin: center center;
+  }
+  .net { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+  .path-line {
+    stroke: var(--teal);
+    stroke-width: 1.7;
+    stroke-dasharray: 6 7;
+    stroke-linecap: round;
+    opacity: 0.35;
+  }
+  .path-line.is-live { opacity: 1; }
+
+  .phone {
+    position: absolute; left: 268px; top: 148px;
+    width: 300px; height: 596px;
+    background: var(--ink);
+    border-radius: 36px;
+    padding: 12px;
+    box-shadow: 0 24px 60px rgba(15,23,42,0.18), 0 0 0 1px rgba(15,23,42,0.08);
+    z-index: 3;
+  }
+  .notch {
+    position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+    width: 78px; height: 8px; background: #020617; border-radius: 99px; z-index: 4;
+  }
+  .screen {
+    position: relative; height: 100%;
+    background: var(--wash); border-radius: 26px; overflow: hidden;
+    display: flex; flex-direction: column; padding: 0 14px 12px;
+  }
+  .statusbar {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 28px; margin: 0 -14px 8px; padding: 10px 14px 0;
+    background: var(--ink); color: #e2e8f0;
+    font-size: 11px; font-weight: 500;
+  }
+  .hud { display: flex; align-items: center; gap: 4px; }
+  .hud-count {
+    display: none; min-width: 12px; height: 12px; padding: 0 3px;
+    border-radius: 99px; background: #fff; color: var(--ink);
+    font-size: 8px; font-weight: 700; line-height: 12px; text-align: center;
+  }
+  .hud[data-state="pushing"] .hud-count { display: inline-block; }
+  .hud-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--hud-y);
+    box-shadow: 0 0 0 2px rgba(250,204,21,0.25);
+  }
+  .hud[data-state="synced"] .hud-dot {
+    background: var(--hud-g);
+    box-shadow: 0 0 0 2px rgba(74,222,128,0.28);
+  }
+  .eyebrow {
+    margin-top: 10px; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--teal);
+  }
+  .wo {
+    margin: 4px 0 10px; font-size: 15px; font-weight: 700;
+    color: var(--ink); letter-spacing: -0.01em;
+  }
+  .note {
+    background: #fff; border: 1px solid var(--line); border-radius: 14px;
+    min-height: 88px; padding: 12px 12px 14px;
+    font-size: 13.5px; line-height: 1.45; color: var(--ink);
+  }
+  .caret {
+    display: inline-block; width: 1.5px; height: 14px; margin-left: 1px;
+    background: var(--teal); vertical-align: -2px;
+    animation: caretBlink 1s steps(2, end) infinite;
+  }
+  .caret[hidden] { display: none; }
+  @keyframes caretBlink { 50% { opacity: 0; } }
+  .save {
+    position: relative; margin-top: 12px; height: 40px; border: 0; border-radius: 12px;
+    background: var(--teal); color: #fff;
+    font: 600 15px "IBM Plex Sans", Inter, sans-serif;
+    overflow: hidden;
+  }
+  .save.saved { background: var(--ok); }
+  .save.press { filter: brightness(0.88); }
+  .ripple {
+    position: absolute; left: 50%; top: 50%;
+    width: 8px; height: 8px; margin: -4px 0 0 -4px;
+    border-radius: 50%; background: rgba(255,255,255,0.55);
+    transform: scale(0); opacity: 0; pointer-events: none;
+  }
+  .save.rippling .ripple { animation: ripple 380ms ease-out forwards; }
+  @keyframes ripple { to { transform: scale(22); opacity: 0; } }
+  .keyboard {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 8px 8px 10px; background: #e2e8f0;
+    transform: translateY(102%);
+    transition: transform 280ms cubic-bezier(.22,.8,.28,1);
+  }
+  .keyboard.up { transform: translateY(0); }
+  .kb-row { display: flex; justify-content: center; gap: 4px; margin: 3px 0; }
+  .kb-row i {
+    display: block; width: 23px; height: 26px;
+    background: #fff; border-radius: 5px; box-shadow: 0 1px 0 #cbd5e1;
+  }
+  .kb-row.row9 i { width: 24px; }
+  .kb-row i.space { width: 148px; }
+  .kb-row i.hit { background: var(--teal-soft); transform: translateY(1px); box-shadow: none; }
+
+  .hand {
+    position: absolute; width: 78px; height: 96px;
+    left: 392px; top: 520px;
+    fill: var(--hand); stroke: var(--ink); stroke-width: 1.8;
+    filter: drop-shadow(0 6px 8px rgba(15,23,42,0.18));
+    opacity: 0; pointer-events: none; z-index: 6;
+    transform-origin: 34px 8px;
+  }
+  .hand.bob { animation: handBob 0.44s ease-in-out infinite alternate; }
+  @keyframes handBob { from { transform: translateY(0); } to { transform: translateY(4px); } }
+  .hand.press { transform: scale(0.92); }
+
+  .card {
+    position: absolute; z-index: 3; width: 280px;
+    background: #fff; border: 1px solid var(--line); border-radius: 14px;
+    padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+    box-shadow: 0 10px 28px rgba(15,23,42,0.06);
+  }
+  .card-sg { top: 178px; left: 1300px; }
+  .card-office { top: 618px; left: 1300px; }
+  .card-title { font: 600 15px/1.2 "IBM Plex Sans", Inter, sans-serif; color: var(--ink); }
+  .card-status { font: 400 12px/1.3 "IBM Plex Sans", Inter, sans-serif; color: var(--muted); margin-top: 2px; }
+  .card-icon {
+    flex: 0 0 28px; width: 28px; height: 28px; border-radius: 8px;
+    background: #f0fdfa; display: grid; place-items: center;
+  }
+  .card-ring {
+    position: absolute; inset: -6px; border-radius: 18px; pointer-events: none;
+    opacity: 0;
+  }
+  .card-ring[data-ring="teal"].on { opacity: 1; box-shadow: 0 0 0 2px var(--pkt), 0 0 18px rgba(45,212,191,0.45); }
+  .card-ring[data-ring="green"].on { opacity: 1; box-shadow: 0 0 0 2px var(--hud-g), 0 0 18px rgba(74,222,128,0.35); }
+
+  .packet {
+    position: absolute; left: 0; top: 0; z-index: 4;
+    width: 14px; height: 14px; margin: -7px 0 0 -7px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #fff, var(--pkt2) 38%, var(--pkt) 72%);
+    box-shadow: 0 0 10px 3px rgba(45,212,191,0.7), 0 0 22px 6px rgba(94,234,212,0.35);
+    opacity: 0; pointer-events: none;
+  }
+  .packet-sm { width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px; }
+
+  .caption {
+    position: absolute; left: 0; right: 0; bottom: 36px; z-index: 5;
+    text-align: center; font: 400 12px/1.4 "IBM Plex Sans", Inter, sans-serif; color: var(--muted);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .caret, .hand.bob, .save.rippling .ripple { animation: none; }
+    .keyboard { transition: none; }
+    .hand { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="viewport">
+<div class="stage" id="stage">
+  <svg class="net" viewBox="0 0 1920 1080" preserveAspectRatio="none" aria-hidden="true">
+    <g id="dotField"></g>
+    <path id="pathCurve" class="path-line" d="M 568 378 C 780 300, 1040 210, 1300 218" fill="none"/>
+    <path id="pathDown" class="path-line" d="M 1440 268 L 1440 618" fill="none"/>
+  </svg>
+
+  <div class="phone" id="phone">
+    <div class="notch"></div>
+    <div class="screen">
+      <div class="statusbar">
+        <span class="time">9:41 AM</span>
+        <div class="hud" id="hud" data-state="idle">
+          <span class="hud-count" id="hudCount">1</span>
+          <span class="hud-dot" id="hudDot"></span>
+        </div>
+      </div>
+      <div class="eyebrow">JOB NOTE</div>
+      <div class="wo">WO-1042 · North pump</div>
+      <div class="note" id="note">
+        <span class="note-text" id="noteText"></span><span class="caret" id="caret" hidden></span>
+      </div>
+      <button class="save" id="save" type="button">
+        <span class="save-label" id="saveLabel">Save</span>
+        <span class="ripple" id="ripple"></span>
+      </button>
+      <div class="keyboard" id="keyboard" aria-hidden="true">
+        <div class="kb-row"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="kb-row row9"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="kb-row"><i class="space"></i></div>
+      </div>
+    </div>
+  </div>
+
+  <svg class="hand" id="hand" viewBox="0 0 80 92" aria-hidden="true">
+    <rect x="30" y="4" width="11" height="38" rx="5.5"/>
+    <rect x="43" y="24" width="10" height="22" rx="5"/>
+    <rect x="54" y="28" width="9" height="18" rx="4.5"/>
+    <rect x="10" y="38" width="18" height="11" rx="5.5" transform="rotate(-22 19 43.5)"/>
+    <rect x="18" y="38" width="40" height="34" rx="12"/>
+    <rect x="26" y="68" width="24" height="18" rx="7"/>
+  </svg>
+
+  <div class="card card-sg" id="cardSg">
+    <div class="card-ring" data-ring="teal"></div>
+    <div class="card-icon" aria-hidden="true">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="6" rx="1.2"/>
+        <rect x="3" y="14" width="18" height="6" rx="1.2"/>
+        <path d="M7 7h.01M7 17h.01"/>
+      </svg>
+    </div>
+    <div class="card-copy">
+      <div class="card-title">Sync Gateway</div>
+      <div class="card-status" id="sgStatus">On the internet</div>
+    </div>
+  </div>
+
+  <div class="card card-office" id="cardOffice">
+    <div class="card-ring" data-ring="green"></div>
+    <div class="card-icon" aria-hidden="true">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 20V8l8-4 8 4v12"/>
+        <path d="M9 20v-6h6v6"/>
+        <path d="M9 10h.01M15 10h.01"/>
+      </svg>
+    </div>
+    <div class="card-copy">
+      <div class="card-title">Office</div>
+      <div class="card-status" id="officeStatus">Couchbase Server</div>
+    </div>
+  </div>
+
+  <div class="packet" id="pkt1"></div>
+  <div class="packet packet-sm" id="pkt2"></div>
+  <div class="packet" id="pkt3"></div>
+  <p class="caption" id="caption">A note starts empty on the phone.</p>
+</div>
+</div>
+
+<script>
+const NOTE = "Replaced gasket on P-12. Pressure OK.";
+const PAUSE_AFTER = 15;
+const CHAR_MS = 90;
+const LOOP_S = 13.20;
+const PATH_CURVE = "M 568 378 C 780 300, 1040 210, 1300 218";
+const PATH_DOWN  = "M 1440 268 L 1440 618";
+const T = { idleEnd:0.70, typeEnd:4.70, holdEnd:5.18, aimEnd:5.88, tapEnd:6.26, pushEnd:8.46, syncEnd:12.26, resetEnd:13.20 };
+const CAPTION = {
+  idle: "A note starts empty on the phone.",
+  typing: "Typing the job note.",
+  aim: "Reach for Save.",
+  tap: "Saved on the device.",
+  push: "Pushing across the internet.",
+  synced: "Saved on the phone, then across the internet.",
+};
+
+function typedCountAt(t) {
+  if (t < T.idleEnd || t >= T.syncEnd) return 0;
+  const elapsed = (Math.min(t, T.typeEnd) - T.idleEnd) * 1000;
+  const first = PAUSE_AFTER * CHAR_MS;
+  if (elapsed <= first) return Math.min(PAUSE_AFTER, Math.floor(elapsed / CHAR_MS));
+  const afterPause = elapsed - first - 400;
+  if (afterPause <= 0) return PAUSE_AFTER;
+  return Math.min(NOTE.length, PAUSE_AFTER + Math.floor(afterPause / CHAR_MS));
+}
+function phaseAt(t) {
+  if (t < T.idleEnd) return "idle";
+  if (t < T.typeEnd) return "typing";
+  if (t < T.holdEnd) return "hold";
+  if (t < T.aimEnd) return "aim";
+  if (t < T.tapEnd) return "tap";
+  if (t < T.pushEnd) return "push";
+  if (t < T.syncEnd) return "synced";
+  return "idle";
+}
+function clamp(x){ return Math.max(0, Math.min(1, x)); }
+function snapshot(t) {
+  const phase = phaseAt(t);
+  const n = typedCountAt(t);
+  return {
+    t, phase,
+    typed: NOTE.slice(0, n),
+    caretOn: phase === "typing" || phase === "hold",
+    keyboard: phase === "typing" || phase === "hold" || phase === "aim",
+    keyHit: (phase === "typing" && n > 0) ? (n - 1) % 20 : -1,
+    button: (phase === "tap" || phase === "push" || phase === "synced") ? "saved" : "save",
+    ripple: phase === "tap",
+    hand: phase === "typing" || phase === "hold" ? "type"
+        : phase === "aim" ? "aim"
+        : phase === "tap" ? "press" : "hidden",
+    handBob: phase === "typing" || phase === "hold",
+    hud: phase === "push" ? "pushing" : (phase === "synced" ? "synced" : "idle"),
+    sg: phase === "push" ? "receiving" : (phase === "synced" ? "forwarded" : "idle"),
+    office: phase === "push" ? "waiting" : (phase === "synced" ? "note" : "idle"),
+    pathBright: phase === "push" || phase === "synced",
+    packets: {
+      p1: t >= 6.26 && t < 6.26 + 1.35,
+      p2: t >= 6.48 && t < 6.48 + 1.35,
+      p3: t >= 7.16 && t < 7.16 + 1.05,
+      p1u: clamp((t - 6.26) / 1.35),
+      p2u: clamp((t - 6.48) / 1.35),
+      p3u: clamp((t - 7.16) / 1.05),
+    },
+    caption:
+      phase === "idle" ? CAPTION.idle :
+      phase === "typing" || phase === "hold" ? CAPTION.typing :
+      phase === "aim" ? CAPTION.aim :
+      phase === "tap" ? CAPTION.tap :
+      phase === "push" ? CAPTION.push : CAPTION.synced,
+  };
+}
+
+const Scene = {
+  setHud(state){ document.getElementById("hud").dataset.state = state; },
+  setSg(state){
+    const map = { idle:"On the internet", receiving:"Receiving", forwarded:"Forwarded" };
+    document.getElementById("sgStatus").textContent = map[state];
+    document.querySelector("#cardSg .card-ring").classList.toggle("on", state === "receiving");
+  },
+  setOffice(state){
+    const map = { idle:"Couchbase Server", waiting:"Waiting", note:"1 note in" };
+    document.getElementById("officeStatus").textContent = map[state];
+    document.querySelector("#cardOffice .card-ring").classList.toggle("on", state === "note");
+  },
+  setPath(live){ document.querySelectorAll(".path-line").forEach(p => p.classList.toggle("is-live", live)); },
+  setCaption(text){ document.getElementById("caption").textContent = text; },
+  placePacket(id, pathEl, progress, visible){
+    const el = document.getElementById(id);
+    if (!visible) { el.style.opacity = 0; return; }
+    const len = pathEl.getTotalLength();
+    const pt = pathEl.getPointAtLength(clamp(progress) * len);
+    el.style.left = pt.x + "px";
+    el.style.top = pt.y + "px";
+    const fadeIn = Math.min(1, progress / 0.10);
+    const fadeOut = progress > 0.88 ? 1 - (progress - 0.88) / 0.12 : 1;
+    el.style.opacity = String(Math.max(0, fadeIn * fadeOut));
+  },
+  crawlDash(px){ document.querySelectorAll(".path-line").forEach(p => { p.style.strokeDashoffset = String(-px); }); },
+};
+
+function apply(s){
+  document.getElementById("noteText").textContent = s.typed;
+  document.getElementById("caret").hidden = !s.caretOn;
+
+  const save = document.getElementById("save");
+  document.getElementById("saveLabel").textContent = s.button === "saved" ? "Saved" : "Save";
+  save.classList.toggle("saved", s.button === "saved");
+  save.classList.toggle("press", s.hand === "press");
+  save.classList.toggle("rippling", s.ripple);
+
+  document.getElementById("keyboard").classList.toggle("up", s.keyboard);
+  document.querySelectorAll(".kb-row i").forEach((k,i) => k.classList.toggle("hit", i === s.keyHit));
+
+  const hand = document.getElementById("hand");
+  hand.style.opacity = s.hand === "hidden" ? "0" : "1";
+  hand.style.transition = s.hand === "aim"
+    ? "left 0.55s cubic-bezier(.16,1,.3,1), top 0.55s cubic-bezier(.16,1,.3,1), opacity 0.2s"
+    : "opacity 0.25s";
+  if (s.hand === "aim" || s.hand === "press") { hand.style.left = "404px"; hand.style.top = "402px"; }
+  else { hand.style.left = "392px"; hand.style.top = "628px"; }
+  hand.classList.toggle("bob", s.handBob);
+  hand.classList.toggle("press", s.hand === "press");
+
+  Scene.setHud(s.hud);
+  Scene.setSg(s.sg);
+  Scene.setOffice(s.office);
+  Scene.setPath(s.pathBright);
+  Scene.setCaption(s.caption);
+  Scene.crawlDash(s.pathBright ? Math.max(0, (Math.min(s.t, 8.46) - 6.26) * 48) : 0);
+  const curve = document.getElementById("pathCurve");
+  const down = document.getElementById("pathDown");
+  Scene.placePacket("pkt1", curve, s.packets.p1u, s.packets.p1);
+  Scene.placePacket("pkt2", curve, s.packets.p2u, s.packets.p2);
+  Scene.placePacket("pkt3", down,  s.packets.p3u, s.packets.p3);
+}
+
+function paintDots(){
+  const g = document.getElementById("dotField");
+  const ns = "http://www.w3.org/2000/svg";
+  for (let y = 24; y < 1080; y += 28) {
+    for (let x = 24; x < 1920; x += 28) {
+      const c = document.createElementNS(ns, "circle");
+      c.setAttribute("cx", x + ((y / 28) % 2 ? 8 : 0));
+      c.setAttribute("cy", y);
+      c.setAttribute("r", "1.05");
+      c.setAttribute("fill", "#94a3b8");
+      c.setAttribute("fill-opacity", "0.38");
+      g.appendChild(c);
+    }
+  }
+}
+function fit(){
+  const params = new URLSearchParams(location.search);
+  const stage = document.getElementById("stage");
+  if (params.has("t") || params.has("capture") || params.has("noscale")) {
+    stage.style.transform = "none";
+    stage.style.transformOrigin = "center center";
+    return;
+  }
+  if (params.has("embed")) {
+    const cx = 220, cy = 100, cw = 1500, ch = 860;
+    const k = Math.max(innerWidth / cw, innerHeight / ch);
+    const visW = innerWidth / k;
+    const visH = innerHeight / k;
+    const ox = cx + (cw - visW) / 2;
+    const oy = cy + (ch - visH) / 2;
+    stage.style.transformOrigin = "0 0";
+    stage.style.transform = "scale(" + k + ") translate(" + (-ox) + "px," + (-oy) + "px)";
+    return;
+  }
+  const k = Math.min(innerWidth / 1920, innerHeight / 1080);
+  stage.style.transformOrigin = "center center";
+  stage.style.transform = "scale(" + k + ")";
+}
+
+window.__DURATION = LOOP_S;
+window.__setTime = function(t){
+  apply(snapshot(((t % LOOP_S) + LOOP_S) % LOOP_S));
+};
+
+function boot(){
+  paintDots();
+  fit();
+  addEventListener("resize", fit);
+  const params = new URLSearchParams(location.search);
+  const freezeT = params.has("t") ? parseFloat(params.get("t")) : null;
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (freezeT !== null && !Number.isNaN(freezeT)) { apply(snapshot(freezeT)); return; }
+  if (reduced || params.has("capture")) { apply(snapshot(0)); return; }
+  const t0 = performance.now();
+  function frame(now){
+    apply(snapshot(((now - t0) / 1000) % LOOP_S));
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+document.addEventListener("DOMContentLoaded", boot);
+</script>
+</body>
+</html>

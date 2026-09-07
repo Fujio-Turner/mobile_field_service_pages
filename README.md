@@ -17,6 +17,7 @@ python3 -m http.server 4173 --directory public
 | Path | What |
 | --- | --- |
 | `public/` | **CloudFront origin.** `index.html`, `faq.html`, `css/`, `js/`, `images/`, `docs/` |
+| `public/hero-sync.html` | 1920×1080 type/save/sync film (13.2s). `?embed=1` in the homepage iframe. `?t=6.9` freeze. `?noscale=1` to record an MP4 |
 | `public/docs/schema/*.json` | JSON Schema 2020-12 files (`$schema` → json-schema.org) |
 | `content/` | Markdown copied from the app (`docs/`, `guides/`) |
 | `templates/doc.html` | Pandoc wrapper for doc pages |
