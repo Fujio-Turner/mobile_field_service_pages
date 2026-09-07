@@ -39,6 +39,25 @@
     wrap.appendChild(btn);
   });
 
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  function syncHeroVideo() {
+    document.querySelectorAll("video.hero-video").forEach(function (video) {
+      if (reduceMotion.matches) {
+        video.pause();
+        video.removeAttribute("autoplay");
+        try { video.currentTime = 0; } catch (err) { /* ignore */ }
+      } else {
+        video.setAttribute("autoplay", "");
+        const play = video.play();
+        if (play && typeof play.catch === "function") play.catch(function () {});
+      }
+    });
+  }
+  syncHeroVideo();
+  if (typeof reduceMotion.addEventListener === "function") {
+    reduceMotion.addEventListener("change", syncHeroVideo);
+  }
+
   const mermaidNodes = document.querySelectorAll("pre code.language-mermaid, pre.mermaid, code.mermaid");
   if (mermaidNodes.length && window.mermaid) {
     window.mermaid.initialize({

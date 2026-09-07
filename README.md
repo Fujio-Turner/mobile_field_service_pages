@@ -17,7 +17,8 @@ python3 -m http.server 4173 --directory public
 | Path | What |
 | --- | --- |
 | `public/` | **Site root** (what [mobile.fuj.io](https://mobile.fuj.io) serves). `index.html`, `faq.html`, `css/`, `js/`, `images/`, `docs/` |
-| `public/hero-sync.html` | 1920×1080 type/save/sync film (13.2s). `?embed=1` in the homepage iframe. `?t=6.9` freeze. `?noscale=1` to record an MP4 |
+| `public/videos/hero-sync.mp4` | Homepage hero loop (15s, 688×464). Poster: `images/hero-sync-poster.jpg` |
+| `public/hero-sync.html` | Older HTML film (noindex). Not embedded on the homepage. |
 | `public/docs/schema/*.json` | JSON Schema 2020-12 files (`$schema` → json-schema.org) |
 | `content/` | Markdown copied from the app (`docs/`, `guides/`) |
 | `templates/doc.html` | Pandoc wrapper for doc pages |
