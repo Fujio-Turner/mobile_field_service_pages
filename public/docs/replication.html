@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Replication — Mobile Field Service</title>
+  <meta name="description" content="Mobile Field Service documentation." />
+  <meta name="theme-color" content="#0f766e" />
+  <link rel="icon" type="image/svg+xml" href="../images/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/site.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="../index.html">
+        <img src="../images/favicon.svg" alt="" width="32" height="32" />
+        Mobile Field Service
+      </a>
+      <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../index.html#product">Product</a></li>
+        <li><a href="../index.html#screens">Screens</a></li>
+        <li><a href="../docs/index.html" aria-current="page">Docs</a></li>
+        <li><a href="https://github.com/Fujio-Turner/mobile_field_service">App repo</a></li>
+      </ul>
+      <a class="btn btn-primary" href="https://github.com/Fujio-Turner/mobile_field_service">GitHub</a>
+    </div>
+  </header>
+  <main class="wrap doc-layout">
+    <article class="prose">
+      <p class="crumb"><a href="../index.html">Home</a> · <a href="../docs/index.html">Docs</a> · Replication</p>
+<h1 id="couchbase-lite-replication--mobile_field_service">Couchbase Lite replication — mobile_field_service</h1>
+<p>How this app syncs with Sync Gateway / Capella App Services.</p>
+<p><strong>Official API:</strong> <a href="https://cbl-reactnative.dev/DataSync/remote-sync-gateway">cbl-reactnative.dev — Remote sync</a><br />
+<strong>Worked Expo sample:</strong> <a href="https://github.com/couchbase-examples/expo-cbl-travel">couchbase-examples/expo-cbl-travel</a> (<code>services/database.service.ts</code>)<br />
+<strong>Auth / session TTL:</strong> <a href="auth.html">docs/AUTH.md</a><br />
+<strong>Env / debug channel keys:</strong> <a href="settings.html">SETTINGS.md</a><br />
+<strong>Allow-list / push filters:</strong> <a href="architecture.html">docs/DESIGN.md</a></p>
+<p>Binding: <strong><a href="https://github.com/Fujio-Turner/cbl-reactnative">Fujio-Turner/cbl-reactnative</a></strong> (<code>import { … } from 'cbl-reactnative'</code>). The travel sample imports <code>@couchbase/couchbase-lite-react-native</code> — same API shape; we do <strong>not</strong> use official 1.1 as SoT (no vector).</p>
+<hr />
+<h2 id="tldr">TL;DR</h2>
+<ol type="1">
+<li><strong>One</strong> <code>CblReactNativeEngine</code> per process (travel sample singleton).</li>
+<li><strong>Schema is build-time</strong> (<code>EXPO_PUBLIC_REPL_SCHEMA</code>, not Profile): <strong><code>simple</code></strong> (default) = one continuous <code>PUSH_AND_PULL</code> replicator for all <code>field.*</code> except <code>tmp</code>. <strong><code>oneshot</code></strong> = one-shot <code>workordersin</code>+<code>orders</code> first, then one-shot all <code>field.*</code> every <code>EXPO_PUBLIC_REPL_ONESHOT_SEC</code> (default 300) and on foreground.</li>
+<li><code>new ReplicatorConfiguration(endpoint)</code> then <strong><code>addCollection(col, CollectionConfig)</code></strong> per allow-listed <code>field.*</code> collection (<code>CollectionConfig</code> from the Fujio-Turner fork). <strong>Never</strong> <code>local.tmp</code>.</li>
+<li>Each collection config takes a <strong><code>channels: string[]</code></strong>. <strong>Default empty</strong> — do not call <code>setChannels</code>; pull every channel the SG session can access. A non-empty list is a pull filter for lab/debug.</li>
+<li>Authenticate with <strong><code>SessionAuthenticator</code></strong> after <code>POST /{db}/_session</code>. Honor <code>expires</code>. Do not put a fat OIDC JWT on every request.</li>
+<li>Push filters are <strong>pure</strong> functions with <code>"show source"</code>.</li>
+<li><strong>401 / 404 / 10401</strong> → replicator <strong>STOPPED</strong> (no retry). Stop, refresh session, recreate replicator, <code>start(false)</code> (do not reset checkpoint).</li>
+<li>Production <code>wss://</code> + system CAs (<code>acceptOnlySelfSignedServerCertificate = false</code>). Lab may use <code>ws://</code> + self-signed.</li>
+</ol>
+<hr />
+<h2 id="1-pattern-from-expo-cbl-travel-adapted">1. Pattern (from expo-cbl-travel, adapted)</h2>
+<p>Travel sample:</p>
+<ul>
+<li><code>new CblReactNativeEngine()</code> once</li>
+<li><code>FileSystem.getDefaultPath()</code> + <code>DatabaseConfiguration.setDirectory</code></li>
+<li><code>createCollection</code> per linked SG collection</li>
+<li><code>new CollectionConfig(channels | null, null)</code> + <code>setPushFilter</code></li>
+<li><code>new ReplicatorConfiguration(endpoint)</code> + <code>addCollection(col, config)</code></li>
+<li><code>setContinuous(true)</code>, <code>Replicator.create</code>, <code>start</code></li>
+</ul>
+<p><strong>We change:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Travel sample</th>
+<th>This app</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>BasicAuthenticator(user, pass)</code> on the replicator</td>
+<td><code>POST /mfs/_session</code> → <code>SessionAuthenticator(sessionId, cookieName)</code></td>
+</tr>
+<tr>
+<td>Credentials in <code>app.json</code> extra</td>
+<td>Keychain (<a href="auth.html">AUTH.md</a>); never commit passwords</td>
+</tr>
+<tr>
+<td>All linked collections, no push filter</td>
+<td>Allow-list + per-collection push filters</td>
+</tr>
+<tr>
+<td><code>start(true)</code> in their init (resets checkpoint)</td>
+<td><code>start(false)</code> except a deliberate rebuild-from-zero</td>
+</tr>
+<tr>
+<td>Encryption key hardcoded in the sample</td>
+<td>Keychain <code>mfs.dbkey.&lt;employeeId&gt;</code></td>
+</tr>
+<tr>
+<td>Scope <code>inventory</code> hotels/landmarks</td>
+<td>Scope <code>field</code> (+ <code>local.tmp</code> <strong>not</strong> replicated)</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb1"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> endpoint <span class="op">=</span> <span class="kw">new</span> <span class="fu">URLEndpoint</span>(sgUrl)<span class="op">;</span> <span class="co">// wss://host:4984/mfs</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> session <span class="op">=</span> <span class="kw">new</span> <span class="fu">SessionAuthenticator</span>(sessionId<span class="op">,</span> cookieName <span class="op">??</span> <span class="st">&#39;SyncGatewaySession&#39;</span>)<span class="op">;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> config <span class="op">=</span> <span class="kw">new</span> <span class="fu">ReplicatorConfiguration</span>(endpoint)<span class="op">;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (<span class="kw">const</span> col <span class="kw">of</span> fieldCollections) {</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="co">// channels default [] → pass null so SG grants decide the pull set</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> channels <span class="op">=</span> <span class="fu">channelsFor</span>(col<span class="op">.</span><span class="at">name</span>)<span class="op">;</span> <span class="co">// string[]</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> cc <span class="op">=</span> <span class="kw">new</span> <span class="fu">CollectionConfig</span>(channels<span class="op">.</span><span class="at">length</span> <span class="op">?</span> channels <span class="op">:</span> <span class="kw">null</span><span class="op">,</span> <span class="kw">null</span>)<span class="op">;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  cc<span class="op">.</span><span class="fu">setPushFilter</span>(<span class="fu">pushFilterFor</span>(col<span class="op">.</span><span class="at">name</span>))<span class="op">;</span> <span class="co">// &quot;show source&quot; pure fn</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (channels<span class="op">.</span><span class="at">length</span>) cc<span class="op">.</span><span class="fu">setChannels</span>(channels)<span class="op">;</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  config<span class="op">.</span><span class="fu">addCollection</span>(col<span class="op">,</span> cc)<span class="op">;</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co">// do not include local.tmp</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>config<span class="op">.</span><span class="fu">setAuthenticator</span>(session)<span class="op">;</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>config<span class="op">.</span><span class="fu">setContinuous</span>(<span class="kw">true</span>)<span class="op">;</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>config<span class="op">.</span><span class="fu">setAcceptOnlySelfSignedCerts</span>(<span class="kw">false</span>)<span class="op">;</span> <span class="co">// production</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> replicator <span class="op">=</span> <span class="cf">await</span> Replicator<span class="op">.</span><span class="fu">create</span>(config)<span class="op">;</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="cf">await</span> replicator<span class="op">.</span><span class="fu">addChangeListener</span>(onReplicatorStatus)<span class="op">;</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="cf">await</span> replicator<span class="op">.</span><span class="fu">addDocumentChangeListener</span>(onReplicatedDoc)<span class="op">;</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="cf">await</span> replicator<span class="op">.</span><span class="fu">start</span>(<span class="kw">false</span>)<span class="op">;</span></span></code></pre></div>
+<p>SG user example (email): <a href="index.html">README.md</a>.</p>
+<hr />
+<h2 id="2-what-replicates">2. What replicates</h2>
+<table>
+<thead>
+<tr>
+<th>Collection</th>
+<th>Push?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>field.workordersin</code></td>
+<td>only <code>origin == 'field' &amp;&amp; readyToPush</code></td>
+</tr>
+<tr>
+<td><code>field.workordersout</code></td>
+<td><code>syncState</code> in ready_to_push | pushed | push_error</td>
+</tr>
+<tr>
+<td><code>field.orders</code></td>
+<td>not inbound; same syncState rule</td>
+</tr>
+<tr>
+<td><code>field.customers</code></td>
+<td>only <code>origin == 'field' &amp;&amp; readyToPush</code></td>
+</tr>
+<tr>
+<td><code>field.messages</code> / notes / task instances / inventory_tx</td>
+<td><code>readyToPush</code></td>
+</tr>
+<tr>
+<td><code>field.tracking</code></td>
+<td><strong>always</strong> (device-owned crumbs; do not wait for Submit)</td>
+</tr>
+<tr>
+<td><code>field.assets</code> products rates taxes users (dispatch)</td>
+<td><strong>never</strong> (filter false)</td>
+</tr>
+<tr>
+<td><code>local.tmp</code></td>
+<td><strong>omitted</strong> from <code>CollectionConfiguration[]</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="notes-and-tasks-pr-08">Notes and tasks (PR-08)</h3>
+<p>Documented here for the replicator PR. RN push filters must be <strong>pure</strong> with <code>"show source"</code>.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">tasksPushFilter</span>(document<span class="op">:</span> <span class="dt">any</span><span class="op">,</span> _flags<span class="op">:</span> <span class="dt">any</span>)<span class="op">:</span> <span class="dt">boolean</span> {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;show source&quot;</span><span class="op">;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="bu">document</span>[<span class="st">&quot;type&quot;</span>] <span class="op">===</span> <span class="st">&quot;task&quot;</span> <span class="op">&amp;&amp;</span> <span class="bu">document</span>[<span class="st">&quot;readyToPush&quot;</span>] <span class="op">===</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">notesPushFilter</span>(document<span class="op">:</span> <span class="dt">any</span><span class="op">,</span> _flags<span class="op">:</span> <span class="dt">any</span>)<span class="op">:</span> <span class="dt">boolean</span> {</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;show source&quot;</span><span class="op">;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="bu">document</span>[<span class="st">&quot;readyToPush&quot;</span>] <span class="op">===</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<ul>
+<li>Templates (<code>type == 'task_template'</code>) never push.</li>
+<li>Job notes/tasks start <code>readyToPush: false</code>. <code>SubmitWork</code> flips existing children. New children on an <strong>editable</strong> parent that is already submitted copy <code>readyToPush: true</code>.</li>
+<li>General notes (no parent) set <code>readyToPush: true</code> on create.</li>
+<li>Frozen parent → 409; do not push a follow-up onto the frozen copy.</li>
+</ul>
+<h3 id="messages-pr-14">Messages (PR-14)</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">messagesPushFilter</span>(document<span class="op">:</span> <span class="dt">any</span><span class="op">,</span> _flags<span class="op">:</span> <span class="dt">any</span>)<span class="op">:</span> <span class="dt">boolean</span> {</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;show source&quot;</span><span class="op">;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="bu">document</span>[<span class="st">&quot;readyToPush&quot;</span>] <span class="op">===</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<ul>
+<li><code>SendMessage</code> sets <code>readyToPush: true</code> on create (not gated on job Submit).</li>
+<li>Completing a WO does <strong>not</strong> freeze the thread.</li>
+<li>Channels: <code>emp:{from.employeeId}</code> plus each <code>toEmployeeIds</code> entry; job threads also <code>wo:{workOrderInId}</code> when SG grants that channel.</li>
+</ul>
+<h3 id="orders-pr-15">Orders (PR-15)</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">ordersPushFilter</span>(document<span class="op">:</span> <span class="dt">any</span><span class="op">,</span> _flags<span class="op">:</span> <span class="dt">any</span>)<span class="op">:</span> <span class="dt">boolean</span> {</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;show source&quot;</span><span class="op">;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="bu">document</span>[<span class="st">&quot;role&quot;</span>] <span class="op">===</span> <span class="st">&quot;inbound&quot;</span>) <span class="cf">return</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> s <span class="op">=</span> <span class="bu">document</span>[<span class="st">&quot;syncState&quot;</span>]<span class="op">;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> s <span class="op">===</span> <span class="st">&quot;ready_to_push&quot;</span> <span class="op">||</span> s <span class="op">===</span> <span class="st">&quot;pushed&quot;</span> <span class="op">||</span> s <span class="op">===</span> <span class="st">&quot;push_error&quot;</span><span class="op">;</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<ul>
+<li>Never <code>save</code> inbound orders. <code>rates</code> / <code>taxes</code> push filter is <code>false</code>.</li>
+<li><code>SubmitOrder</code> allowed at quoted | accepted | complete | cancelled (no payment).</li>
+</ul>
+<h3 id="tracking-pr-16">Tracking (PR-16)</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">trackingPushFilter</span>(_document<span class="op">:</span> <span class="dt">any</span><span class="op">,</span> _flags<span class="op">:</span> <span class="dt">any</span>)<span class="op">:</span> <span class="dt">boolean</span> {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;show source&quot;</span><span class="op">;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<ul>
+<li>Device-owned crumbs; do not wait for Submit.</li>
+<li>Never log the <code>tracking</code> map. Channel <code>emp:{employeeId}</code>. Id uses employeeId, not email.</li>
+</ul>
+<p>Channels: <code>emp:{employeeId}</code> (SG username is <strong>email</strong>). See DESIGN matrix.</p>
+<h3 id="pull-channel-lists-optional">Pull channel lists (optional)</h3>
+<p>Each <code>CollectionConfig</code> has <code>channels: string[]</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Pull behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>[]</code> / omitted (<strong>default</strong>)</td>
+<td>All channels the session user can access</td>
+</tr>
+<tr>
+<td><code>['emp:E-4412']</code></td>
+<td>Only docs in that channel (SG still ignores channels the user cannot read)</td>
+</tr>
+</tbody>
+</table>
+<p>Do <strong>not</strong> put <code>tmp</code> in the map. Persist lab overrides in Keychain <code>mfs.sync.collectionChannels</code>. Optional env <code>EXPO_PUBLIC_SG_CHANNELS</code> (comma-separated) applies to every field collection only when nothing is stored.</p>
+<p>Edit and restart from <strong>Profile → Settings / debug</strong>.</p>
+<hr />
+<h2 id="3-session-not-basic-on-the-wire-default">3. Session, not Basic-on-the-wire (default)</h2>
+<ol type="1">
+<li>Login: <code>POST /mfs/_session</code> with HTTP Basic (email + password) <strong>or</strong> <code>Authorization: Bearer &lt;id_token&gt;</code>.</li>
+<li>Store <code>session_id</code>, <code>cookie_name</code>, <code>expires</code> in Keychain.</li>
+<li>Replicator: <code>SessionAuthenticator</code> only.</li>
+</ol>
+<p>OIDC ID tokens are large — <strong>exchange for a session</strong>. Rebuild the replicator when you get a new session (<code>stop</code> → <code>create</code> → <code>start(false)</code>).</p>
+<p>Pre-refresh ~5 minutes before <code>expires</code> (<a href="auth.html">AUTH.md</a>).</p>
+<hr />
+<h2 id="4-status-listener">4. Status listener</h2>
+<table>
+<thead>
+<tr>
+<th>Activity</th>
+<th>UI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0 STOPPED</td>
+<td>If error 401/404/10401 → <code>OnReplicatorAuthFailure</code>. Else show error.</td>
+</tr>
+<tr>
+<td>1 OFFLINE</td>
+<td>Banner; local work continues (transient net)</td>
+</tr>
+<tr>
+<td>2 CONNECTING</td>
+<td>Spinner on Profile</td>
+</tr>
+<tr>
+<td>3 IDLE</td>
+<td>Last success time</td>
+</tr>
+<tr>
+<td>4 BUSY</td>
+<td><code>progress.completed/total</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Permanent (replicator STOPPED):</strong> 401, 404, 10401.<br />
+<strong>Transient (retry):</strong> 408, 429, 500–504, 1001 DNS.<br />
+<strong>Document-level (do not log the tech out):</strong> 409 conflict, 404 on a single doc, 413 payload, 403 forbidden.</p>
+<table>
+<thead>
+<tr>
+<th>HTTP / CBL</th>
+<th>Class</th>
+<th>Listener</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>400, 405, 422</td>
+<td>client</td>
+<td>status + doc</td>
+<td>log <code>mfs.repl.http_client</code> / <code>doc_client</code></td>
+</tr>
+<tr>
+<td>401, 10401</td>
+<td>auth</td>
+<td>status</td>
+<td>STOPPED → refresh session</td>
+</tr>
+<tr>
+<td>403</td>
+<td>forbidden</td>
+<td>status + doc</td>
+<td>log; do not wipe the session</td>
+</tr>
+<tr>
+<td>404</td>
+<td>not_found</td>
+<td><strong>status</strong> = missing db (fatal); <strong>doc</strong> = missing/purged doc</td>
+<td></td>
+</tr>
+<tr>
+<td>408</td>
+<td>timeout</td>
+<td>status</td>
+<td>OFFLINE, CBL retries</td>
+</tr>
+<tr>
+<td>409</td>
+<td>conflict</td>
+<td><strong>doc</strong> (usual)</td>
+<td>log <code>mfs.repl.conflict</code> + collection policy; CBL default resolver</td>
+</tr>
+<tr>
+<td>413</td>
+<td>payload</td>
+<td>doc</td>
+<td>log; compress photos, do not retry that blob as-is</td>
+</tr>
+<tr>
+<td>429</td>
+<td>rate_limit</td>
+<td>status</td>
+<td>OFFLINE, CBL retries</td>
+</tr>
+<tr>
+<td>500–504</td>
+<td>transient</td>
+<td>status</td>
+<td>OFFLINE</td>
+</tr>
+<tr>
+<td>1006 / 11006 / 5011</td>
+<td>tls</td>
+<td>status</td>
+<td>fatal TLS</td>
+</tr>
+</tbody>
+</table>
+<p>TLS: <code>ws</code> vs <code>wss</code> mismatch → 11006/1006. Unknown/self-signed on <code>wss</code> → 5011. Fix URL/certs; do not log the cookie.</p>
+<h3 id="conflict-resolvers-per-collection">Conflict resolvers (per collection)</h3>
+<p><code>src/sync/conflicts.ts</code> is a <strong>switch/case per <code>field.*</code> collection</strong>. Today every case returns CBL <strong>default</strong> (<code>null</code> from the <code>"show source"</code> hook). Each case documents what a custom resolver <em>could</em> do (e.g. tracking map union, <code>workordersout</code> by <code>audit.up.dt</code>). Wired via <code>CollectionConfig.setConflictResolver</code> when the native API exists.</p>
+<h3 id="completed--pending">Completed / pending</h3>
+<ul>
+<li><strong>Pending:</strong> <code>pendingDocumentIdsInCollection</code> when present, else COUNT <code>ready_to_push</code>.</li>
+<li><strong>Completed this run:</strong> document listener counters <code>docsPushOk</code> / <code>docsPullOk</code> (and failed / conflict).</li>
+<li><strong>Progress:</strong> CBL <code>progress.completed/total</code> while BUSY.</li>
+</ul>
+<hr />
+<h2 id="5-document-listener">5. Document listener</h2>
+<p><code>onReplicatedDoc</code>:</p>
+<ul>
+<li>Push of <code>workordersout</code> / working <code>orders</code> with no error → <code>SetSyncState(id, 'pushed')</code></li>
+<li>Document error → <code>SetSyncState(id, 'push_error', code)</code></li>
+<li>Skip if already at target (avoid loops)</li>
+<li>Log <code>mfs.repl.doc</code> with id + collection only (<a href="logging.html">LOGGING.md</a>)</li>
+</ul>
+<hr />
+<h2 id="6-lifecycle">6. Lifecycle</h2>
+<h3 id="simple-default">Simple (default)</h3>
+<ul>
+<li><strong>Foreground:</strong> if replicator null (iOS killed) or STOPPED without a fatal config error, recreate + <code>start(false)</code>.</li>
+<li><strong>Background:</strong> stop or let the OS freeze sockets; always restart on active.</li>
+</ul>
+<h3 id="oneshot">Oneshot</h3>
+<ul>
+<li><strong>Login / first foreground:</strong> one-shot <code>PUSH_AND_PULL</code> for <code>workordersin</code> + <code>orders</code> only (<code>setContinuous(false)</code>). Get today’s board.</li>
+<li><strong>After that shot IDLE/STOPPED without auth/TLS error:</strong> mark bootstrap done. Do <strong>not</strong> keep a socket open.</li>
+<li><strong>Then:</strong> one-shot <strong>all</strong> <code>field.*</code> except <code>tmp</code> (so outbound, chat, tracking, catalogs actually move) on:
+<ul>
+<li>app <strong>foreground</strong></li>
+<li>every <code>EXPO_PUBLIC_REPL_ONESHOT_SEC</code> seconds (default <strong>300</strong>) while the process is running</li>
+</ul></li>
+<li>Overlapping shots are skipped. Foreground within 5 s of the last shot is skipped (Provider + AppState both fire on mount).</li>
+<li>Interval shots wait until bootstrap finished.</li>
+</ul>
+<p>Both schemas:</p>
+<ul>
+<li><strong>Logout:</strong> <code>stop()</code>, close DB, delete auth keys.</li>
+<li><strong>Do not</strong> <code>start(true)</code> (reset checkpoint) unless an operator action says “full resync”.</li>
+<li>Not configurable on Profile. Debug <strong>shows</strong> the compiled schema.</li>
+</ul>
+<hr />
+<h2 id="7-lab-vs-production">7. Lab vs production</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Lab</th>
+<th>Production</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>URL</td>
+<td><code>ws://</code> or <code>wss://</code> from env</td>
+<td><code>wss://</code> only</td>
+</tr>
+<tr>
+<td>Certs</td>
+<td>self-signed allowed</td>
+<td>system CAs</td>
+</tr>
+<tr>
+<td>Auth</td>
+<td>README email user</td>
+<td>same pattern, real passwords</td>
+</tr>
+<tr>
+<td>Delta sync</td>
+<td>optional on SG</td>
+<td>enable if EE server supports it</td>
+</tr>
+<tr>
+<td>Guest</td>
+<td>disabled</td>
+<td>disabled</td>
+</tr>
+</tbody>
+</table>
+<p>Capella: same <code>wss</code> replicator; travel sample’s App Endpoint + collection <strong>link</strong> steps still apply — link every <code>field.*</code> collection except do not create <code>tmp</code> on the server.</p>
+<hr />
+<h2 id="8-checklist-before-merge">8. Checklist before merge</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" />Engine singleton</label></li>
+<li><label><input type="checkbox" checked="" />Directory + encryption key from Keychain</label></li>
+<li><label><input type="checkbox" checked="" /><code>tmp</code> not in replicator configs</label></li>
+<li><label><input type="checkbox" checked="" /><code>"show source"</code> on every push filter</label></li>
+<li><label><input type="checkbox" checked="" /><code>channels: string[]</code> per collection; default empty (no <code>setChannels</code>)</label></li>
+<li><label><input type="checkbox" checked="" />SessionAuthenticator + stored <code>expires</code></label></li>
+<li><label><input type="checkbox" checked="" />401 path tested</label></li>
+<li><label><input type="checkbox" checked="" /><code>start(false)</code></label></li>
+<li><label><input type="checkbox" checked="" />No password in <code>app.json</code> (unlike the travel sample extra field)</label></li>
+<li><label><input type="checkbox" checked="" />Profile <strong>Settings / debug</strong>: versions, DB path/name, replicator URL/status/last success, collection counts, start/stop/restart</label></li>
+<li><label><input type="checkbox" checked="" />Operator sync bar: connected / not connected + last synced / pending push / downloading</label></li>
+<li><label><input type="checkbox" checked="" />Build-time <code>EXPO_PUBLIC_REPL_SCHEMA=simple|oneshot</code> (oneshot interval <code>EXPO_PUBLIC_REPL_ONESHOT_SEC</code>)</label></li>
+</ul>
+    </article>
+    <aside class="toc" aria-label="On this page">
+      <p class="eyebrow">On this page</p>
+<ul>
+<li><a href="#couchbase-lite-replication--mobile_field_service" id="toc-couchbase-lite-replication--mobile_field_service">Couchbase Lite replication — mobile_field_service</a>
+<ul>
+<li><a href="#tldr" id="toc-tldr">TL;DR</a></li>
+<li><a href="#1-pattern-from-expo-cbl-travel-adapted" id="toc-1-pattern-from-expo-cbl-travel-adapted">1. Pattern (from expo-cbl-travel, adapted)</a></li>
+<li><a href="#2-what-replicates" id="toc-2-what-replicates">2. What replicates</a></li>
+<li><a href="#3-session-not-basic-on-the-wire-default" id="toc-3-session-not-basic-on-the-wire-default">3. Session, not Basic-on-the-wire (default)</a></li>
+<li><a href="#4-status-listener" id="toc-4-status-listener">4. Status listener</a></li>
+<li><a href="#5-document-listener" id="toc-5-document-listener">5. Document listener</a></li>
+<li><a href="#6-lifecycle" id="toc-6-lifecycle">6. Lifecycle</a></li>
+<li><a href="#7-lab-vs-production" id="toc-7-lab-vs-production">7. Lab vs production</a></li>
+<li><a href="#8-checklist-before-merge" id="toc-8-checklist-before-merge">8. Checklist before merge</a></li>
+</ul></li>
+</ul>
+    </aside>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>© <span id="year">2026</span> Fujio-Turner. Apache License 2.0.</p>
+      <p><a href="https://github.com/Fujio-Turner/mobile_field_service">Application</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_pages">This site</a></p>
+    </div>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="../js/site.js"></script>
+</body>
+</html>

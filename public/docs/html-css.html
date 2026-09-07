@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UI style — Mobile Field Service</title>
+  <meta name="description" content="Mobile Field Service documentation." />
+  <meta name="theme-color" content="#0f766e" />
+  <link rel="icon" type="image/svg+xml" href="../images/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/site.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="../index.html">
+        <img src="../images/favicon.svg" alt="" width="32" height="32" />
+        Mobile Field Service
+      </a>
+      <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../index.html#product">Product</a></li>
+        <li><a href="../index.html#screens">Screens</a></li>
+        <li><a href="../docs/index.html" aria-current="page">Docs</a></li>
+        <li><a href="https://github.com/Fujio-Turner/mobile_field_service">App repo</a></li>
+      </ul>
+      <a class="btn btn-primary" href="https://github.com/Fujio-Turner/mobile_field_service">GitHub</a>
+    </div>
+  </header>
+  <main class="wrap doc-layout">
+    <article class="prose">
+      <p class="crumb"><a href="../index.html">Home</a> · <a href="../docs/index.html">Docs</a> · UI style</p>
+<h1 id="html--css--ui-style--mobile_field_service">HTML &amp; CSS / UI style — mobile_field_service</h1>
+<p>This is a <strong>phone-first Expo (iOS/Android)</strong> app. There is <strong>no Web/Windows runtime</strong>. “HTML/CSS” here means <strong>how we build UI</strong>: React Native <code>StyleSheet</code> + a single theme, not a DaisyUI Hub.</p>
+<p>If a small <strong>web</strong> companion appears later (status page, not the field app), use the web appendix.</p>
+<hr />
+<h2 id="1-golden-rules">1. Golden rules</h2>
+<ul>
+<li><strong>Theme tokens, not magic numbers.</strong> Colors, type, space live in <code>src/theme.ts</code>. Screens import tokens; they do not hard-code <code>#fff</code> or <code>14</code>.</li>
+<li><strong>Phone-first.</strong> Design at 390×844. Large phone / ~7″ tablet must not clip; no desktop layout.</li>
+<li><strong>No emoji as icons.</strong> Use SVG (react-native-svg) or a small icon set. 24×24, 1.5 stroke, one color from the theme.</li>
+<li><strong>Touch targets ≥ 44×44 pt.</strong> Primary actions full-width on the phone unless Profile <strong>Large screen optimize</strong> is on (then thumb-zone width; <strong>Left hand</strong> mirrors).</li>
+<li><strong>One visual language</strong> for assets / customer / sales modes. Mode changes <strong>data</strong>, not a new skin.</li>
+<li><strong>No inline styles</strong> except a one-off that cannot be a named style (rare). Prefer <code>StyleSheet.create</code>.</li>
+<li><strong>Do not ship a WebView</strong> for core flows (login, Today, editors). OIDC uses the <strong>system browser</strong> (<a href="auth.html">AUTH.md</a>).</li>
+</ul>
+<hr />
+<h2 id="2-theme-srcthemets">2. Theme (<code>src/theme.ts</code>)</h2>
+<p>Keep a small palette (names, not brand fluff):</p>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>color.bg</code> / <code>color.surface</code></td>
+<td>Screen / card</td>
+</tr>
+<tr>
+<td><code>color.text</code> / <code>color.muted</code></td>
+<td>Body / secondary</td>
+</tr>
+<tr>
+<td><code>color.accent</code></td>
+<td>Primary button, Today row chevron</td>
+</tr>
+<tr>
+<td><code>color.danger</code></td>
+<td>Destructive, push_error</td>
+</tr>
+<tr>
+<td><code>color.warn</code></td>
+<td>Reassigned, stale sync</td>
+</tr>
+<tr>
+<td><code>color.ok</code></td>
+<td>Synced, complete</td>
+</tr>
+<tr>
+<td><code>color.okBright</code> / <code>warnBright</code> / <code>dangerBright</code></td>
+<td>Dots on the dark Today clock</td>
+</tr>
+<tr>
+<td><code>space.xs…xl</code></td>
+<td>4 / 8 / 12 / 16 / 24</td>
+</tr>
+<tr>
+<td><code>type.sm</code> / <code>md</code> / <code>lg</code> / <code>title</code></td>
+<td>13 / 15 / 17 / 22</td>
+</tr>
+</tbody>
+</table>
+<p>Light theme first. Dark: follow <code>useColorScheme</code> later; do not invert ad hoc in one screen.</p>
+<p><strong>Type:</strong> system UI font (<code>Platform.select</code> San Francisco / Roboto). No extra display font in v1.</p>
+<hr />
+<h2 id="3-layout">3. Layout</h2>
+<ul>
+<li><strong>Safe areas:</strong> Expo Router + <code>SafeAreaView</code> / <code>react-native-safe-area-context</code>. Never draw under the notch or home indicator.</li>
+<li><strong>Lists:</strong> <code>FlatList</code> / <code>FlashList</code>. Today is infinite scroll (<code>LIMIT</code>/<code>OFFSET</code>) — do not load the whole day into a <code>ScrollView</code> of Views.</li>
+<li><strong>Editors:</strong> keyboard-aware scroll (<code>KeyboardAvoidingView</code> / <code>KeyboardStickyView</code>). Primary CTA pinned above the keyboard when possible.</li>
+<li><strong>Debug:</strong> Profile → Settings / debug. Long form; keep tokens; do not dump secrets.</li>
+<li><strong>Headers:</strong> nested stacks show <strong>Back</strong> (left; right if Left hand). Back pops the screen you came from; empty stack → Today. Touch target ≥ 44 pt.</li>
+<li><strong>Badges:</strong> Started, Reassigned, Amendment, Frozen — text + color token, not color-only.</li>
+</ul>
+<hr />
+<h2 id="4-components">4. Components</h2>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Primary button</td>
+<td>Filled <code>color.accent</code>, white label, 48 pt height</td>
+</tr>
+<tr>
+<td>Secondary</td>
+<td>Outline / ghost</td>
+</tr>
+<tr>
+<td>Destructive</td>
+<td><code>color.danger</code>, confirm on Complete/Cancel/Logout</td>
+</tr>
+<tr>
+<td>Text field</td>
+<td>Label above, error below, <code>secureTextEntry</code> on password</td>
+</tr>
+<tr>
+<td>Row (Today)</td>
+<td>64+ pt, number + site + time + badge</td>
+</tr>
+<tr>
+<td>Empty</td>
+<td>One sentence + last-sync time</td>
+</tr>
+<tr>
+<td>Offline</td>
+<td>Today clock HUD (dot + elapsed + pending count), not a modal that blocks the job</td>
+</tr>
+</tbody>
+</table>
+<p>Copy: short, sentence case. “Sign in”, “Start work”, “Add follow-up”. No marketing voice.</p>
+<hr />
+<h2 id="5-accessibility">5. Accessibility</h2>
+<ul>
+<li><code>accessibilityLabel</code> on icon-only buttons.</li>
+<li>Contrast: body text vs <code>bg</code> ≥ 4.5:1.</li>
+<li>Dynamic type: prefer <code>allowFontScaling</code>; don’t clip titles at extra-large sizes.</li>
+<li>Password fields: no screenshots (<code>secureTextEntry</code>).</li>
+</ul>
+<hr />
+<h2 id="6-assets--images">6. Assets / images</h2>
+<ul>
+<li>Job photos: JPEG 200–800 KB, no EXIF in the blob (<a href="architecture.html">DESIGN.md</a>).</li>
+<li>UI icons: SVG, not PNGs per density unless a photo/illustration.</li>
+<li>Map: MapLibre; pins from CBL. Basemap may be empty offline — that is OK.</li>
+</ul>
+<hr />
+<h2 id="7-what-not-to-do">7. What not to do</h2>
+<ul>
+<li>HTML strings + <code>WebView</code> for Today or editors.</li>
+<li>Nested backticks if you ever build HTML in a JS template (same footgun as Zeus Hub): use <code>&lt;code&gt;</code> or a normal string.</li>
+<li>Tailwind <strong>in RN</strong> unless the project explicitly adds NativeWind later. Until then, StyleSheet + theme.</li>
+<li>Different palettes per <code>workModes[]</code>.</li>
+</ul>
+<hr />
+<h2 id="appendix--web-companion-if-added">Appendix — web companion (if added)</h2>
+<p>Not the field app. If we add a static status or docs site:</p>
+<ul>
+<li>HTML / CSS / JS in separate files.</li>
+<li>Tailwind utilities + DaisyUI components (same as other Fujio-Turner tools).</li>
+<li>No emoji icons; Heroicons SVG.</li>
+<li>Never nest <code>`code`</code> inside <code>`…${html}`</code> templates.</li>
+</ul>
+    </article>
+    <aside class="toc" aria-label="On this page">
+      <p class="eyebrow">On this page</p>
+<ul>
+<li><a href="#html--css--ui-style--mobile_field_service" id="toc-html--css--ui-style--mobile_field_service">HTML &amp; CSS / UI style — mobile_field_service</a>
+<ul>
+<li><a href="#1-golden-rules" id="toc-1-golden-rules">1. Golden rules</a></li>
+<li><a href="#2-theme-srcthemets" id="toc-2-theme-srcthemets">2. Theme (<code>src/theme.ts</code>)</a></li>
+<li><a href="#3-layout" id="toc-3-layout">3. Layout</a></li>
+<li><a href="#4-components" id="toc-4-components">4. Components</a></li>
+<li><a href="#5-accessibility" id="toc-5-accessibility">5. Accessibility</a></li>
+<li><a href="#6-assets--images" id="toc-6-assets--images">6. Assets / images</a></li>
+<li><a href="#7-what-not-to-do" id="toc-7-what-not-to-do">7. What not to do</a></li>
+<li><a href="#appendix--web-companion-if-added" id="toc-appendix--web-companion-if-added">Appendix — web companion (if added)</a></li>
+</ul></li>
+</ul>
+    </aside>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>© <span id="year">2026</span> Fujio-Turner. Apache License 2.0.</p>
+      <p><a href="https://github.com/Fujio-Turner/mobile_field_service">Application</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_pages">This site</a></p>
+    </div>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="../js/site.js"></script>
+</body>
+</html>

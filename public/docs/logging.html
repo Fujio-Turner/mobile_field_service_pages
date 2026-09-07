@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Logging — Mobile Field Service</title>
+  <meta name="description" content="Mobile Field Service documentation." />
+  <meta name="theme-color" content="#0f766e" />
+  <link rel="icon" type="image/svg+xml" href="../images/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/site.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="../index.html">
+        <img src="../images/favicon.svg" alt="" width="32" height="32" />
+        Mobile Field Service
+      </a>
+      <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../index.html#product">Product</a></li>
+        <li><a href="../index.html#screens">Screens</a></li>
+        <li><a href="../docs/index.html" aria-current="page">Docs</a></li>
+        <li><a href="https://github.com/Fujio-Turner/mobile_field_service">App repo</a></li>
+      </ul>
+      <a class="btn btn-primary" href="https://github.com/Fujio-Turner/mobile_field_service">GitHub</a>
+    </div>
+  </header>
+  <main class="wrap doc-layout">
+    <article class="prose">
+      <p class="crumb"><a href="../index.html">Home</a> · <a href="../docs/index.html">Docs</a> · Logging</p>
+<h1 id="logging--mobile_field_service">Logging — mobile_field_service</h1>
+<p>Single standard for <strong>app logs</strong> and <strong>Couchbase Lite LogSinks</strong>. One style everywhere. No <code>console.log</code> in <code>src/ops</code>, <code>src/db</code>, or <code>src/sync</code>.</p>
+<p>CBL sink API: <a href="https://cbl-reactnative.dev/Troubleshooting/using-logs">Using logs</a>. Travel sample: <a href="https://github.com/couchbase-examples/expo-cbl-travel/blob/main/hooks/startLogging.ts"><code>hooks/startLogging.ts</code></a>.</p>
+<hr />
+<h2 id="tldr">TL;DR</h2>
+<ol type="1">
+<li><strong>App code</strong> logs through <code>src/log/logger.ts</code> (<code>log.debug|info|warn|error</code>).</li>
+<li><strong>CBL native</strong> logs through <code>LogSinks.setConsole</code> / <code>setFile</code> — never <code>Database.setLogLevel</code> (deprecated; cannot mix with LogSinks).</li>
+<li><strong>Four app levels:</strong> <code>debug</code>, <code>info</code>, <code>warn</code>, <code>error</code>. Production default <strong>info</strong>.</li>
+<li><strong>Structured key/value.</strong> Message is a stable event name. Fields are pairs, not <code>JSON.stringify(doc)</code>.</li>
+<li><strong>Always</strong> <code>"err"</code> + error on failures. Never stringify the error into the message.</li>
+<li><strong>Never log secrets, PII, document bodies, blobs, session ids, passwords, Bearer tokens, encryption keys, street notes.</strong></li>
+<li>Configure <strong>once</strong> at process start (<code>src/db/engine.ts</code> after <code>new CblReactNativeEngine()</code>).</li>
+</ol>
+<hr />
+<h2 id="1-app-logger-srclogloggerts">1. App logger (<code>src/log/logger.ts</code>)</h2>
+<p>Target shape (one JSON line):</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  ts<span class="op">:</span> <span class="dt">number</span><span class="op">;</span>          <span class="co">// unix seconds (same unit as audit.dt)</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  level<span class="op">:</span> <span class="st">&#39;debug&#39;</span> <span class="op">|</span> <span class="st">&#39;info&#39;</span> <span class="op">|</span> <span class="st">&#39;warn&#39;</span> <span class="op">|</span> <span class="st">&#39;error&#39;</span><span class="op">;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  event<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>       <span class="co">// dotted, stable: mfs.wo.start, mfs.repl.auth_fail</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  op<span class="op">?:</span> <span class="dt">string</span><span class="op">;</span>         <span class="co">// catalog name: StartWork, SubmitOrder</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  employeeId<span class="op">?:</span> <span class="dt">string</span><span class="op">;</span> <span class="co">// never email/password</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  collection<span class="op">?:</span> <span class="dt">string</span><span class="op">;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  docId<span class="op">?:</span> <span class="dt">string</span><span class="op">;</span>      <span class="co">// id only</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  durMs<span class="op">?:</span> <span class="dt">number</span><span class="op">;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  err<span class="op">?:</span> <span class="dt">string</span><span class="op">;</span>        <span class="co">// err.message, not stack in production</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  errCode<span class="op">?:</span> <span class="dt">string</span> <span class="op">|</span> <span class="dt">number</span><span class="op">;</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  appVer<span class="op">:</span> <span class="dt">string</span><span class="op">;</span>      <span class="co">// same string as audit.*.ver</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { log } <span class="im">from</span> <span class="st">&#39;../log/logger&#39;</span><span class="op">;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>log<span class="op">.</span><span class="fu">info</span>(<span class="st">&#39;mfs.wo.start&#39;</span><span class="op">,</span> { op<span class="op">:</span> <span class="st">&#39;StartWork&#39;</span><span class="op">,</span> collection<span class="op">:</span> <span class="st">&#39;workordersout&#39;</span><span class="op">,</span> docId<span class="op">:</span> outId<span class="op">,</span> durMs })<span class="op">;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (err) {</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  log<span class="op">.</span><span class="fu">error</span>(<span class="st">&#39;mfs.repl.auth_fail&#39;</span><span class="op">,</span> { op<span class="op">:</span> <span class="st">&#39;OnReplicatorAuthFailure&#39;</span><span class="op">,</span> err<span class="op">,</span> errCode<span class="op">:</span> <span class="dv">401</span> })<span class="op">;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p><strong>Do</strong></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>log<span class="op">.</span><span class="fu">info</span>(<span class="st">&#39;mfs.order.submit&#39;</span><span class="op">,</span> { op<span class="op">:</span> <span class="st">&#39;SubmitOrder&#39;</span><span class="op">,</span> docId<span class="op">,</span> syncState<span class="op">:</span> <span class="st">&#39;ready_to_push&#39;</span> })<span class="op">;</span></span></code></pre></div>
+<p><strong>Don't</strong></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">console</span><span class="op">.</span><span class="fu">log</span>(<span class="st">&#39;submitted&#39;</span><span class="op">,</span> <span class="bu">JSON</span><span class="op">.</span><span class="fu">stringify</span>(order))<span class="op">;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>log<span class="op">.</span><span class="fu">info</span>(<span class="vs">`submitted </span><span class="sc">${</span>id<span class="sc">}</span><span class="vs"> for </span><span class="sc">${</span>email<span class="sc">}</span><span class="vs">`</span>)<span class="op">;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>log<span class="op">.</span><span class="fu">info</span>(<span class="st">&#39;fail &#39;</span> <span class="op">+</span> err)<span class="op">;</span></span></code></pre></div>
+<p>Screens may <code>console.warn</code> only while prototyping; any merged <code>src/ops/*</code> / <code>src/sync/*</code> / <code>src/db/*</code> must use <code>log</code>.</p>
+<hr />
+<h2 id="2-levels">2. Levels</h2>
+<table>
+<thead>
+<tr>
+<th>Level</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>debug</code></td>
+<td>Query explain, replicator progress ticks, index create. <strong>Dev only.</strong></td>
+</tr>
+<tr>
+<td><code>info</code></td>
+<td>Successful mutations, copy-on-write, replicator start/stop, login success (no secrets), Submit.</td>
+</tr>
+<tr>
+<td><code>warn</code></td>
+<td>Retry, stale session refresh, missing GPS on a <code>history[]</code> stamp, tracking skip (accuracy/capped), push_error then retry.</td>
+</tr>
+<tr>
+<td><code>error</code></td>
+<td>Save failed, 401/404 stopped replicator, encryption open failed. Always <code>"err"</code>.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-event-names">3. Event names</h2>
+<p>Prefix <code>mfs.</code>. Keep a closed set; add in the same PR as the code.</p>
+<table>
+<thead>
+<tr>
+<th>Event</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mfs.auth.login_ok</code> / <code>mfs.auth.login_fail</code></td>
+<td>LoginRemote</td>
+</tr>
+<tr>
+<td><code>mfs.auth.refresh</code></td>
+<td>RefreshAuth</td>
+</tr>
+<tr>
+<td><code>mfs.repl.start</code> / <code>mfs.repl.stop</code></td>
+<td>Replicator lifecycle</td>
+</tr>
+<tr>
+<td><code>mfs.repl.auth_fail</code></td>
+<td>401 / 404 / 10401</td>
+</tr>
+<tr>
+<td><code>mfs.repl.doc</code></td>
+<td>Document listener: collection + id + isPush + errCode (no body)</td>
+</tr>
+<tr>
+<td><code>mfs.wo.start</code> / <code>mfs.wo.complete</code> / <code>mfs.wo.amend</code></td>
+<td>Work-order ops</td>
+</tr>
+<tr>
+<td><code>mfs.wo.inbound_apply</code> / <code>mfs.wo.inbound_drop</code></td>
+<td>Inbound kit merge / hide untouched cancelled inbound</td>
+</tr>
+<tr>
+<td><code>mfs.order.create</code> / <code>mfs.order.submit</code></td>
+<td>Orders</td>
+</tr>
+<tr>
+<td><code>mfs.blob.commit</code></td>
+<td>Photo commit: byteLength only</td>
+</tr>
+<tr>
+<td><code>mfs.track.point</code></td>
+<td>RecordTrackPoint: <code>docId</code> + <code>ts</code> + result only — <strong>never</strong> the <code>tracking</code> map</td>
+</tr>
+<tr>
+<td><code>mfs.dev.simulate_inbound</code></td>
+<td>Lab-only dispatch kit simulate (Settings / debug)</td>
+</tr>
+<tr>
+<td><code>mfs.repl.skip</code></td>
+<td>Replicator not started (demo, native missing)</td>
+</tr>
+<tr>
+<td><code>mfs.db.open</code></td>
+<td>DB opened; <code>encryption</code> true/false only — <strong>never</strong> the key</td>
+</tr>
+<tr>
+<td><code>mfs.db.open_fail</code> / <code>mfs.db.wipe</code> / <code>mfs.db.recover</code></td>
+<td>Open failed (often encrypt mismatch); leftover native handle closed, file deleted, then re-open. <code>recover</code> logs <code>from_encryption</code> / <code>to_encryption</code> only</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="4-what-never-to-log">4. What never to log</h2>
+<table>
+<thead>
+<tr>
+<th>Forbidden</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Password, session_id, cookie, Bearer / ID token</td>
+<td>Auth</td>
+</tr>
+<tr>
+<td>DB encryption string</td>
+<td>Device theft</td>
+</tr>
+<tr>
+<td>Full document JSON</td>
+<td>PII + size</td>
+</tr>
+<tr>
+<td><code>tracking</code> map / lat-lon series</td>
+<td>Location PII + size</td>
+</tr>
+<tr>
+<td>Photo / blob bytes, local file paths with names</td>
+<td>PII</td>
+</tr>
+<tr>
+<td>Customer phone, street address, note <code>body</code></td>
+<td>PII</td>
+</tr>
+<tr>
+<td>SQL++ with interpolated PII</td>
+<td>Prefer parameterized queries; log query <strong>name</strong>, not string</td>
+</tr>
+</tbody>
+</table>
+<p>Allowed: <code>docId</code>, <code>collection</code>, <code>employeeId</code>, counts, <code>errCode</code>, <code>durMs</code>, <code>syncState</code>, HTTP status.</p>
+<hr />
+<h2 id="5-couchbase-lite-logsinks">5. Couchbase Lite LogSinks</h2>
+<p>Configure immediately after the engine singleton (travel sample does this in <code>initializeDatabase</code>).</p>
+<p><strong>Development</strong></p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { LogSinks<span class="op">,</span> LogLevel<span class="op">,</span> LogDomain } <span class="im">from</span> <span class="st">&#39;cbl-reactnative&#39;</span><span class="op">;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="cf">await</span> LogSinks<span class="op">.</span><span class="fu">setConsole</span>({</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  level<span class="op">:</span> LogLevel<span class="op">.</span><span class="at">DEBUG</span><span class="op">,</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  domains<span class="op">:</span> [LogDomain<span class="op">.</span><span class="at">ALL</span>]<span class="op">,</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span></code></pre></div>
+<p><strong>Production</strong></p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="cf">await</span> LogSinks<span class="op">.</span><span class="fu">setConsole</span>({</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  level<span class="op">:</span> LogLevel<span class="op">.</span><span class="at">INFO</span><span class="op">,</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  domains<span class="op">:</span> [LogDomain<span class="op">.</span><span class="at">REPLICATOR</span><span class="op">,</span> LogDomain<span class="op">.</span><span class="at">NETWORK</span><span class="op">,</span> LogDomain<span class="op">.</span><span class="at">DATABASE</span>]<span class="op">,</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span></code></pre></div>
+<p><code>VERBOSE</code> / <code>DEBUG</code> + <code>LogDomain.ALL</code> — <strong>debug builds only</strong>. Official docs: do not ship VERBOSE in production.</p>
+<p>Optional file sink for support bundles (<code>LogSinks.setFile</code>). Wrapper lines look like <code>RN ::DEBUG:: database_Open</code> — still no payloads.</p>
+<p>Do <strong>not</strong> call deprecated <code>Database.setLogLevel</code> alongside LogSinks.</p>
+<p>App messages can enter the same pipeline with <code>LogSinks.write(LogLevel.WARNING, LogDomain.REPLICATOR, 'session refresh')</code> — still no secrets in that string.</p>
+<hr />
+<h2 id="6-replication-errors">6. Replication errors</h2>
+<p>Map replicator <code>status.getError()</code> to app logs:</p>
+<table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>App event</th>
+<th>Level</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>401, 404, 10401 (replicator)</td>
+<td><code>mfs.repl.auth_fail</code> / <code>http_auth</code> / <code>http_not_found</code></td>
+<td>error → then <a href="auth.html">AUTH.md</a> refresh</td>
+</tr>
+<tr>
+<td>403</td>
+<td><code>mfs.repl.http_forbidden</code></td>
+<td>warn</td>
+</tr>
+<tr>
+<td>409</td>
+<td><code>mfs.repl.conflict</code> / <code>http_conflict</code></td>
+<td>warn (per-collection policy, default CBL)</td>
+</tr>
+<tr>
+<td>413</td>
+<td><code>mfs.repl.doc_payload</code></td>
+<td>error</td>
+</tr>
+<tr>
+<td>408, 429, 5xx, 1001</td>
+<td><code>mfs.repl.offline</code> / <code>http_timeout</code> / <code>http_rate_limit</code></td>
+<td>warn (CBL retries)</td>
+</tr>
+<tr>
+<td>400, 422</td>
+<td><code>mfs.repl.http_client</code></td>
+<td>warn</td>
+</tr>
+<tr>
+<td>11006 / 1006 TLS mismatch</td>
+<td><code>mfs.repl.tls</code></td>
+<td>error</td>
+</tr>
+<tr>
+<td>5011 unknown/self-signed cert</td>
+<td><code>mfs.repl.tls</code></td>
+<td>error</td>
+</tr>
+</tbody>
+</table>
+<p>Log <strong>code + domain</strong>, not the session cookie that failed.</p>
+<hr />
+<h2 id="7-version-on-every-line">7. Version on every line</h2>
+<p><code>appVer</code> is <code>Application.nativeApplicationVersion</code> + <code>nativeBuildVersion</code> (same as <code>audit.*.ver</code>). Operators match a support log to a store build without opening the binary.</p>
+    </article>
+    <aside class="toc" aria-label="On this page">
+      <p class="eyebrow">On this page</p>
+<ul>
+<li><a href="#logging--mobile_field_service" id="toc-logging--mobile_field_service">Logging — mobile_field_service</a>
+<ul>
+<li><a href="#tldr" id="toc-tldr">TL;DR</a></li>
+<li><a href="#1-app-logger-srclogloggerts" id="toc-1-app-logger-srclogloggerts">1. App logger (<code>src/log/logger.ts</code>)</a></li>
+<li><a href="#2-levels" id="toc-2-levels">2. Levels</a></li>
+<li><a href="#3-event-names" id="toc-3-event-names">3. Event names</a></li>
+<li><a href="#4-what-never-to-log" id="toc-4-what-never-to-log">4. What never to log</a></li>
+<li><a href="#5-couchbase-lite-logsinks" id="toc-5-couchbase-lite-logsinks">5. Couchbase Lite LogSinks</a></li>
+<li><a href="#6-replication-errors" id="toc-6-replication-errors">6. Replication errors</a></li>
+<li><a href="#7-version-on-every-line" id="toc-7-version-on-every-line">7. Version on every line</a></li>
+</ul></li>
+</ul>
+    </aside>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>© <span id="year">2026</span> Fujio-Turner. Apache License 2.0.</p>
+      <p><a href="https://github.com/Fujio-Turner/mobile_field_service">Application</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_pages">This site</a></p>
+    </div>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="../js/site.js"></script>
+</body>
+</html>

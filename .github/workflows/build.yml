@@ -1,0 +1,19 @@
+name: Build docs HTML
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pandoc/actions/setup@v1
+      - run: python3 scripts/build.py
+      - name: Upload public/
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-site
+          path: public

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>$title$ — Mobile Field Service</title>
+  <meta name="description" content="$if(description)$$description$$else$Mobile Field Service documentation.$endif$" />
+  <meta name="theme-color" content="#0f766e" />
+  <link rel="icon" type="image/svg+xml" href="$prefix$images/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="$prefix$css/site.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="$prefix$index.html">
+        <img src="$prefix$images/favicon.svg" alt="" width="32" height="32" />
+        Mobile Field Service
+      </a>
+      <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="$prefix$index.html#product">Product</a></li>
+        <li><a href="$prefix$index.html#screens">Screens</a></li>
+        <li><a href="$prefix$docs/index.html" aria-current="page">Docs</a></li>
+        <li><a href="https://github.com/Fujio-Turner/mobile_field_service">App repo</a></li>
+      </ul>
+      <a class="btn btn-primary" href="https://github.com/Fujio-Turner/mobile_field_service">GitHub</a>
+    </div>
+  </header>
+  <main class="wrap doc-layout">
+    <article class="prose">
+      <p class="crumb"><a href="$prefix$index.html">Home</a> · <a href="$prefix$docs/index.html">Docs</a> · $title$</p>
+$body$
+    </article>
+    <aside class="toc" aria-label="On this page">
+      <p class="eyebrow">On this page</p>
+$if(toc)$
+$toc$
+$endif$
+    </aside>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>© <span id="year">2026</span> Fujio-Turner. Apache License 2.0.</p>
+      <p><a href="https://github.com/Fujio-Turner/mobile_field_service">Application</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_pages">This site</a></p>
+    </div>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="$prefix$js/site.js"></script>
+</body>
+</html>

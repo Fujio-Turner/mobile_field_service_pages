@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Roadmap — Mobile Field Service</title>
+  <meta name="description" content="Mobile Field Service documentation." />
+  <meta name="theme-color" content="#0f766e" />
+  <link rel="icon" type="image/svg+xml" href="../images/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/site.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="../index.html">
+        <img src="../images/favicon.svg" alt="" width="32" height="32" />
+        Mobile Field Service
+      </a>
+      <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../index.html#product">Product</a></li>
+        <li><a href="../index.html#screens">Screens</a></li>
+        <li><a href="../docs/index.html" aria-current="page">Docs</a></li>
+        <li><a href="https://github.com/Fujio-Turner/mobile_field_service">App repo</a></li>
+      </ul>
+      <a class="btn btn-primary" href="https://github.com/Fujio-Turner/mobile_field_service">GitHub</a>
+    </div>
+  </header>
+  <main class="wrap doc-layout">
+    <article class="prose">
+      <p class="crumb"><a href="../index.html">Home</a> · <a href="../docs/index.html">Docs</a> · Roadmap</p>
+<h1 id="mobile-field-service--roadmap">Mobile Field Service — Roadmap</h1>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Title</td>
+<td>Product and engineering roadmap</td>
+</tr>
+<tr>
+<td>Repo</td>
+<td><a href="https://github.com/Fujio-Turner/mobile_field_service">Fujio-Turner/mobile_field_service</a></td>
+</tr>
+<tr>
+<td>Author</td>
+<td>Fujio-Turner / mobile_field_service</td>
+</tr>
+<tr>
+<td>Date</td>
+<td>2026-09-06</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>S01–S16 except S15 (vector) implemented. Demo three modes on iOS.</td>
+</tr>
+<tr>
+<td>Architecture</td>
+<td><a href="architecture.html">DESIGN.md</a></td>
+</tr>
+<tr>
+<td>Use cases</td>
+<td><a href="day-in-the-life.html">DAY_IN_LIFE.md</a></td>
+</tr>
+</tbody>
+</table>
+<p>This is a <strong>Fujio-Turner</strong> offline-first field app (Expo + <a href="https://github.com/Fujio-Turner/cbl-reactnative">cbl-reactnative fork</a>, CBL <strong>4.x EE</strong> target + vector index). Repo: <a href="https://github.com/Fujio-Turner/mobile_field_service">https://github.com/Fujio-Turner/mobile_field_service</a>. Walk a mode day before implementing screens: <a href="day-assets.html">assets</a>, <a href="day-customer.html">customer</a>, <a href="day-sales.html">sales</a>. Auth: <a href="auth.html">AUTH.md</a>. Settings: <a href="settings.html">guides/SETTINGS.md</a>.</p>
+<p>How to read checkboxes:</p>
+<table>
+<thead>
+<tr>
+<th>Mark</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>[x]</code></td>
+<td>Done in this repo</td>
+</tr>
+<tr>
+<td><code>[ ]</code></td>
+<td>Not done</td>
+</tr>
+</tbody>
+</table>
+<p>PRs <strong>00–05 are a linear spine</strong>. After that, photos / tasks / map / inventory / chat can overlap; the replicator PR waits until outbound + children + messages exist so push filters are real. “Independently mergeable” means each PR leaves the app building; it does <strong>not</strong> mean 06–14 can land in any order.</p>
+<hr />
+<h2 id="phase-0--docs-and-constraints">Phase 0 — Docs and constraints</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" />Apache-2.0 LICENSE</label></li>
+<li><label><input type="checkbox" checked="" />React Native / Expo / native <code>.gitignore</code> (Windows entries = <strong>dev machines</strong>, not a runtime)</label></li>
+<li><label><input type="checkbox" checked="" />Architecture: collections, copy-on-write, queries, sync matrix (<a href="architecture.html">DESIGN.md</a>)</label></li>
+<li><label><input type="checkbox" checked="" />Day-in-the-life use cases: assets, customer, sales (<a href="day-in-the-life.html">DAY_IN_LIFE.md</a>)</label></li>
+<li><label><input type="checkbox" checked="" />Schemas: <a href="schema/index.html">docs/schema/</a></label></li>
+<li><label><input type="checkbox" checked="" />This roadmap + PR plan</label></li>
+<li><label><input type="checkbox" checked="" />Engineering guides: logging, UI, release, replication (<a href="index.html">guides/</a>)</label></li>
+<li><label><input type="checkbox" checked="" /><a href="https://github.com/Fujio-Turner/mobile_field_service/blob/main/AGENT.md">AGENT.md</a>; tests live in <code>tests/</code>; local slices in gitignored <code>work/</code></label></li>
+<li><label><input type="checkbox" checked="" />README: EE license, Expo <strong>development builds</strong>, iOS/Android only, CBL via Fujio-Turner/cbl-reactnative (4.x EE target on the fork)</label></li>
+</ul>
+<p><strong>Exit:</strong> an engineer can implement without inventing field names, prefixes, or SQL++.</p>
+<hr />
+<h2 id="phase-1--app-shell-and-session-ui">Phase 1 — App shell and session UI</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" />Expo SDK <strong>52</strong>, RN <strong>0.76.9</strong> (SDK 52 pin), Node ≥ 20, <code>newArchEnabled: true</code></label></li>
+<li><label><input type="checkbox" checked="" />iOS <strong>15.1+</strong>, Android <strong>API 24+</strong> (<code>expo-build-properties</code>)</label></li>
+<li><label><input type="checkbox" checked="" />Expo Router: Login, Today placeholder, Profile</label></li>
+<li><label><input type="checkbox" checked="" />Login UI (email or username + password) — <a href="auth.html">AUTH.md</a></label></li>
+<li><label><input type="checkbox" checked="" /><code>EXPO_PUBLIC_AUTH_STRATEGY=basic|oidc_implicit|oidc_code|demo</code> (default <strong>basic</strong>; <code>.env.example</code> uses <strong>demo</strong>)</label></li>
+<li><label><input type="checkbox" checked="" />Keychain/Keystore session + expiry; <code>RefreshAuth</code>; replicator 401/404 → re-auth (session write/restore/logout in PR-01; mint + 401 path with replicator)</label></li>
+<li><label><input type="checkbox" checked="" />Phone-first tabs; large-phone / small-tablet safe areas</label></li>
+<li><label><input type="checkbox" checked="" />Camera / location <strong>usage strings</strong> in <code>app.json</code> (runtime prompts in later PRs)</label></li>
+<li><label><input type="checkbox" checked="" />Jest (or equivalent) test runner wired</label></li>
+<li><label><input type="checkbox" checked="" />“Development build required” if the native module is missing</label></li>
+</ul>
+<p><strong>Exit:</strong> installable iOS/Android binary; demo login navigates to Today (seed jobs on a development build).</p>
+<hr />
+<h2 id="phase-2--encrypted-database-collections-seed">Phase 2 — Encrypted database, collections, seed</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" /><code>CblReactNativeEngine</code> singleton</label></li>
+<li><label><input type="checkbox" checked="" />Open <code>mfs_&lt;safe&gt;_&lt;hash8&gt;</code> with AES-256 <strong>string</strong> key from Keychain + <code>FileSystem.getDefaultPath()</code></label></li>
+<li><label><input type="checkbox" checked="" />Create scope <code>field</code> (<strong>fourteen</strong> collections including <code>messages</code>, <code>orders</code>, <code>rates</code>, <code>taxes</code>, <code>tracking</code>) + <code>local.tmp</code></label></li>
+<li><label><input type="checkbox" checked="" />Value + FTS indexes from DESIGN.md</label></li>
+<li><label><input type="checkbox" checked="" /><code>stampAuditCreate</code> / <code>stampAuditUpdate</code> / <code>stampHistory</code> (unix <strong>seconds</strong>, app version, path from/to, lat/lon when GPS)</label></li>
+<li><label><input type="checkbox" checked="" />ULID + prefixes (<code>woin</code>, <code>woout</code>, <code>ast</code>, <code>prd</code>, <code>inv</code>, <code>invtx</code>, <code>usr</code>, <code>cus</code>, <code>tsk</code>, <code>nte</code>, <code>msg</code>, <code>ord</code>, <code>rate</code>, <code>tax</code>, <code>tmp</code>) + tracking <code>track:{day}:{employeeId}</code></label></li>
+<li><label><input type="checkbox" checked="" />Users seed with <code>employeeId</code> + <code>email</code> (channel <code>emp:E-4412</code>)</label></li>
+<li><label><input type="checkbox" checked="" />Optional JSON seed: three inbound jobs (WO-10470 / 10482 / 10490), assets, van stock, products, rates, taxes, user + dispatch user, Hartford customer, one inbound order. Skip KV loop if seed markers already exist.</label></li>
+<li><label><input type="checkbox" checked="" /><code>tmp</code> in scope <code>local</code>; replicator allow-list cannot include it; expiration helper</label></li>
+<li><label><input type="checkbox" checked="" /><code>RebuildStock</code> read-model stub (no stock <code>save</code>)</label></li>
+<li><label><input type="checkbox" checked="" />Guard screen if the native module is missing (Expo Go)</label></li>
+</ul>
+<p><strong>Exit:</strong> <code>cblite</code> / VSCode CBL inspector shows <code>field.workordersin</code> seed docs with audit stamps.</p>
+<p><strong>Load:</strong> seed ≤ 20 jobs, ≤ 200 assets, ≤ 50 products — small enough for first-run demo, not a district dump.</p>
+<hr />
+<h2 id="phase-3--today-list--kv-detail">Phase 3 — Today list + KV detail</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" /><code>ListTodayWork</code>: inbound <code>assignedTo.employeeId = $employeeId</code>, <code>status != 'cancelled' AND status != 'superseded'</code>, <code>scheduled.day = $day</code>, <code>ORDER BY scheduled.startDt DESC</code> with <strong>numeric</strong> <code>LIMIT</code>/<code>OFFSET</code> (CBL Mobile rejects <code>IN [...]</code> and <code>$limit</code>)</label></li>
+<li><label><input type="checkbox" checked="" /><strong>Reassigned</strong> / <strong>Assignment changed</strong> badge when inbound assignee ≠ session but local outbound exists</label></li>
+<li><label><input type="checkbox" checked="" />Page 0 merge of active outbound: <code>workordersout</code> <code>status = 'assigned' OR status = 'in_progress' OR status = 'blocked'</code> — <strong>no</strong> <code>day</code> filter; unpaged; collapse one row per <code>source.id</code> preferring outbound</label></li>
+<li><label><input type="checkbox" checked="" />Infinite scroll (offset += 20) on inbound only</label></li>
+<li><label><input type="checkbox" checked="" />Live query on inbound <strong>and</strong> active outbound page 0; coalesce (~50 ms); skip <code>FindOutboundForSources</code> for sources already in the active-outbound set</label></li>
+<li><label><input type="checkbox" checked="" />Empty / error / stale-sync states (stale-sync waits on replicator)</label></li>
+<li><label><input type="checkbox" checked="" />Batched <code>FindOutboundForSources</code> (<code>OR</code> of <code>source.id = $sN</code>, max 20) → <code>openId</code> + <code>openCollection</code> on each row</label></li>
+<li><label><input type="checkbox" checked="" />Row tap → <strong>one</strong> KV get on <code>openCollection</code> (S04)</label></li>
+<li><label><input type="checkbox" checked="" />Read-only inbound detail screen (S04); <strong>Start work</strong> pinned in a bottom dock</label></li>
+<li><label><input type="checkbox" checked="" /><code>query.explain()</code> opt-in via <code>EXPO_PUBLIC_QUERY_EXPLAIN=1</code> (not every query in <code>__DEV__</code>)</label></li>
+<li><label><input type="checkbox" checked="" />Today header clock + seconds countdown (<code>src/ops/todayClock.ts</code>)</label></li>
+</ul>
+<p><strong>Exit:</strong> scrolling 40+ seed jobs stays on the indexed plan; tap does not re-query the list.</p>
+<p><strong>Latency:</strong> today list p95 &lt; 50 ms local; KV p95 &lt; 10 ms.</p>
+<hr />
+<h2 id="phase-4--copy-on-write">Phase 4 — Copy-on-write</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" /><code>StartWork</code>: copy <code>workordersin</code> → <code>workordersout</code> (new <code>woout:&lt;ulid&gt;</code>, <code>role: primary</code>, <code>owner: technician</code>)</label></li>
+<li><label><input type="checkbox" checked="" />Reject start if inbound <code>assignedTo.employeeId</code> ≠ session</label></li>
+<li><label><input type="checkbox" checked="" />Clone inbound <code>taskIds</code> templates into <code>type:'task'</code> instances</label></li>
+<li><label><input type="checkbox" checked="" />Idempotent reopen via <code>idx_woout_source</code> (<code>employeeId</code>, <code>source.id</code>, <code>role=primary</code>)</label></li>
+<li><label><input type="checkbox" checked="" />Race: duplicate copy discarded; oldest <code>audit.cr.dt</code> wins</label></li>
+<li><label><input type="checkbox" checked="" />Provenance <code>source.*</code> with <strong>full body snapshot</strong> minus <code>embedding</code> / blobs</label></li>
+<li><label><input type="checkbox" checked="" /><strong>No writes</strong> to <code>workordersin</code> (dispatch)</label></li>
+<li><label><input type="checkbox" checked="" />Today screen routes started rows to <code>app/wo/out/[id]</code> using <code>openCollection</code></label></li>
+<li><label><input type="checkbox" checked="" />Metric <code>mfs_copy_on_write_total</code></label></li>
+<li><label><input type="checkbox" checked="" /><code>StartWork</code> rejects inbound <code>cancelled</code> / <code>superseded</code></label></li>
+<li><label><input type="checkbox" checked="" /><code>CreateWorkOrderIn</code>: new <code>woin:</code> <code>origin: field</code>, assigned to self; never patch dispatch inbound</label></li>
+</ul>
+<p><strong>Exit:</strong> double-tap Start opens one outbound id; dispatch inbound JSON unchanged; field-created inbound pushes; Today tap on a started job KV-gets the out doc.</p>
+<hr />
+<h2 id="phase-5--outbound-editor-status-submit-no-camera-yet">Phase 5 — Outbound editor, status, Submit (no camera yet)</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" />Status machine: <code>assigned</code> → <code>in_progress</code> ⇄ <code>blocked</code> → <code>complete</code> / <code>cancelled</code></label></li>
+<li><label><input type="checkbox" checked="" />Operation statuses <code>pending | in_progress | done | skipped</code> (schema). Field UI <strong>toggles done ↔︎ pending</strong> (<code>DoneToggle</code>: outline vs filled) — does not cycle <code>in_progress</code>/<code>skipped</code> on tap</label></li>
+<li><label><input type="checkbox" checked="" />Editable operations + embedded checklist (same outline/filled buttons)</label></li>
+<li><label><input type="checkbox" checked="" /><code>CompleteWork</code> gates required operations <code>status === 'done'</code> and required checklist <code>done === true</code> (required <strong>tasks</strong> added in the tasks PR)</label></li>
+<li><label><input type="checkbox" checked="" /><code>CancelWork</code> with reason (tech); dispatch cancel is inbound-only</label></li>
+<li><label><input type="checkbox" checked="" /><code>SubmitWork</code> only after complete/cancel; sets <code>syncState=ready_to_push</code></label></li>
+<li><label><input type="checkbox" checked="" />Complete/Cancel set <code>owner: backend</code> and <strong>freeze the body</strong> (no notes/photos on that id)</label></li>
+<li><label><input type="checkbox" checked="" /><code>CreateAmendment</code>: new <code>woout</code> with <code>role: amendment</code>, <code>amends.id</code></label></li>
+<li><label><input type="checkbox" checked="" /><code>history[]</code> on user saves (path + from/to + dt + lat/lon); skip <code>SetSyncState</code></label></li>
+<li><label><input type="checkbox" />Dispatch-updated banner (inbound KV vs snapshot; no auto-merge) — Reassigned / assignment-changed banner is in</label></li>
+<li><label><input type="checkbox" checked="" />Reassigned banner on an in-progress copy whose inbound assignee changed</label></li>
+</ul>
+<p><strong>Exit:</strong> a tech can start, edit ops, complete, freeze, submit, and open a follow-up paper fully offline (without photos).</p>
+<hr />
+<h2 id="phase-6--photos-and-localtmp">Phase 6 — Photos and <code>local.tmp</code></h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" />Camera runtime permission</label></li>
+<li><label><input type="checkbox" checked="" />Camera → <code>StagePhoto</code> (<code>local.tmp</code>, 24 h expiration) → <code>CommitPhoto</code></label></li>
+<li><label><input type="checkbox" checked="" />Top-level blobs <code>photo:&lt;id&gt;</code> + <code>photo:&lt;id&gt;:thumb</code> (not array paths)</label></li>
+<li><label><input type="checkbox" checked="" />Cap 20 photos/job; compress 200–800 KB; strip EXIF</label></li>
+<li><label><input type="checkbox" checked="" />Delete photo; periodic compact</label></li>
+<li><label><input type="checkbox" checked="" /><strong>No</strong> embedding enqueue</label></li>
+</ul>
+<p><strong>Exit:</strong> 10 photos on a job survive process death; <code>local.tmp</code> staging expires.</p>
+<p><strong>Storage:</strong> 10 photos × 400 KB ≈ 4 MB/job; 15 jobs/day ≈ 60 MB/day photos. v1 cap is the only growth control.</p>
+<hr />
+<h2 id="phase-7--tasks-and-notes">Phase 7 — Tasks and notes</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" /><code>tasks</code> instances + templates; <code>CompleteWork</code> gains required-task predicate</label></li>
+<li><label><input type="checkbox" checked="" /><code>notes</code> job/general; FTS on notes; <strong>409 on frozen parent</strong></label></li>
+<li><label><input type="checkbox" checked="" />New notes/tasks copy parent <code>readyToPush</code> if parent already submitted (editable only)</label></li>
+<li><label><input type="checkbox" checked="" />Push-filter expressions for notes/tasks documented for the replicator PR</label></li>
+</ul>
+<p><strong>Exit:</strong> CompleteWork refuses a job with an open required task; notes cannot land on a frozen WO.</p>
+<hr />
+<h2 id="phase-7b--chat">Phase 7b — Chat</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" /><code>field.messages</code> collection, prefix <code>msg:</code></label></li>
+<li><label><input type="checkbox" checked="" />Job thread <code>thr:wo:{woinId}</code> and DM <code>thr:dm:{empA}:{empB}</code></label></li>
+<li><label><input type="checkbox" checked="" /><code>SendMessage</code> <code>readyToPush: true</code> (not gated on WO Submit)</label></li>
+<li><label><input type="checkbox" checked="" />Chat tab + job-scoped composer from outbound editor</label></li>
+<li><label><input type="checkbox" checked="" />Push filter + <code>emp:</code> / <code>wo:</code> channels documented for the replicator PR</label></li>
+</ul>
+<p><strong>Exit:</strong> airplane-mode send appears after radio returns; completing a WO does not freeze the thread.</p>
+<hr />
+<h2 id="phase-8--assets-map">Phase 8 — Assets map</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" />MapLibre RN + OpenFreeMap Liberty <strong>when online</strong></label></li>
+<li><label><input type="checkbox" checked="" />Document: basemap needs network / last style cache; <strong>pins from CBL work offline</strong></label></li>
+<li><label><input type="checkbox" checked="" />BBox query <code>idx_ast_geo</code>; cluster; tap → KV asset</label></li>
+<li><label><input type="checkbox" checked="" />Filters: type, near job, near GPS</label></li>
+<li><label><input type="checkbox" checked="" />“Use asset on this job” writes <code>assetIds</code> on <code>woout</code> (needs PR-05+)</label></li>
+<li><label><input type="checkbox" checked="" />Location permission</label></li>
+<li><label><input type="checkbox" />Follow-up (not this phase): region MBTiles pack</label></li>
+</ul>
+<p><strong>Exit:</strong> map shows seed pumps/sites; pin opens KV detail; airplane mode still shows pins.</p>
+<hr />
+<h2 id="phase-8b--location-crumbs-tracking">Phase 8b — Location crumbs (<code>tracking</code>)</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" />Collection <code>field.tracking</code>, id <code>track:{YYYY-MM-DD}:{employeeId}</code> (device-local day; not email)</label></li>
+<li><label><input type="checkbox" checked="" /><code>RecordTrackPoint</code> when haversine ≥ <code>EXPO_PUBLIC_TRACK_MIN_MOVE_M</code> (default 100 m; <code>152</code> ≈ 500 ft)</label></li>
+<li><label><input type="checkbox" checked="" />Map <code>tracking</code> keyed by unix seconds → <code>[lat, lon]</code>; cap 4000/day; <code>last</code> <code>[lat, lon, ts]</code> for O(1) compare</label></li>
+<li><label><input type="checkbox" checked="" /><code>GetTrackingDay</code> / <code>GetTrackingLastNDays(n=7)</code> — seven KV gets, no query</label></li>
+<li><label><input type="checkbox" checked="" />Push filter always true; never log the map</label></li>
+<li><label><input type="checkbox" checked="" />Foreground / while-using only in v1 (background trail later)</label></li>
+<li><label><input type="checkbox" checked="" /><strong>TTL 30 days</strong> after <code>day</code> (<code>expiresAt</code> + <code>setDocumentExpiration</code>)</label></li>
+</ul>
+<p><strong>Exit:</strong> moving ~100 m+ writes a point; last 7 constructed ids KV-get; still docs do not dump crumbs.</p>
+<hr />
+<h2 id="phase-9--products-and-inventory">Phase 9 — Products and inventory</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" />Catalog browse + FTS (<code>idx_prd_fts</code>)</label></li>
+<li><label><input type="checkbox" checked="" />Van stock list (<code>locationId</code> of current user)</label></li>
+<li><label><input type="checkbox" checked="" /><code>ConsumeInventoryOnWork</code>: write <strong>only</strong> <code>inventory_tx</code> + <code>woout.materials</code> (<strong>never <code>save</code> stock rows</strong>)</label></li>
+<li><label><input type="checkbox" checked="" />Display qty = pulled <code>qtyOnHand</code> + <code>SUM(qtyDelta WHERE inventory_tx.audit.cr.dt &gt; snapshot.audit.up.dt)</code></label></li>
+<li><label><input type="checkbox" checked="" /><code>RebuildStock</code> read model (no writer)</label></li>
+<li><label><input type="checkbox" checked="" />Insufficient stock error; <code>allowNegative</code> only <code>supervisor</code> / <code>technician_lead</code></label></li>
+<li><label><input type="checkbox" checked="" />v1: one van per technician; <strong>stock not pushed and not saved</strong>; <code>inventory_tx</code> push when <code>readyToPush</code></label></li>
+</ul>
+<p><strong>Exit:</strong> consuming a valve on the job writes <code>invtx:</code> and a materials line; van list shows snapshot + txs newer than <code>snapshot.audit.up.dt</code>; crash between tx and materials is repaired via <code>appliedToWo</code> only.</p>
+<hr />
+<h2 id="phase-9b--orders-rates-taxes-field-customers">Phase 9b — Orders, rates, taxes, field customers</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" />Pull <code>rates</code> + <code>taxes</code>; never save those catalogs</label></li>
+<li><label><input type="checkbox" checked="" /><code>ListTodayOrders</code> / <code>StartOrder</code> (copy inbound → working; never mutate inbound)</label></li>
+<li><label><input type="checkbox" checked="" /><code>CreateOrder</code> <code>origin: field</code>; <code>PriceLines</code> integer cents</label></li>
+<li><label><input type="checkbox" checked="" /><code>CompleteOrder</code> freeze + <code>CreateOrderAmendment</code></label></li>
+<li><label><input type="checkbox" checked="" /><code>CreateCustomer</code> <code>origin: field</code> (do not patch pulled customers)</label></li>
+<li><label><input type="checkbox" checked="" />Optional <code>orderId</code> on delivery WOs; <code>workOrderOutId</code> on orders taken on site</label></li>
+<li><label><input type="checkbox" checked="" />Seed: one inbound order, two rates, one tax, Hartford customer</label></li>
+</ul>
+<p><strong>Exit:</strong> sales-mode Today lists an inbound order; copy + complete does not change inbound JSON; walk-up creates <code>cus:</code> + <code>ord:</code>.</p>
+<hr />
+<h2 id="phase-10--sync">Phase 10 — Sync</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" />Lab SG/App Services <strong>fixture documented</strong> in DESIGN (collections <code>field.*</code> except <code>tmp</code>, session auth, channels <code>emp:{employeeId}</code>)</label></li>
+<li><label><input type="checkbox" checked="" /><code>SessionAuthenticator</code> after <code>POST /_session</code> (default); optional <code>BasicAuthenticator</code> or <code>Authorization: Bearer</code> header (<a href="auth.html">AUTH.md</a>)</label></li>
+<li><label><input type="checkbox" checked="" />Replicator change listener: 401 / 404 / 10401 → <code>OnReplicatorAuthFailure</code></label></li>
+<li><label><input type="checkbox" checked="" /><code>await Replicator.create</code>; collection allow-list; <strong><code>local.tmp</code> not included</strong></label></li>
+<li><label><input type="checkbox" checked="" />RN <code>"show source"</code> push filters (never-push for pull-only; woout/notes/tasks/tx as specified)</label></li>
+<li><label><input type="checkbox" checked="" /><strong>No JS pull-filter functions</strong> in v1 (optional <code>channels: string[]</code> per collection; default empty)</label></li>
+<li><label><input type="checkbox" checked="" /><code>addDocumentChangeListener</code> → <code>syncState</code> <code>pushed</code> / <code>push_error</code></label></li>
+<li><label><input type="checkbox" checked="" />Feature-detect pending-ids; else COUNT <code>ready_to_push</code></label></li>
+<li><label><input type="checkbox" checked="" />Sync status on Profile; foreground restart</label></li>
+<li><label><input type="checkbox" checked="" />Operator sync bar: connected / not connected + last synced / pending push / downloading</label></li>
+<li><label><input type="checkbox" checked="" />Profile <strong>Large screen optimize</strong> (optional right-thumb zone + <strong>Left hand</strong> checkbox)</label></li>
+<li><label><input type="checkbox" checked="" /><code>ReconcileDuplicateOutbound</code> on pull</label></li>
+<li><label><input type="checkbox" checked="" />Channels sketch; SG sync function is <strong>external</strong></label></li>
+<li><label><input type="checkbox" checked="" />Per-collection pull <code>channels: string[]</code> on <code>CollectionConfig</code> (<strong>default empty</strong> = no client filter)</label></li>
+<li><label><input type="checkbox" checked="" />Profile <strong>Settings / debug</strong>: versions, DB path, replicator URL/status/last times, collection counts, start/stop/restart, channel editor</label></li>
+<li><label><input type="checkbox" checked="" />Build-time replication schema <code>simple</code> (continuous all <code>field.*</code>) vs <code>oneshot</code> (bootstrap <code>workordersin</code>+<code>orders</code>, then periodic + foreground one-shots). Not a Profile toggle.</label></li>
+</ul>
+<p><strong>Exit:</strong> lab SG round-trip: pull inbound, push submitted outbound + blobs + txs.</p>
+<hr />
+<h2 id="phase-11--search-polish-observability">Phase 11 — Search, polish, observability</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" />FTS notes / products / assets</label></li>
+<li><label><input type="checkbox" checked="" />Structured logs (no PII/doc dumps)</label></li>
+<li><label><input type="checkbox" checked="" />Metrics: query latency, copy-on-write, blob bytes, replicator</label></li>
+<li><label><input type="checkbox" checked="" />Database compact on idle after photo deletes</label></li>
+<li><label><input type="checkbox" checked="" />Customer history (local complete <code>workordersout</code>)</label></li>
+</ul>
+<hr />
+<h2 id="phase-ee--vector-similarity-gated">Phase EE — Vector similarity (gated)</h2>
+<p><strong>Binding:</strong> <a href="https://github.com/Fujio-Turner/cbl-reactnative">Fujio-Turner/cbl-reactnative</a> <code>feat/vector-search-support</code> (<code>VectorIndexConfiguration</code>). Official <code>@couchbase/couchbase-lite-react-native</code> 1.1 does <strong>not</strong> expose vector search — do not use it.</p>
+<p><strong>Still needed:</strong> native CBL <strong>4.x</strong> bump on that fork if not already, <strong>and</strong> on-device MobileCLIP runtime (model size, NNAPI/CoreML). Lab/testing <strong>does not require</strong> an EE license.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" />Lock MobileCLIP-S2 <strong>512-d</strong> (<code>embedding.clip512</code>)</label></li>
+<li><label><input type="checkbox" />On-device embed at <code>CommitPhoto</code> <strong>only in this phase</strong></label></li>
+<li><label><input type="checkbox" />Never write <code>clip512: []</code></label></li>
+<li><label><input type="checkbox" />Create vector index when API exists (cosine, dim=512, centroids ≈ √N)</label></li>
+<li><label><input type="checkbox" /><code>APPROX_VECTOR_DISTANCE(embedding.clip512, $vec)</code></label></li>
+<li><label><input type="checkbox" />Similarity screen behind <code>VECTOR_SEARCH_ENABLED &amp;&amp; nativeVectorApi</code></label></li>
+<li><label><input type="checkbox" /><strong>No</strong> production JS brute-force cosine over the full catalog</label></li>
+</ul>
+<hr />
+<h2 id="phase-future--pod-signature">Phase future — POD signature</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />Signature capture (name + blob) on complete/deliver, in addition to photo proof</label></li>
+<li><label><input type="checkbox" />Store as top-level blob on working <code>workordersout</code> / <code>orders</code>, not nested arrays</label></li>
+</ul>
+<hr />
+<h2 id="non-goals-on-this-roadmap">Non-goals on this roadmap</h2>
+<ul>
+<li>Web / Windows / macOS app</li>
+<li>SAP adapter, Zeus Hub, sibling ops dashboard</li>
+<li>koten-ai branding or remotes</li>
+<li>P2P CBL sync</li>
+<li>Passwords in CBL</li>
+<li>Mutating <strong>dispatch</strong> inbound <code>workordersin</code> (field <code>origin: field</code> create is allowed) or reopening a completed <code>workordersout</code> id</li>
+<li>POD <strong>signature</strong> pad (photo proof now; see Phase future)</li>
+<li>Credit card payment at order create (later; catalog snapshot only in v1)</li>
+<li>Inventory reservation / “out of stock” on create (assume plenty)</li>
+<li>Customer-facing chat</li>
+<li>Official <code>@couchbase/couchbase-lite-react-native</code> 1.1 as the binding SoT</li>
+<li>Offline MBTiles as a v1 requirement</li>
+<li>Offline login after Logout</li>
+</ul>
+<hr />
+<h2 id="pr-plan">PR Plan</h2>
+<p>Ordered, independently reviewable PRs. Each PR should build, typecheck, and leave the app runnable (stub screens allowed until their PR). <strong>00→05 must land in order.</strong> After 05, 07/08/09/10 can overlap; <strong>11 (replicator) waits for 07 and 10</strong> so notes/tasks/tx filters exist. Completeness of push filters is extended in 07/10 if 11 were started early — do not start 11 early.</p>
+<h3 id="pr-00--docs">PR-00 — Docs</h3>
+<table>
+<tbody>
+<tr>
+<td>Title</td>
+<td><code>docs: field-service architecture, day-in-the-life, and roadmap</code></td>
+</tr>
+<tr>
+<td>Files</td>
+<td><code>docs/DESIGN.md</code>, <code>docs/ROADMAP.md</code>, <code>docs/DAY_IN_LIFE*.md</code>, <code>docs/schema/*</code>, <code>guides/*</code>, <code>AGENT.md</code>, <code>README.md</code></td>
+</tr>
+<tr>
+<td>Deps</td>
+<td>none</td>
+</tr>
+<tr>
+<td>Description</td>
+<td>Fujio-Turner architecture on <a href="https://github.com/Fujio-Turner/mobile_field_service">https://github.com/Fujio-Turner/mobile_field_service</a>: fourteen <code>field</code> collections (including <code>tracking</code>), <code>history[]</code> audit trail, three modes, field-created inbound WOs, cbl-reactnative fork + vector, auth session TTL. No application code.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pr-01--expo-app-shell--login-ui">PR-01 — Expo app shell + login UI</h3>
+<table>
+<tbody>
+<tr>
+<td>Title</td>
+<td><code>feat: Expo SDK 52 shell, navigation, and login screen</code></td>
+</tr>
+<tr>
+<td>Files</td>
+<td><code>package.json</code> (Expo <strong>52</strong>, <code>react-native</code> <strong>0.76.9</strong>, Node engines ≥ 20), <code>app.json</code> (<code>newArchEnabled</code>, iOS 15.1, camera/location usage strings), <code>app/_layout.tsx</code>, <code>app/login.tsx</code>, <code>app/(tabs)/*</code>, <code>src/theme.ts</code>, <code>src/session/AuthContext.tsx</code> (HTTP stub), <code>plugin.config.js</code>, <code>jest.config.js</code> (or equivalent), <code>.env.example</code></td>
+</tr>
+<tr>
+<td>Deps</td>
+<td>PR-00</td>
+</tr>
+<tr>
+<td>Description</td>
+<td>Development-build Expo app, New Architecture on, phone-first tabs. Login per <a href="auth.html">AUTH.md</a> (default basic → Keychain session). Demo strategy skips SG. README: EE license, no Expo Go, Fujio-Turner/cbl-reactnative. Test runner wired with a smoke test.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pr-02--cbl-open-collections-audit-seed">PR-02 — CBL open, collections, audit, seed</h3>
+<table>
+<tbody>
+<tr>
+<td>Title</td>
+<td><code>feat: encrypted CBL database, field collections, local.tmp, seed</code></td>
+</tr>
+<tr>
+<td>Files</td>
+<td><code>src/db/engine.ts</code>, <code>src/db/database.ts</code>, <code>src/db/collections.ts</code>, <code>src/db/indexes.ts</code>, <code>src/db/seed.ts</code>, <code>src/ids.ts</code>, <code>src/audit.ts</code>, <code>src/session/dbKey.ts</code></td>
+</tr>
+<tr>
+<td>Deps</td>
+<td>PR-01</td>
+</tr>
+<tr>
+<td>Description</td>
+<td>Singleton engine, per-employee encrypted DB (<code>mfs_&lt;safe&gt;_&lt;hash8&gt;</code>), <code>setDirectory(FileSystem.getDefaultPath())</code>, string <code>setEncryptionKey</code>, <strong>fourteen</strong> <code>field.*</code> collections (including <code>messages</code>, <code>orders</code>, <code>rates</code>, <code>taxes</code>, <code>tracking</code>) + <code>local.tmp</code>, value/FTS indexes, ULID helpers, audit + <code>stampHistory</code>. Seed users with <code>employeeId</code>/<code>email</code>/<code>workModes</code>. Optional seed of today’s jobs + inbound order. Guard if native module missing.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pr-03--today-list-query--pagination">PR-03 — Today list query + pagination</h3>
+<table>
+<tbody>
+<tr>
+<td>Title</td>
+<td><code>feat: today’s work list with LIMIT/OFFSET, filters, and live query</code></td>
+</tr>
+<tr>
+<td>Files</td>
+<td><code>src/ops/listTodayWork.ts</code>, <code>src/ops/findOutboundForSources.ts</code>, <code>app/(tabs)/index.tsx</code>, <code>src/features/today/*</code></td>
+</tr>
+<tr>
+<td>Deps</td>
+<td>PR-02</td>
+</tr>
+<tr>
+<td>Description</td>
+<td>SQL++ today list keyed by <code>assignedTo.employeeId</code> (<code>idx_woin_today</code>) excluding cancelled/superseded via <code>!=</code> (not <code>IN</code>), page size 20, numeric LIMIT/OFFSET. Page 0 merge of active outbound (<code>OR</code> of statuses), collapse per <code>source.id</code>. <strong>Reassigned</strong> badge. Live query inbound + outbound; coalesce. <code>openId</code>/<code>openCollection</code> via batched <code>OR</code> lookup.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pr-04--kv-inbound-detail">PR-04 — KV inbound detail</h3>
+<table>
+<tbody>
+<tr>
+<td>Title</td>
+<td><code>feat: work-order inbound detail via KV get</code></td>
+</tr>
+<tr>
+<td>Files</td>
+<td><code>src/ops/getWorkOrderIn.ts</code>, <code>app/wo/in/[id].tsx</code></td>
+</tr>
+<tr>
+<td>Deps</td>
+<td>PR-03</td>
+</tr>
+<tr>
+<td>Description</td>
+<td>Inbound route uses <code>workordersin.document(id)</code> only. Read-only site, schedule, ops, materials, asset refs. Started jobs are <strong>not</strong> this route (see PR-05).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pr-05--copy-on-write-startwork--today-routing">PR-05 — Copy-on-write StartWork + Today routing</h3>
+<table>
+<tbody>
+<tr>
+<td>Title</td>
+<td><code>feat: copy-on-write start work and route Today to outbound editor</code></td>
+</tr>
+<tr>
+<td>Files</td>
+<td><code>src/ops/startWork.ts</code>, <code>src/ops/getWorkOrderOut.ts</code>, <code>app/wo/out/[id].tsx</code> (shell), <code>app/(tabs)/index.tsx</code> (tap → <code>openCollection</code>), tests for idempotency</td>
+</tr>
+<tr>
+<td>Deps</td>
+<td>PR-04</td>
+</tr>
+<tr>
+<td>Description</td>
+<td>Copy inbound JSON to new <code>woout:&lt;ulid&gt;</code> (<code>role: primary</code>, <code>owner: technician</code>) with <code>source.*</code> full snapshot; clone task templates; idempotent by <strong>employeeId</strong> + <code>source.id</code> + <code>role=primary</code>. Reject if inbound not assigned to session. Never writes inbound. Today tap KV-gets <code>openCollection.document(openId)</code> and navigates to in vs out. Metric counter.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pr-06--outbound-editor--status--submit">PR-06 — Outbound editor + status + Submit</h3>
+<table>
+<tbody>
+<tr>
+<td>Title</td>
+<td><code>feat: outbound editor, status machine, and submit</code></td>
+</tr>
+<tr>
+<td>Files</td>
+<td><code>app/wo/out/[id].tsx</code>, <code>src/ops/updateWorkOrderOut.ts</code>, <code>src/ops/transitionStatus.ts</code>, <code>src/ops/submitWork.ts</code></td>
+</tr>
+<tr>
+<td>Deps</td>
+<td>PR-05</td>
+</tr>
+<tr>
+<td>Description</td>
+<td>Editor for operations/checklist; status transitions including tech cancel; CompleteWork ops+checklist gates; Complete/Cancel freeze body and set <code>owner: backend</code>; <code>CreateAmendment</code> for forgotten info; <code>history[]</code> path/from/to + geo/time; Submit only after complete/cancel via <code>SetSyncState</code>. No camera. CompleteWork task gate is a documented hook for PR-08.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pr-07--photos--localtmp">PR-07 — Photos + local.tmp</h3>
+<table>
+<tbody>
+<tr>
+<td>Title</td>
+<td><code>feat: photo blobs on stable keys and tmp staging</code></td>
+</tr>
+<tr>
+<td>Files</td>
+<td><code>src/ops/photos.ts</code>, <code>src/ops/tmp.ts</code>, camera permission flow in <code>app/wo/out/[id].tsx</code></td>
+</tr>
+<tr>
+<td>Deps</td>
+<td>PR-06</td>
+</tr>
+<tr>
+<td>Description</td>
+<td>Stage in <code>local.tmp</code> with expiration; commit top-level <code>photo:&lt;id&gt;</code> / <code>:thumb</code> blobs; cap 20; JPEG budget; delete + compact. No CLIP embed.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pr-08--tasks-and-notes">PR-08 — Tasks and notes</h3>
+<table>
+<tbody>
+<tr>
+<td>Title</td>
+<td><code>feat: job tasks and notes collections</code></td>
+</tr>
+<tr>
+<td>Files</td>
+<td><code>src/ops/tasks.ts</code>, <code>src/ops/notes.ts</code>, <code>app/(tabs)/notes.tsx</code>, <code>app/note/[id].tsx</code>, <code>src/ops/transitionStatus.ts</code> (required-task hook)</td>
+</tr>
+<tr>
+<td>Deps</td>
+<td>PR-06 (CompleteWork hook); photos not required</td>
+</tr>
+<tr>
+<td>Description</td>
+<td><code>tasks</code> instances + templates; <code>notes</code> job/general; FTS on notes. CompleteWork honors required tasks. Post-submit children inherit <code>readyToPush</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pr-09--assets-map">PR-09 — Assets map</h3>
+<table>
+<tbody>
+<tr>
+<td>Title</td>
+<td><code>feat: MapLibre asset map and KV asset detail</code></td>
+</tr>
+<tr>
+<td>Files</td>
+<td><code>app/(tabs)/map.tsx</code>, <code>app/asset/[id].tsx</code>, <code>src/ops/assets.ts</code></td>
+</tr>
+<tr>
+<td>Deps</td>
+<td><strong>PR-05</strong> (link-to-job needs <code>woout</code>); PR-02 is not sufficient</td>
+</tr>
+<tr>
+<td>Description</td>
+<td>OpenFreeMap when online + MapLibre; bbox query; cluster; tap KV; link asset to open <code>woout</code>. Document offline pins vs online basemap. Location permission.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pr-16--tracking-crumbs">PR-16 — Tracking crumbs</h3>
+<table>
+<tbody>
+<tr>
+<td>Title</td>
+<td><code>feat: per-day tracking collection and RecordTrackPoint</code></td>
+</tr>
+<tr>
+<td>Files</td>
+<td><code>src/ops/tracking.ts</code>, <code>src/geo/haversine.ts</code>, location watch in app shell</td>
+</tr>
+<tr>
+<td>Deps</td>
+<td><strong>PR-02</strong> (collection); <strong>PR-09</strong> (location permission). Replicator allow-list in PR-11.</td>
+</tr>
+<tr>
+<td>Description</td>
+<td><code>field.tracking</code>, id <code>track:{YYYY-MM-DD}:{employeeId}</code>. Map keyed by unix seconds → <code>[lat, lon]</code>. Write when moved ≥ <code>EXPO_PUBLIC_TRACK_MIN_MOVE_M</code> (default 100 m). <code>GetTrackingLastNDays</code> = N KV gets. Cap 4000/day. Never log the map. Foreground / while-using only.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pr-10--inventory-and-products">PR-10 — Inventory and products</h3>
+<table>
+<tbody>
+<tr>
+<td>Title</td>
+<td><code>feat: product catalog, van stock, consume-on-job, rebuild</code></td>
+</tr>
+<tr>
+<td>Files</td>
+<td><code>app/(tabs)/inventory.tsx</code>, <code>src/ops/products.ts</code>, <code>src/ops/inventory.ts</code></td>
+</tr>
+<tr>
+<td>Deps</td>
+<td>PR-06</td>
+</tr>
+<tr>
+<td>Description</td>
+<td>FTS catalog. Display qty = snapshot <code>qtyOnHand</code> + <code>SUM(qtyDelta WHERE tx.audit.cr.dt &gt; snapshot.audit.up.dt)</code>. Consume writes <strong>only</strong> <code>inventory_tx</code> + materials — <strong>never <code>save</code> stock</strong>. <code>RebuildStock</code> is a read model with that cutoff. Movements-only push. Role-gated <code>allowNegative</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pr-11--replicator-and-sync-ui">PR-11 — Replicator and sync UI</h3>
+<table>
+<tbody>
+<tr>
+<td>Title</td>
+<td><code>feat: collection replicator, RN push filters, and sync status</code></td>
+</tr>
+<tr>
+<td>Files</td>
+<td><code>src/sync/replicator.ts</code>, <code>src/sync/filters.ts</code>, <code>app/(tabs)/profile.tsx</code>, <code>src/ops/syncSnapshot.ts</code></td>
+</tr>
+<tr>
+<td>Deps</td>
+<td><strong>PR-07, PR-08, PR-10, PR-14</strong> (woout + photos + notes/tasks/tx + messages filters). Do not merge before those filters exist.</td>
+</tr>
+<tr>
+<td>Description</td>
+<td>Session auth, <code>Replicator.create</code> + <code>addCollection</code>, explicit allow-list of <strong>fourteen</strong> <code>field</code> collections (including <code>tracking</code>), omit <code>local.tmp</code>, <code>"show source"</code> push filters, optional per-collection <code>channels: string[]</code> (default empty), <code>emp:{employeeId}</code> on SG, document listener calls <strong><code>SetSyncState</code></strong> for <code>pushed</code>/<code>push_error</code>, pending-count fallback, foreground restart, duplicate-outbound reconcile (primaries only). Profile Settings / debug. Lab <code>wss</code> URL via env. Lab SG collection list lives in DESIGN.md.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pr-12--observability-and-fts-search-chrome">PR-12 — Observability and FTS search chrome</h3>
+<table>
+<tbody>
+<tr>
+<td>Title</td>
+<td><code>feat: structured logs, metrics, and FTS search</code></td>
+</tr>
+<tr>
+<td>Files</td>
+<td><code>src/log/logger.ts</code>, <code>src/metrics/index.ts</code>, <code>app/search/index.tsx</code></td>
+</tr>
+<tr>
+<td>Deps</td>
+<td>PR-11</td>
+</tr>
+<tr>
+<td>Description</td>
+<td>JSON logs without PII; latency histograms; FTS across notes/products/assets.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pr-14--chat--messages">PR-14 — Chat / messages</h3>
+<table>
+<tbody>
+<tr>
+<td>Title</td>
+<td><code>feat: messages collection and job/direct chat</code></td>
+</tr>
+<tr>
+<td>Files</td>
+<td><code>src/ops/messages.ts</code>, <code>app/(tabs)/chat.tsx</code>, <code>app/chat/[threadId].tsx</code></td>
+</tr>
+<tr>
+<td>Deps</td>
+<td>PR-02 (collection); better after PR-05 so job threads have a <code>woin</code></td>
+</tr>
+<tr>
+<td>Description</td>
+<td><code>field.messages</code>, <code>msg:&lt;ulid&gt;</code>, <code>SendMessage</code> with <code>readyToPush: true</code> and <code>history[]</code>. Job <code>thr:wo:{woinId}</code> and DM threads. Completing a WO does not freeze chat.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pr-15--orders-rates-taxes-field-customers">PR-15 — Orders, rates, taxes, field customers</h3>
+<table>
+<tbody>
+<tr>
+<td>Title</td>
+<td><code>feat: orders copy-on-write, rates/taxes catalogs, field customers</code></td>
+</tr>
+<tr>
+<td>Files</td>
+<td><code>src/ops/orders.ts</code>, <code>src/ops/pricing.ts</code>, <code>src/ops/customers.ts</code>, <code>app/order/**</code></td>
+</tr>
+<tr>
+<td>Deps</td>
+<td>PR-02; better after PR-06 so freeze/amendment UX is reused</td>
+</tr>
+<tr>
+<td>Description</td>
+<td>Inbound orders pull-only; <code>StartOrder</code> / <code>CreateOrder</code>; <code>PriceLines</code> snapshots cents; freeze + amendment; <code>CreateCustomer</code> origin field. Do not mutate inbound orders or dispatch customers.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pr-13--ee-vector-similarity-later">PR-13 — EE vector similarity (later)</h3>
+<table>
+<tbody>
+<tr>
+<td>Title</td>
+<td><code>feat: mobile-CLIP embeddings and gated vector search</code></td>
+</tr>
+<tr>
+<td>Files</td>
+<td><code>src/embed/clip.ts</code>, <code>src/ops/similar.ts</code>, <code>app/search/similar.tsx</code>, native module <strong>if</strong> RN plugin still lacks vector indexes</td>
+</tr>
+<tr>
+<td>Deps</td>
+<td>PR-07, PR-12; <strong>blocked</strong> on vector API <strong>and</strong> native CLIP runtime</td>
+</tr>
+<tr>
+<td>Description</td>
+<td>Persist <code>embedding.clip512</code> (512 floats, never <code>[]</code>) on commit photo when the model exists. Create vector index only when the API exists. Similarity UI behind <code>VECTOR_SEARCH_ENABLED &amp;&amp; nativeVectorApi</code>. Do not fake ANN.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="merge-notes">Merge notes</h3>
+<ul>
+<li>Spine: 00 → 01 → 02 → 03 → 04 → 05.</li>
+<li>After 05: <strong>06</strong> (editor + freeze + amendment) then <strong>07</strong> (photos). <strong>08</strong> (tasks/notes) can parallel 07. <strong>09</strong> (map) depends on <strong>05</strong>, not 04. <strong>16</strong> (tracking) after <strong>09</strong> location permission (collection exists from <strong>02</strong>). <strong>10</strong> (inventory) depends on <strong>06</strong>. <strong>14</strong> (chat) can parallel 06+ after 02/05.</li>
+<li><strong>11</strong> (sync) after <strong>07 + 08 + 10 + 14 + 15</strong>. If filters must land incrementally, extend <code>src/sync/filters.ts</code> — but prefer 11 last among them.</li>
+<li><strong>15</strong> (orders) after <strong>02</strong>; reuse freeze UX from <strong>06</strong>.</li>
+<li>PR-06 CompleteWork ships without the required-task predicate; PR-08 adds it in the same operation.</li>
+<li>No PR may add Web or Windows runtime targets.</li>
+<li>No PR may write passwords into CBL, mutate <strong>dispatch</strong> inbound WOs/orders, reopen a completed outbound/order id, nest blobs in arrays, or replicate <code>tmp</code>.</li>
+<li>Prefer <a href="https://github.com/Fujio-Turner/cbl-reactnative">Fujio-Turner/cbl-reactnative</a> over official 1.1. Native 4.x + vector live on that fork.</li>
+<li>No PR may brand this as koten-ai.</li>
+</ul>
+    </article>
+    <aside class="toc" aria-label="On this page">
+      <p class="eyebrow">On this page</p>
+<ul>
+<li><a href="#mobile-field-service--roadmap" id="toc-mobile-field-service--roadmap">Mobile Field Service — Roadmap</a>
+<ul>
+<li><a href="#phase-0--docs-and-constraints" id="toc-phase-0--docs-and-constraints">Phase 0 — Docs and constraints</a></li>
+<li><a href="#phase-1--app-shell-and-session-ui" id="toc-phase-1--app-shell-and-session-ui">Phase 1 — App shell and session UI</a></li>
+<li><a href="#phase-2--encrypted-database-collections-seed" id="toc-phase-2--encrypted-database-collections-seed">Phase 2 — Encrypted database, collections, seed</a></li>
+<li><a href="#phase-3--today-list--kv-detail" id="toc-phase-3--today-list--kv-detail">Phase 3 — Today list + KV detail</a></li>
+<li><a href="#phase-4--copy-on-write" id="toc-phase-4--copy-on-write">Phase 4 — Copy-on-write</a></li>
+<li><a href="#phase-5--outbound-editor-status-submit-no-camera-yet" id="toc-phase-5--outbound-editor-status-submit-no-camera-yet">Phase 5 — Outbound editor, status, Submit (no camera yet)</a></li>
+<li><a href="#phase-6--photos-and-localtmp" id="toc-phase-6--photos-and-localtmp">Phase 6 — Photos and <code>local.tmp</code></a></li>
+<li><a href="#phase-7--tasks-and-notes" id="toc-phase-7--tasks-and-notes">Phase 7 — Tasks and notes</a></li>
+<li><a href="#phase-7b--chat" id="toc-phase-7b--chat">Phase 7b — Chat</a></li>
+<li><a href="#phase-8--assets-map" id="toc-phase-8--assets-map">Phase 8 — Assets map</a></li>
+<li><a href="#phase-8b--location-crumbs-tracking" id="toc-phase-8b--location-crumbs-tracking">Phase 8b — Location crumbs (<code>tracking</code>)</a></li>
+<li><a href="#phase-9--products-and-inventory" id="toc-phase-9--products-and-inventory">Phase 9 — Products and inventory</a></li>
+<li><a href="#phase-9b--orders-rates-taxes-field-customers" id="toc-phase-9b--orders-rates-taxes-field-customers">Phase 9b — Orders, rates, taxes, field customers</a></li>
+<li><a href="#phase-10--sync" id="toc-phase-10--sync">Phase 10 — Sync</a></li>
+<li><a href="#phase-11--search-polish-observability" id="toc-phase-11--search-polish-observability">Phase 11 — Search, polish, observability</a></li>
+<li><a href="#phase-ee--vector-similarity-gated" id="toc-phase-ee--vector-similarity-gated">Phase EE — Vector similarity (gated)</a></li>
+<li><a href="#phase-future--pod-signature" id="toc-phase-future--pod-signature">Phase future — POD signature</a></li>
+<li><a href="#non-goals-on-this-roadmap" id="toc-non-goals-on-this-roadmap">Non-goals on this roadmap</a></li>
+<li><a href="#pr-plan" id="toc-pr-plan">PR Plan</a></li>
+</ul></li>
+</ul>
+    </aside>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>© <span id="year">2026</span> Fujio-Turner. Apache License 2.0.</p>
+      <p><a href="https://github.com/Fujio-Turner/mobile_field_service">Application</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_pages">This site</a></p>
+    </div>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="../js/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Schema — rates — Mobile Field Service</title>
+  <meta name="description" content="Mobile Field Service documentation." />
+  <meta name="theme-color" content="#0f766e" />
+  <link rel="icon" type="image/svg+xml" href="../../images/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../css/site.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="../../index.html">
+        <img src="../../images/favicon.svg" alt="" width="32" height="32" />
+        Mobile Field Service
+      </a>
+      <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../../index.html#product">Product</a></li>
+        <li><a href="../../index.html#screens">Screens</a></li>
+        <li><a href="../../docs/index.html" aria-current="page">Docs</a></li>
+        <li><a href="https://github.com/Fujio-Turner/mobile_field_service">App repo</a></li>
+      </ul>
+      <a class="btn btn-primary" href="https://github.com/Fujio-Turner/mobile_field_service">GitHub</a>
+    </div>
+  </header>
+  <main class="wrap doc-layout">
+    <article class="prose">
+      <p class="crumb"><a href="../../index.html">Home</a> · <a href="../../docs/index.html">Docs</a> · Schema — rates</p>
+<h1 id="schema--fieldrates">Schema — <code>field.rates</code></h1>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Collection</td>
+<td><code>rates</code> (scope <code>field</code>)</td>
+</tr>
+<tr>
+<td>Doc id</td>
+<td><code>rate:&lt;ULID&gt;</code></td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td><code>rate</code></td>
+</tr>
+<tr>
+<td>Repo</td>
+<td><a href="https://github.com/Fujio-Turner/mobile_field_service">Fujio-Turner/mobile_field_service</a></td>
+</tr>
+<tr>
+<td>Date</td>
+<td>2026-09-04</td>
+</tr>
+<tr>
+<td>Design</td>
+<td><a href="../architecture.html">DESIGN.md</a></td>
+</tr>
+<tr>
+<td>Used by</td>
+<td><a href="orders.html">SCHEMA_ORDERS.md</a></td>
+</tr>
+</tbody>
+</table>
+<p>Price book: labor, product, service, travel, surcharge. <strong>Pull-only catalog.</strong> The device never <code>save</code>s rate documents. Orders <strong>snapshot</strong> <code>amount</code> onto <code>lines[].unitPrice</code> at add-line / reprice time.</p>
+<hr />
+<h2 id="envelope">Envelope</h2>
+<p><code>type</code>, <code>audit.cr|up.{dt,ver,by}</code> (unix seconds). No <code>history[]</code> (pull catalog).</p>
+<hr />
+<h2 id="fields">Fields</h2>
+<p><strong>Required:</strong> <code>type</code>, <code>audit</code>, <code>code</code>, <code>name</code>, <code>kind</code>, <code>amount</code>, <code>currency</code>, <code>unit</code>, <code>active</code>.</p>
+<p><strong>Optional:</strong> <code>productId</code>, <code>description</code>, <code>effectiveFromDt</code>, <code>effectiveToDt</code>, <code>taxInclusive</code>, <code>defaultTaxIds[]</code>, <code>minQty</code>, <code>crewId</code>, <code>districtId</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Values / notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>kind</code></td>
+<td><code>labor</code> | <code>product</code> | <code>service</code> | <code>travel</code> | <code>surcharge</code></td>
+</tr>
+<tr>
+<td><code>amount</code></td>
+<td>Integer <strong>cents</strong> (or minor units) per <code>unit</code></td>
+</tr>
+<tr>
+<td><code>currency</code></td>
+<td><code>USD</code></td>
+</tr>
+<tr>
+<td><code>unit</code></td>
+<td><code>hour</code> | <code>ea</code> | <code>mile</code> | <code>flat</code> | <code>day</code></td>
+</tr>
+<tr>
+<td><code>taxInclusive</code></td>
+<td>If true, <code>amount</code> includes tax; <code>PriceLines</code> extracts tax using <a href="taxes.html">SCHEMA_TAXES.md</a></td>
+</tr>
+<tr>
+<td><code>defaultTaxIds</code></td>
+<td>Default <code>tax:</code> ids when a line does not override</td>
+</tr>
+<tr>
+<td><code>effectiveFromDt</code> / <code>effectiveToDt</code></td>
+<td>Unix seconds; omit <code>to</code> = open-ended</td>
+</tr>
+<tr>
+<td><code>productId</code></td>
+<td>When this rate is the list price of a <code>prd:</code></td>
+</tr>
+</tbody>
+</table>
+<p>Pick the rate where <code>active === true</code> and <code>effectiveFromDt &lt;= now &lt; effectiveToDt</code> (missing <code>to</code> = open). If several match, prefer <code>districtId</code> then <code>crewId</code> then global (<code>districtId</code> absent).</p>
+<hr />
+<h2 id="example">Example</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;rate&quot;</span><span class="fu">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;audit&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;cr&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;dt&quot;</span><span class="fu">:</span> <span class="dv">1750000000</span><span class="fu">,</span> <span class="dt">&quot;ver&quot;</span><span class="fu">:</span> <span class="st">&quot;server&quot;</span><span class="fu">,</span> <span class="dt">&quot;by&quot;</span><span class="fu">:</span> <span class="st">&quot;pricing&quot;</span> <span class="fu">},</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;up&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;dt&quot;</span><span class="fu">:</span> <span class="dv">1788400000</span><span class="fu">,</span> <span class="dt">&quot;ver&quot;</span><span class="fu">:</span> <span class="st">&quot;server&quot;</span><span class="fu">,</span> <span class="dt">&quot;by&quot;</span><span class="fu">:</span> <span class="st">&quot;pricing&quot;</span> <span class="fu">}</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;code&quot;</span><span class="fu">:</span> <span class="st">&quot;VLV-CHK-4-LIST&quot;</span><span class="fu">,</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;Check valve 4in list&quot;</span><span class="fu">,</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;kind&quot;</span><span class="fu">:</span> <span class="st">&quot;product&quot;</span><span class="fu">,</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;productId&quot;</span><span class="fu">:</span> <span class="st">&quot;prd:01K4Q6PPP00000000000000001&quot;</span><span class="fu">,</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;amount&quot;</span><span class="fu">:</span> <span class="dv">18500</span><span class="fu">,</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;currency&quot;</span><span class="fu">:</span> <span class="st">&quot;USD&quot;</span><span class="fu">,</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;unit&quot;</span><span class="fu">:</span> <span class="st">&quot;ea&quot;</span><span class="fu">,</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;taxInclusive&quot;</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;defaultTaxIds&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;tax:01K4Q6TAX00000000000001&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;effectiveFromDt&quot;</span><span class="fu">:</span> <span class="dv">1750000000</span><span class="fu">,</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;active&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;districtId&quot;</span><span class="fu">:</span> <span class="st">&quot;district:north&quot;</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>Labor example: <code>kind: service</code>, <code>code: LABOR-STD</code>, <code>amount: 12500</code> ($125.00), <code>unit: hour</code>.</p>
+<hr />
+<h2 id="indexes">Indexes</h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Kind</th>
+<th>Keys</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>idx_rate_code</code></td>
+<td>value</td>
+<td><code>code</code></td>
+</tr>
+<tr>
+<td><code>idx_rate_product</code></td>
+<td>value</td>
+<td><code>productId</code>, <code>active</code></td>
+</tr>
+<tr>
+<td><code>idx_rate_kind</code></td>
+<td>value</td>
+<td><code>kind</code>, <code>active</code></td>
+</tr>
+<tr>
+<td>FTS <code>idx_rate_fts</code></td>
+<td>fts</td>
+<td><code>code</code>, <code>name</code>, <code>description</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="replication">Replication</h2>
+<p><strong>PULL only.</strong> Push filter <code>return false</code>. Channel: <code>district:{id}</code> and/or <code>public</code>.</p>
+<p>Hard rule: <strong>no live join</strong> from an order line to <code>rates.amount</code> for display of a saved order. Show <code>lines[].unitPrice</code>.</p>
+<hr />
+<h2 id="json-schema">JSON Schema</h2>
+<p><a href="https://json-schema.org/draft/2020-12/schema">JSON Schema 2020-12</a>. Document body; id is <code>rate:&lt;ULID&gt;</code>.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;$schema&quot;</span><span class="fu">:</span> <span class="st">&quot;https://json-schema.org/draft/2020-12/schema&quot;</span><span class="fu">,</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;$id&quot;</span><span class="fu">:</span> <span class="st">&quot;https://github.com/Fujio-Turner/mobile_field_service/docs/schema/rates.json&quot;</span><span class="fu">,</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;title&quot;</span><span class="fu">:</span> <span class="st">&quot;field.rates&quot;</span><span class="fu">,</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;object&quot;</span><span class="fu">,</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;additionalProperties&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;required&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;type&quot;</span><span class="ot">,</span> <span class="st">&quot;audit&quot;</span><span class="ot">,</span> <span class="st">&quot;code&quot;</span><span class="ot">,</span> <span class="st">&quot;name&quot;</span><span class="ot">,</span> <span class="st">&quot;kind&quot;</span><span class="ot">,</span> <span class="st">&quot;amount&quot;</span><span class="ot">,</span> <span class="st">&quot;currency&quot;</span><span class="ot">,</span> <span class="st">&quot;unit&quot;</span><span class="ot">,</span> <span class="st">&quot;active&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;properties&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;const&quot;</span><span class="fu">:</span> <span class="st">&quot;rate&quot;</span> <span class="fu">},</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;audit&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;$ref&quot;</span><span class="fu">:</span> <span class="st">&quot;#/$defs/audit&quot;</span> <span class="fu">},</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;code&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span><span class="fu">,</span> <span class="dt">&quot;minLength&quot;</span><span class="fu">:</span> <span class="dv">1</span> <span class="fu">},</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span><span class="fu">,</span> <span class="dt">&quot;minLength&quot;</span><span class="fu">:</span> <span class="dv">1</span> <span class="fu">},</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;kind&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span><span class="fu">,</span> <span class="dt">&quot;enum&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;labor&quot;</span><span class="ot">,</span> <span class="st">&quot;product&quot;</span><span class="ot">,</span> <span class="st">&quot;service&quot;</span><span class="ot">,</span> <span class="st">&quot;travel&quot;</span><span class="ot">,</span> <span class="st">&quot;surcharge&quot;</span><span class="ot">]</span> <span class="fu">},</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;amount&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;integer&quot;</span><span class="fu">,</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Integer cents per unit&quot;</span> <span class="fu">},</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;currency&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span><span class="fu">,</span> <span class="dt">&quot;minLength&quot;</span><span class="fu">:</span> <span class="dv">3</span><span class="fu">,</span> <span class="dt">&quot;maxLength&quot;</span><span class="fu">:</span> <span class="dv">3</span> <span class="fu">},</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;unit&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span><span class="fu">,</span> <span class="dt">&quot;enum&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;hour&quot;</span><span class="ot">,</span> <span class="st">&quot;ea&quot;</span><span class="ot">,</span> <span class="st">&quot;mile&quot;</span><span class="ot">,</span> <span class="st">&quot;flat&quot;</span><span class="ot">,</span> <span class="st">&quot;day&quot;</span><span class="ot">]</span> <span class="fu">},</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;active&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;boolean&quot;</span> <span class="fu">},</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;productId&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span> <span class="fu">},</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span> <span class="fu">},</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;effectiveFromDt&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;$ref&quot;</span><span class="fu">:</span> <span class="st">&quot;#/$defs/unixSeconds&quot;</span> <span class="fu">},</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;effectiveToDt&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;$ref&quot;</span><span class="fu">:</span> <span class="st">&quot;#/$defs/unixSeconds&quot;</span> <span class="fu">},</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;taxInclusive&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;boolean&quot;</span> <span class="fu">},</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;defaultTaxIds&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;array&quot;</span><span class="fu">,</span> <span class="dt">&quot;items&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span> <span class="fu">}</span> <span class="fu">},</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;minQty&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;number&quot;</span> <span class="fu">},</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;crewId&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span> <span class="fu">},</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;districtId&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span> <span class="fu">}</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;$defs&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;unixSeconds&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;integer&quot;</span><span class="fu">,</span> <span class="dt">&quot;minimum&quot;</span><span class="fu">:</span> <span class="dv">0</span> <span class="fu">},</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;auditStamp&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;object&quot;</span><span class="fu">,</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;additionalProperties&quot;</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;required&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;dt&quot;</span><span class="ot">,</span> <span class="st">&quot;ver&quot;</span><span class="ot">,</span> <span class="st">&quot;by&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;properties&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;dt&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;$ref&quot;</span><span class="fu">:</span> <span class="st">&quot;#/$defs/unixSeconds&quot;</span> <span class="fu">},</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;ver&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span> <span class="fu">},</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;by&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span> <span class="fu">}</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;audit&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;object&quot;</span><span class="fu">,</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;additionalProperties&quot;</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;required&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;cr&quot;</span><span class="ot">,</span> <span class="st">&quot;up&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;properties&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;cr&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;$ref&quot;</span><span class="fu">:</span> <span class="st">&quot;#/$defs/auditStamp&quot;</span> <span class="fu">},</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;up&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;$ref&quot;</span><span class="fu">:</span> <span class="st">&quot;#/$defs/auditStamp&quot;</span> <span class="fu">}</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+    </article>
+    <aside class="toc" aria-label="On this page">
+      <p class="eyebrow">On this page</p>
+<ul>
+<li><a href="#schema--fieldrates" id="toc-schema--fieldrates">Schema — <code>field.rates</code></a>
+<ul>
+<li><a href="#envelope" id="toc-envelope">Envelope</a></li>
+<li><a href="#fields" id="toc-fields">Fields</a></li>
+<li><a href="#example" id="toc-example">Example</a></li>
+<li><a href="#indexes" id="toc-indexes">Indexes</a></li>
+<li><a href="#replication" id="toc-replication">Replication</a></li>
+<li><a href="#json-schema" id="toc-json-schema">JSON Schema</a></li>
+</ul></li>
+</ul>
+    </aside>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>© <span id="year">2026</span> Fujio-Turner. Apache License 2.0.</p>
+      <p><a href="https://github.com/Fujio-Turner/mobile_field_service">Application</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_pages">This site</a></p>
+    </div>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="../../js/site.js"></script>
+</body>
+</html>

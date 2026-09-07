@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Schemas — Mobile Field Service</title>
+  <meta name="description" content="Mobile Field Service documentation." />
+  <meta name="theme-color" content="#0f766e" />
+  <link rel="icon" type="image/svg+xml" href="../../images/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../css/site.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="../../index.html">
+        <img src="../../images/favicon.svg" alt="" width="32" height="32" />
+        Mobile Field Service
+      </a>
+      <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../../index.html#product">Product</a></li>
+        <li><a href="../../index.html#screens">Screens</a></li>
+        <li><a href="../../docs/index.html" aria-current="page">Docs</a></li>
+        <li><a href="https://github.com/Fujio-Turner/mobile_field_service">App repo</a></li>
+      </ul>
+      <a class="btn btn-primary" href="https://github.com/Fujio-Turner/mobile_field_service">GitHub</a>
+    </div>
+  </header>
+  <main class="wrap doc-layout">
+    <article class="prose">
+      <p class="crumb"><a href="../../index.html">Home</a> · <a href="../../docs/index.html">Docs</a> · Schemas</p>
+<h1 id="schemas">Schemas</h1>
+<p>One file per collection (or pair). Shared envelope: <a href="common.html">SCHEMA_COMMON.md</a> (<code>audit</code> + <code>history[]</code> on user/device docs; <strong>no</strong> <code>lastAction</code>). Movement crumbs: <a href="tracking.html">SCHEMA_TRACKING.md</a> (<strong>TTL 30 days</strong>). Architecture: <a href="../architecture.html">DESIGN.md</a>. Settings: <a href="../settings.html">guides/SETTINGS.md</a>.</p>
+<p>Each file includes a <strong><a href="https://json-schema.org/draft/2020-12/schema">JSON Schema 2020-12</a></strong> (<code>"$schema": "https://json-schema.org/draft/2020-12/schema"</code>) for the document body. Copy a block into a <a href="https://json-schema.org">JSON Schema</a> validator. <code>$defs</code> for <code>audit</code> / <code>history[]</code> / <code>assignedTo</code> / <code>geo</code> live in <a href="common.html">SCHEMA_COMMON.md</a>; collection files repeat a copy so each schema is self-contained.</p>
+<table>
+<thead>
+<tr>
+<th>Collection</th>
+<th>File</th>
+<th>Prefix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>(envelope)</em></td>
+<td><a href="common.html">SCHEMA_COMMON.md</a></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>workordersin</code></td>
+<td><a href="workordersin.html">SCHEMA_WORKORDERSIN.md</a></td>
+<td><code>woin:</code></td>
+</tr>
+<tr>
+<td><code>workordersout</code></td>
+<td><a href="workordersout.html">SCHEMA_WORKORDERSOUT.md</a></td>
+<td><code>woout:</code></td>
+</tr>
+<tr>
+<td><code>assets</code></td>
+<td><a href="assets.html">SCHEMA_ASSETS.md</a></td>
+<td><code>ast:</code></td>
+</tr>
+<tr>
+<td><code>products</code></td>
+<td><a href="products.html">SCHEMA_PRODUCTS.md</a></td>
+<td><code>prd:</code></td>
+</tr>
+<tr>
+<td><code>inventory</code></td>
+<td><a href="inventory.html">SCHEMA_INVENTORY.md</a></td>
+<td><code>inv:</code> / <code>invtx:</code></td>
+</tr>
+<tr>
+<td><code>users</code></td>
+<td><a href="users.html">SCHEMA_USERS.md</a></td>
+<td><code>usr:</code></td>
+</tr>
+<tr>
+<td><code>customers</code></td>
+<td><a href="customers.html">SCHEMA_CUSTOMERS.md</a></td>
+<td><code>cus:</code></td>
+</tr>
+<tr>
+<td><code>tasks</code></td>
+<td><a href="tasks.html">SCHEMA_TASKS.md</a></td>
+<td><code>tsk:</code></td>
+</tr>
+<tr>
+<td><code>notes</code></td>
+<td><a href="notes.html">SCHEMA_NOTES.md</a></td>
+<td><code>nte:</code></td>
+</tr>
+<tr>
+<td><code>messages</code></td>
+<td><a href="messages.html">SCHEMA_MESSAGES.md</a></td>
+<td><code>msg:</code></td>
+</tr>
+<tr>
+<td><code>orders</code></td>
+<td><a href="orders.html">SCHEMA_ORDERS.md</a></td>
+<td><code>ord:</code></td>
+</tr>
+<tr>
+<td><code>rates</code></td>
+<td><a href="rates.html">SCHEMA_RATES.md</a></td>
+<td><code>rate:</code></td>
+</tr>
+<tr>
+<td><code>taxes</code></td>
+<td><a href="taxes.html">SCHEMA_TAXES.md</a></td>
+<td><code>tax:</code></td>
+</tr>
+<tr>
+<td><code>tracking</code></td>
+<td><a href="tracking.html">SCHEMA_TRACKING.md</a></td>
+<td><code>track:{day}:{employeeId}</code></td>
+</tr>
+<tr>
+<td><code>tmp</code></td>
+<td><a href="tmp.html">SCHEMA_TMP.md</a></td>
+<td><code>tmp:</code></td>
+</tr>
+</tbody>
+</table>
+    </article>
+    <aside class="toc" aria-label="On this page">
+      <p class="eyebrow">On this page</p>
+<ul>
+<li><a href="#schemas" id="toc-schemas">Schemas</a></li>
+</ul>
+    </aside>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>© <span id="year">2026</span> Fujio-Turner. Apache License 2.0.</p>
+      <p><a href="https://github.com/Fujio-Turner/mobile_field_service">Application</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_pages">This site</a></p>
+    </div>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="../../js/site.js"></script>
+</body>
+</html>

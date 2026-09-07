@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Release — Mobile Field Service</title>
+  <meta name="description" content="Mobile Field Service documentation." />
+  <meta name="theme-color" content="#0f766e" />
+  <link rel="icon" type="image/svg+xml" href="../images/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/site.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="../index.html">
+        <img src="../images/favicon.svg" alt="" width="32" height="32" />
+        Mobile Field Service
+      </a>
+      <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../index.html#product">Product</a></li>
+        <li><a href="../index.html#screens">Screens</a></li>
+        <li><a href="../docs/index.html" aria-current="page">Docs</a></li>
+        <li><a href="https://github.com/Fujio-Turner/mobile_field_service">App repo</a></li>
+      </ul>
+      <a class="btn btn-primary" href="https://github.com/Fujio-Turner/mobile_field_service">GitHub</a>
+    </div>
+  </header>
+  <main class="wrap doc-layout">
+    <article class="prose">
+      <p class="crumb"><a href="../index.html">Home</a> · <a href="../docs/index.html">Docs</a> · Release</p>
+<h1 id="release--mobile_field_service">Release — mobile_field_service</h1>
+<p>Use this every time you cut a store / TestFlight / Play internal build. Replace <code>x.y.z</code> with the semver (e.g. <code>0.1.0</code>).</p>
+<p><strong>Standards that must stay green:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Guide</th>
+<th>Obligation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="logging.html">LOGGING.md</a></td>
+<td>No secrets/PII; LogSinks not deprecated API</td>
+</tr>
+<tr>
+<td><a href="html-css.html">HTML_CSS.md</a></td>
+<td>Theme tokens; phone-first</td>
+</tr>
+<tr>
+<td><a href="replication.html">REPLICATION.md</a></td>
+<td>Session TTL; <code>tmp</code> not in replicator; 401 path</td>
+</tr>
+<tr>
+<td><a href="settings.html">SETTINGS.md</a></td>
+<td>Env defaults still match <code>.env.example</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="version-method">Version method</h2>
+<p><strong>Semver</strong> <code>MAJOR.MINOR.PATCH</code> (optional <code>+ios.N</code> / Play <code>versionCode</code> is numeric).</p>
+<p><strong>User-visible version</strong> (what <code>audit.cr.ver</code> / <code>audit.up.ver</code> store):</p>
+<pre class="text"><code>{expo.version}+{ios.buildNumber|android.versionCode}</code></pre>
+<p>Example: <code>0.1.0+12</code>. Read at runtime from <code>expo-application</code> (<code>nativeApplicationVersion</code> + <code>nativeBuildVersion</code>). <strong>Do not</strong> hard-code the version in screens.</p>
+<h3 id="sources-of-truth-bump-all-of-these">Sources of truth (bump all of these)</h3>
+<p>Bump these files on every ship. The app is real (<code>app.json</code> <code>expo.version</code> is what Profile shows).</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Field</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>app.json</code> / <code>app.config.ts</code></td>
+<td><code>expo.version</code></td>
+<td><code>"0.1.0"</code></td>
+</tr>
+<tr>
+<td><code>app.json</code></td>
+<td><code>expo.ios.buildNumber</code></td>
+<td><code>"12"</code> (string, increment every iOS ship)</td>
+</tr>
+<tr>
+<td><code>app.json</code></td>
+<td><code>expo.android.versionCode</code></td>
+<td><code>12</code> (int, increment every Play ship)</td>
+</tr>
+<tr>
+<td><code>package.json</code></td>
+<td><code>version</code></td>
+<td><code>"0.1.0"</code> (same as expo.version)</td>
+</tr>
+<tr>
+<td><code>ios/.../Info.plist</code></td>
+<td><code>CFBundleShortVersionString</code> / <code>CFBundleVersion</code></td>
+<td>EAS/prebuild usually copies from <code>app.json</code> — <strong>verify after prebuild</strong></td>
+</tr>
+<tr>
+<td><code>android/app/build.gradle</code></td>
+<td><code>versionName</code> / <code>versionCode</code></td>
+<td>Same — <strong>verify after prebuild</strong></td>
+</tr>
+<tr>
+<td><code>RELEASE_NOTES.md</code></td>
+<td>New section <strong>at the top</strong></td>
+<td><code>## v0.1.0 — YYYY-MM-DD</code></td>
+</tr>
+<tr>
+<td><code>README.md</code></td>
+<td>Badge / “current version” if present</td>
+<td>Match</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Native module pin</strong> (not the app semver, but must be recorded in notes):</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>What</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>package.json</code></td>
+<td><code>cbl-reactnative</code> → git URL + commit/branch of <a href="https://github.com/Fujio-Turner/cbl-reactnative">Fujio-Turner/cbl-reactnative</a></td>
+</tr>
+<tr>
+<td><code>package-lock.json</code></td>
+<td>Lockfile commit</td>
+</tr>
+</tbody>
+</table>
+<p>Do not ship official <code>@couchbase/couchbase-lite-react-native</code> 1.1 as the production binding (no vector). See <a href="architecture.html">DESIGN.md</a> stack.</p>
+<hr />
+<h2 id="1-branch">1. Branch</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> checkout main <span class="kw">&amp;&amp;</span> <span class="fu">git</span> pull</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> checkout <span class="at">-b</span> release-x.y.z</span></code></pre></div>
+<hr />
+<h2 id="2-bump-versions">2. Bump versions</h2>
+<ol type="1">
+<li>Set <code>expo.version</code> / <code>package.json</code> <code>version</code> to <code>x.y.z</code>.</li>
+<li>Increment iOS <code>buildNumber</code> and Android <code>versionCode</code> (never reuse a Play <code>versionCode</code>).</li>
+<li>Confirm <code>audit</code> / logger <code>appVer</code> still read from Expo Application APIs (no new literals).</li>
+<li>Native CBL: if the fork moved, pin the new git SHA and note CBL native (3.3 / 4.x) in RELEASE_NOTES.</li>
+</ol>
+<hr />
+<h2 id="3-release_notesmd">3. RELEASE_NOTES.md</h2>
+<p>Create or update at repo root. Newest section first:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">## vx.y.z — YYYY-MM-DD</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">### New Features</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>…</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="fu">### Bug Fixes</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>…</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="fu">### Changes</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Version bump — app <span class="in">`x.y.z`</span> (build N)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>cbl-reactnative @ <span class="dv">&amp;lt;</span>git sha<span class="dv">&amp;gt;</span></span></code></pre></div>
+<hr />
+<h2 id="4-docs-sweep">4. Docs sweep</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />README version / SG example still true</label></li>
+<li><label><input type="checkbox" /><code>docs/DESIGN.md</code> / <code>docs/AUTH.md</code> / <code>guides/*</code> not contradicting the binary</label></li>
+<li><label><input type="checkbox" />Replication allow-list still excludes <code>local.tmp</code></label></li>
+</ul>
+<hr />
+<h2 id="5-quality-gates">5. Quality gates</h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npx</span> tsc <span class="at">--noEmit</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> test</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">npx</span> expo-doctor          <span class="co"># when Expo app exists</span></span></code></pre></div>
+<p>Manual:</p>
+<ul class="task-list">
+<li><label><input type="checkbox" />Login (email) → Today (airplane mode still lists local work)</label></li>
+<li><label><input type="checkbox" />StartWork copy; dispatch inbound JSON unchanged</label></li>
+<li><label><input type="checkbox" />Complete → freeze → amendment</label></li>
+<li><label><input type="checkbox" />Replicator: stop network → OFFLINE; 401 → login/refresh (<a href="auth.html">AUTH.md</a>)</label></li>
+<li><label><input type="checkbox" />No password / session in Metro logs (<a href="logging.html">LOGGING.md</a>)</label></li>
+</ul>
+<p>Lab/testing <strong>does not require</strong> a CBL EE license. Store production with encryption + vector <strong>does</strong>.</p>
+<hr />
+<h2 id="6-build-artifacts">6. Build artifacts</h2>
+<p><strong>Development:</strong> <code>npx expo run:ios</code> / <code>run:android</code> (dev client, not Expo Go).</p>
+<p><strong>Release:</strong> EAS or local archive.</p>
+<table>
+<thead>
+<tr>
+<th>Store</th>
+<th>Artifact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TestFlight</td>
+<td><code>.ipa</code> signed with distribution profile</td>
+</tr>
+<tr>
+<td>Play internal</td>
+<td><code>.aab</code> (<code>versionCode</code> unique)</td>
+</tr>
+</tbody>
+</table>
+<p>Never commit keystores. Android signing stays in EAS secrets / local <code>keystore.properties</code> (gitignored).</p>
+<hr />
+<h2 id="7-tag-and-github-release">7. Tag and GitHub release</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add <span class="at">-A</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;release: v x.y.z&quot;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> tag <span class="at">-a</span> vx.y.z <span class="at">-m</span> <span class="st">&quot;v x.y.z&quot;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push origin release-x.y.z</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push origin vx.y.z</span></code></pre></div>
+<p>GitHub Release: attach notes; do not attach keystores or <code>.cblite2</code> with customer data.</p>
+<p>Merge the release branch to <code>main</code> after the build is accepted.</p>
+<hr />
+<h2 id="8-post-release">8. Post-release</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />Confirm Hub/device <code>appVer</code> matches the tag</label></li>
+<li><label><input type="checkbox" />Confirm SG session TTL still matches AUTH (pre-refresh)</label></li>
+<li><label><input type="checkbox" />If native CBL changed, smoke vector index create on one device</label></li>
+</ul>
+<hr />
+<h2 id="checklist-copy">Checklist (copy)</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" /><code>package.json</code> version</label></li>
+<li><label><input type="checkbox" /><code>app.json</code> <code>expo.version</code></label></li>
+<li><label><input type="checkbox" />iOS <code>buildNumber</code></label></li>
+<li><label><input type="checkbox" />Android <code>versionCode</code></label></li>
+<li><label><input type="checkbox" /><code>RELEASE_NOTES.md</code></label></li>
+<li><label><input type="checkbox" /><code>cbl-reactnative</code> git pin</label></li>
+<li><label><input type="checkbox" />Tests + tsc</label></li>
+<li><label><input type="checkbox" />Auth + replication smoke</label></li>
+<li><label><input type="checkbox" />Tag <code>vx.y.z</code></label></li>
+</ul>
+    </article>
+    <aside class="toc" aria-label="On this page">
+      <p class="eyebrow">On this page</p>
+<ul>
+<li><a href="#release--mobile_field_service" id="toc-release--mobile_field_service">Release — mobile_field_service</a>
+<ul>
+<li><a href="#version-method" id="toc-version-method">Version method</a></li>
+<li><a href="#1-branch" id="toc-1-branch">1. Branch</a></li>
+<li><a href="#2-bump-versions" id="toc-2-bump-versions">2. Bump versions</a></li>
+<li><a href="#3-release_notesmd" id="toc-3-release_notesmd">3. RELEASE_NOTES.md</a></li>
+<li><a href="#4-docs-sweep" id="toc-4-docs-sweep">4. Docs sweep</a></li>
+<li><a href="#5-quality-gates" id="toc-5-quality-gates">5. Quality gates</a></li>
+<li><a href="#6-build-artifacts" id="toc-6-build-artifacts">6. Build artifacts</a></li>
+<li><a href="#7-tag-and-github-release" id="toc-7-tag-and-github-release">7. Tag and GitHub release</a></li>
+<li><a href="#8-post-release" id="toc-8-post-release">8. Post-release</a></li>
+<li><a href="#checklist-copy" id="toc-checklist-copy">Checklist (copy)</a></li>
+</ul></li>
+</ul>
+    </aside>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>© <span id="year">2026</span> Fujio-Turner. Apache License 2.0.</p>
+      <p><a href="https://github.com/Fujio-Turner/mobile_field_service">Application</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_pages">This site</a></p>
+    </div>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="../js/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Auth — Mobile Field Service</title>
+  <meta name="description" content="Mobile Field Service documentation." />
+  <meta name="theme-color" content="#0f766e" />
+  <link rel="icon" type="image/svg+xml" href="../images/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/site.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="../index.html">
+        <img src="../images/favicon.svg" alt="" width="32" height="32" />
+        Mobile Field Service
+      </a>
+      <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../index.html#product">Product</a></li>
+        <li><a href="../index.html#screens">Screens</a></li>
+        <li><a href="../docs/index.html" aria-current="page">Docs</a></li>
+        <li><a href="https://github.com/Fujio-Turner/mobile_field_service">App repo</a></li>
+      </ul>
+      <a class="btn btn-primary" href="https://github.com/Fujio-Turner/mobile_field_service">GitHub</a>
+    </div>
+  </header>
+  <main class="wrap doc-layout">
+    <article class="prose">
+      <p class="crumb"><a href="../index.html">Home</a> · <a href="../docs/index.html">Docs</a> · Auth</p>
+<h1 id="auth--login-page-and-replicator">Auth — login page and replicator</h1>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Title</td>
+<td>Sync Gateway login, tokens, expiry</td>
+</tr>
+<tr>
+<td>Repo</td>
+<td><a href="https://github.com/Fujio-Turner/mobile_field_service">Fujio-Turner/mobile_field_service</a></td>
+</tr>
+<tr>
+<td>Author</td>
+<td>Fujio-Turner / mobile_field_service</td>
+</tr>
+<tr>
+<td>Date</td>
+<td>2026-09-06</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>Implemented (<code>basic</code> + <code>demo</code>; OIDC screens stubbed behind env)</td>
+</tr>
+<tr>
+<td>Design</td>
+<td><a href="architecture.html">DESIGN.md</a></td>
+</tr>
+</tbody>
+</table>
+<p>How the <strong>login screen</strong> gets a credential, how the <strong>replicator</strong> presents it to Sync Gateway / App Services, where it is stored, and what happens when it <strong>expires</strong>.</p>
+<p>Couchbase Lite for React Native authenticates a replicator with <strong><code>BasicAuthenticator</code></strong>, <strong><code>SessionAuthenticator</code></strong>, or <strong>custom headers</strong> (Bearer). There is no CBL 2.x <code>OpenIDConnectAuthenticator</code> on this plugin.</p>
+<p>References:</p>
+<ul>
+<li><a href="https://www.couchbase.com/blog/oidc-implicit-flow-client-authentication-couchbase-sync-gateway/">OIDC implicit flow + Sync Gateway</a></li>
+<li><a href="https://www.couchbase.com/blog/oidc-authorization-code-flow-client-authentication-couchbase-sync-gateway/">OIDC authorization code flow + Sync Gateway</a></li>
+<li><a href="https://cbl-reactnative.dev/DataSync/remote-sync-gateway">CBL RN remote sync — client auth + custom headers</a></li>
+<li>App replication how-to: <a href="replication.html">guides/REPLICATION.md</a></li>
+<li>Env / Keychain catalog: <a href="settings.html">guides/SETTINGS.md</a></li>
+<li><a href="https://docs.couchbase.com/sync-gateway/current/security/authentication-users.html">SG user authentication</a></li>
+</ul>
+<hr />
+<h2 id="build-time-choice-not-a-runtime-toggle-in-v1">Build-time choice (not a runtime toggle in v1)</h2>
+<p><strong>Default: username / password.</strong> Other strategies are compiled in via env so a company build is one mode:</p>
+<table>
+<thead>
+<tr>
+<th><code>EXPO_PUBLIC_AUTH_STRATEGY</code></th>
+<th>Login UI</th>
+<th>How the replicator authenticates</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>basic</code></strong> (default)</td>
+<td>Email/username + password</td>
+<td><code>BasicAuthenticator</code> <strong>or</strong> app <code>POST /{db}/_session</code> then <code>SessionAuthenticator</code></td>
+</tr>
+<tr>
+<td><strong><code>oidc_implicit</code></strong></td>
+<td>“Sign in with {IdP}”</td>
+<td>Device gets a signed ID token; <strong><code>POST /{db}/_session</code> with <code>Authorization: Bearer &lt;id_token&gt;</code></strong> → <code>SessionAuthenticator</code>. Do <strong>not</strong> put the JWT on every replicator request (tokens are large).</td>
+</tr>
+<tr>
+<td><strong><code>oidc_code</code></strong></td>
+<td>“Sign in with {IdP}” (browser redirect)</td>
+<td>Sync Gateway runs authorization-code; client ends with an SG session cookie</td>
+</tr>
+<tr>
+<td><strong><code>demo</code></strong></td>
+<td>Known personas (Jon / Maya Chen / Priya) or any other id as Jon; no network</td>
+<td>Synthetic session in Keychain; replicator not started</td>
+</tr>
+</tbody>
+</table>
+<p>v1 ships <strong><code>basic</code></strong>. OIDC screens and replicator header wiring are implemented behind the same <code>AuthPort</code> so a later build can flip the env without rewriting Today / CBL.</p>
+<p><code>users</code> documents remain <strong>profiles</strong> (<code>employeeId</code>, email). They are not a password store.</p>
+<hr />
+<h2 id="login-page-applogintsx">Login page (<code>app/login.tsx</code>)</h2>
+<pre class="mermaid"><code>flowchart TB
+  Open[App open] --&gt; Restore{Keychain has live credential?}
+  Restore --&gt;|yes, not expired| OpenDB[Open DB + start replicator]
+  Restore --&gt;|missing or expired| UI[Login screen]
+  UI --&gt; Strat{strategy}
+  Strat --&gt;|basic| Form[username/email + password]
+  Strat --&gt;|oidc_implicit / oidc_code| IdP[Sign in with IdP]
+  Strat --&gt;|demo| Demo[Continue]
+  Form --&gt; Enclave[Store in Keychain / Keystore]
+  IdP --&gt; Enclave
+  Demo --&gt; Enclave
+  Enclave --&gt; OpenDB</code></pre>
+<p><strong>Basic UI:</strong> one identifier field (email or username), password, Sign in, offline error, invalid-credential error. Fields use <code>FieldInput</code> (<code>showSoftInputOnFocus</code>). No “remember password” checkbox — the OS secure store <strong>is</strong> the remember. <strong>Demo UI:</strong> identifier only; any non-empty value; no server. <code>.env.example</code> uses <strong>demo</strong>.</p>
+<p><strong>OIDC UI:</strong> no password field. One button. iOS: <code>ASWebAuthenticationSession</code> / Expo AuthSession. Android: Chrome Custom Tabs. Never a WebView that can see the password on the IdP page if the IdP supports the system browser.</p>
+<p>After success, navigate to DB open → Today. Do not write any secret into CBL.</p>
+<hr />
+<h2 id="three-ways-onto-the-replicator">Three ways onto the replicator</h2>
+<h3 id="1-username--password-default">1. Username + password (default)</h3>
+<p>Two equivalent client patterns; pick <strong>session</strong> for expiry control:</p>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Replicator</th>
+<th>Expiry handle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A. BasicAuthenticator</strong></td>
+<td><code>new BasicAuthenticator(user, password)</code></td>
+<td>CBL does <code>POST _session</code> internally and keeps the cookie for the replicator lifetime. App still stores password in the enclave to rebuild the replicator after process death.</td>
+</tr>
+<tr>
+<td><strong>B. SessionAuthenticator (preferred)</strong></td>
+<td>App <code>POST /{db}/_session</code> with basic auth → <code>{ session_id, expires, cookie_name }</code> → <code>new SessionAuthenticator(sessionId, cookieName)</code></td>
+<td>App <strong>owns</strong> <code>expires</code>. Pre-refresh and 401 path are explicit.</td>
+</tr>
+</tbody>
+</table>
+<p>v1 <strong>basic strategy uses B</strong>. Password is used only to mint/refresh a session, then the replicator sees the session cookie, not the password on every WebSocket frame after start (CBL still may send basic on A).</p>
+<pre class="http"><code>POST /mfs/_session
+Authorization: Basic base64(user:pass)</code></pre>
+<p>Response (shape):</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;session_id&quot;</span><span class="fu">:</span> <span class="st">&quot;904ac010862f37c8dd99015a33ab5a3565fd8447&quot;</span><span class="fu">,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;expires&quot;</span><span class="fu">:</span> <span class="st">&quot;2026-09-04T18:00:00.000Z&quot;</span><span class="fu">,</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;cookie_name&quot;</span><span class="fu">:</span> <span class="st">&quot;SyncGatewaySession&quot;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>config<span class="op">.</span><span class="fu">setAuthenticator</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">new</span> <span class="fu">SessionAuthenticator</span>(sessionId<span class="op">,</span> cookieName <span class="op">??</span> <span class="st">&#39;SyncGatewaySession&#39;</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>)<span class="op">;</span></span></code></pre></div>
+<h3 id="2-oidc-implicit--token-on-the-device">2. OIDC implicit — token on the device</h3>
+<p>From the Couchbase implicit-flow write-up:</p>
+<ol type="1">
+<li>App obtains a <strong>signed</strong> ID token (RS256) from the IdP on device.</li>
+<li><strong>Always exchange for an SG session</strong> (ID tokens are large):</li>
+</ol>
+<pre class="http"><code>POST /mfs/_session
+Authorization: Bearer &lt;id_token&gt;</code></pre>
+<p>SG validates issuer/audience, may auto-register (<code>oidc.providers.*.register</code>), returns <code>session_id</code> + <strong><code>expires</code></strong>. Replicator uses <code>SessionAuthenticator(session_id)</code>. Honor TTL: pre-refresh and 401/404 as below.</p>
+<p><code>EXPO_PUBLIC_AUTH_BEARER_ON_REPL=true</code> (JWT on every replicator request via <code>setHeaders</code>) is <strong>not</strong> the default and should stay off unless a proxy demands it.</p>
+<p>The app <strong>must</strong> refresh the ID token (IdP silent refresh / refresh token) <strong>before</strong> the SG session <code>expires</code>, then <code>POST /_session</code> again. Implicit flow does <strong>not</strong> give SG a refresh token; refresh is <strong>application code</strong>.</p>
+<h3 id="3-oidc-authorization-code--sg-fetches-the-token">3. OIDC authorization code — SG fetches the token</h3>
+<p>SG is the OAuth client. The app opens the provider authorize URL (SG-hosted or IdP), receives a code (or SG completes the code exchange), and ends with an SG <strong>session</strong> the same as (2)-session.</p>
+<p>CBL 1.x had <code>OpenIDConnectAuthenticator</code>; <strong>CBL 2+ / this RN plugin do not</strong>. The app implements the browser hop. Couchbase still documents this flow; it is more work than implicit. Ship it only when the customer’s IdP forbids implicit/public clients.</p>
+<p>End state on the replicator is still <code>SessionAuthenticator</code> (not Bearer), unless the customer’s proxy demands <code>Authorization: Bearer</code>.</p>
+<hr />
+<h2 id="what-lives-in-the-secure-enclave">What lives in the secure enclave</h2>
+<p>iOS Keychain / Android Keystore via <code>expo-secure-store</code> (<code>src/session/enclave.ts</code>). <strong>Never CBL, never AsyncStorage, never <code>tmp</code>.</strong> DB encryption is a <strong>lab toggle default off</strong>; when on, the CBL password string lives here as <code>mfs.dbkey.*</code> (readable by the app so it can pass it to <code>setEncryptionKey</code> — not a non-exportable hardware Secure Enclave key).</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mfs.auth.strategy</code></td>
+<td><code>basic</code> | <code>oidc_implicit</code> | <code>oidc_code</code></td>
+</tr>
+<tr>
+<td><code>mfs.auth.username</code></td>
+<td>Login identifier (email or username)</td>
+</tr>
+<tr>
+<td><code>mfs.auth.password</code></td>
+<td><strong>basic only</strong>, to mint sessions. Omit for OIDC.</td>
+</tr>
+<tr>
+<td><code>mfs.auth.sessionId</code></td>
+<td>SG <code>session_id</code></td>
+</tr>
+<tr>
+<td><code>mfs.auth.cookieName</code></td>
+<td>Default <code>SyncGatewaySession</code></td>
+</tr>
+<tr>
+<td><code>mfs.auth.sessionExpiresAt</code></td>
+<td>Unix seconds</td>
+</tr>
+<tr>
+<td><code>mfs.auth.idToken</code></td>
+<td>OIDC JWT if Bearer-on-replicator</td>
+</tr>
+<tr>
+<td><code>mfs.auth.refreshToken</code></td>
+<td>OIDC refresh token if the IdP issued one</td>
+</tr>
+<tr>
+<td><code>mfs.auth.idTokenExpiresAt</code></td>
+<td>JWT <code>exp</code></td>
+</tr>
+<tr>
+<td><code>mfs.dbkey.&lt;employeeId&gt;</code></td>
+<td>DB encryption string (only if Settings / debug encryption is <strong>on</strong>)</td>
+</tr>
+<tr>
+<td><code>mfs.cbluid.&lt;employeeId&gt;</code></td>
+<td>Native CBL unique open-name for leftover-handle close (not a secret)</td>
+</tr>
+</tbody>
+</table>
+<p>Logout deletes <strong>auth.</strong>* keys (session, password, tokens). DB encryption key stays unless <code>LogoutAndWipe</code>.</p>
+<p>“Store credentials and call them later” = process death / next launch: <code>RestoreSession</code> reads the enclave, skips the form if <code>sessionExpiresAt &gt; now + skew</code>, opens DB, starts replicator.</p>
+<hr />
+<h2 id="expiry--honor-it">Expiry — honor it</h2>
+<p>Two clocks (either can fire first):</p>
+<table>
+<thead>
+<tr>
+<th>Clock</th>
+<th>Source</th>
+<th>When it dies</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SG session</td>
+<td><code>_session.expires</code></td>
+<td>Replicator gets <strong>401 Unauthorized</strong> (CBL also treats <strong>404</strong> as <strong>permanent</strong> — replicator <strong>STOPPED</strong>)</td>
+</tr>
+<tr>
+<td>OIDC ID token</td>
+<td>JWT <code>exp</code></td>
+<td>Bearer header rejected; same STOPPED path if used on the replicator</td>
+</tr>
+</tbody>
+</table>
+<p>CBL RN: <strong>401</strong> and <strong>404</strong> are <strong>fatal</strong>. Continuous mode does <strong>not</strong> retry them. Activity → <code>STOPPED</code>. Transient codes (408, 429, 5xx, DNS) go <code>OFFLINE</code> and retry.</p>
+<p>User-visible: “not authorized” on an active app. <strong>Do not</strong> spin reconnect with the dead cookie.</p>
+<pre class="mermaid"><code>sequenceDiagram
+  participant App
+  participant Rep as Replicator
+  participant SG as Sync Gateway
+
+  Note over App: sessionExpiresAt approaching
+  App-&gt;&gt;App: RefreshAuth (silent)
+  App-&gt;&gt;SG: POST _session (password or Bearer ID token)
+  SG--&gt;&gt;App: new session_id + expires
+  App-&gt;&gt;Rep: stop
+  App-&gt;&gt;Rep: new SessionAuthenticator / headers
+  App-&gt;&gt;Rep: start(false)
+
+  Note over Rep,SG: if we missed the window
+  Rep-&gt;&gt;SG: replicate
+  SG--&gt;&gt;Rep: 401 or 404
+  Rep-&gt;&gt;App: status STOPPED + error
+  App-&gt;&gt;Rep: stop (idempotent)
+  App-&gt;&gt;App: Login screen (or silent refresh if refresh token still good)</code></pre>
+<h3 id="onreplicatorauthfailure"><code>OnReplicatorAuthFailure</code></h3>
+<p>Listen on <code>replicator.addChangeListener</code>:</p>
+<ol type="1">
+<li><code>error</code> present and HTTP/CBL code is <strong>401</strong>, <strong>10401</strong> (session), or <strong>404</strong> (CBL permanent).</li>
+<li><code>replicator.stop()</code>.</li>
+<li>Try <strong><code>RefreshAuth</code></strong> once (silent). If it succeeds, rebuild replicator, <code>start(false)</code>, stay on Today.</li>
+<li>If refresh fails (password changed, IdP session dead, offline): clear session keys (keep password only if you still want the form pre-filled — v1 <strong>clears password on 401</strong> so a stolen phone after expiry cannot mint sessions). Navigate to <strong>login</strong>.</li>
+<li>Local CBL <strong>stays open</strong>. The tech keeps working offline. Sync banner: “Sign in to sync.”</li>
+</ol>
+<p>Do not <code>LogoutAndWipe</code> on 401.</p>
+<h3 id="refreshauth-pre-re-authorize"><code>RefreshAuth</code> (pre-re-authorize)</h3>
+<p>Run:</p>
+<ul>
+<li>On a timer while the app is foregrounded, <strong>T = 5 minutes</strong> before <code>min(sessionExpiresAt, idTokenExpiresAt)</code>.</li>
+<li>On <code>AppState</code> <code>active</code>.</li>
+<li>Immediately after a 401 <strong>before</strong> showing login.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Strategy</th>
+<th>Silent refresh</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>basic</td>
+<td><code>POST /_session</code> with stored username + password. Replace session id + expires. Rebuild replicator.</td>
+</tr>
+<tr>
+<td>oidc_implicit + session</td>
+<td>Silent IdP refresh → new ID token → <code>POST /_session</code> with <code>Authorization: Bearer</code>. Replace session. Rebuild replicator.</td>
+</tr>
+<tr>
+<td>oidc_implicit + Bearer header</td>
+<td>Silent IdP refresh → <code>setHeaders({ Authorization: 'Bearer ' + newToken })</code>. Rebuild replicator (headers are fixed at create time).</td>
+</tr>
+<tr>
+<td>oidc_code</td>
+<td>Repeat code hop only if refresh token missing; else same as session mint.</td>
+</tr>
+</tbody>
+</table>
+<p>If silent refresh needs UI (IdP interaction), show login — do not block the WO editor.</p>
+<p>Rebuilding the replicator: <code>stop</code> → <code>Replicator.create</code> with the <strong>same</strong> collection allow-list → <code>start(false)</code> (do <strong>not</strong> reset checkpoint).</p>
+<hr />
+<h2 id="operations-catalog">Operations (catalog)</h2>
+<h4 id="loginremote"><code>LoginRemote</code></h4>
+<table>
+<thead>
+<tr>
+<th>Strategy</th>
+<th>Inputs</th>
+<th>Network</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>basic</td>
+<td><code>usernameOrEmail</code>, <code>password</code></td>
+<td><code>POST /{db}/_session</code> (Basic)</td>
+</tr>
+<tr>
+<td>oidc_implicit</td>
+<td>IdP UI</td>
+<td>IdP token + optional <code>POST /_session</code> Bearer</td>
+</tr>
+<tr>
+<td>oidc_code</td>
+<td>IdP / SG redirect</td>
+<td>ends in <code>_session</code> cookie</td>
+</tr>
+<tr>
+<td>demo</td>
+<td>identifier</td>
+<td>none</td>
+</tr>
+</tbody>
+</table>
+<p>Success: write enclave; resolve <code>employeeId</code> (JWT claim or subsequent <code>users</code> pull); open DB; start replicator. Failure: 401 invalid; network error.</p>
+<h4 id="restoresession"><code>RestoreSession</code></h4>
+<p>Enclave has session (or Bearer) with <code>expiresAt &gt; now + 30s</code> → open DB, start replicator. Else login. Offline: open DB <strong>if</strong> encryption key present; replicator <code>OFFLINE</code>; do not treat expiry as wipe.</p>
+<h4 id="refreshauth"><code>RefreshAuth</code></h4>
+<p>See table above. No UI if silent succeeds.</p>
+<h4 id="onreplicatorauthfailure-1"><code>OnReplicatorAuthFailure</code></h4>
+<p>401 / 10401 / 404 → stop → <code>RefreshAuth</code> once → login if still dead.</p>
+<h4 id="logout"><code>Logout</code></h4>
+<p>Stop replicator, close DB, delete <strong>auth.</strong>* enclave keys (including password). Keep <code>mfs.dbkey.*</code>.</p>
+<hr />
+<h2 id="login-screen-copy-basic">Login screen copy (basic)</h2>
+<ul>
+<li>Title: Sign in</li>
+<li>Fields: Email or username, Password</li>
+<li>Primary: Sign in</li>
+<li>Errors: “Wrong email or password.” / “Can’t reach the server. You can still open last session if it hasn’t expired.”</li>
+<li>Footer: app version (same string as <code>audit.*.ver</code>)</li>
+</ul>
+<p>OIDC: replace fields with one IdP button; same errors for cancel / network.</p>
+<hr />
+<h2 id="security-notes">Security notes</h2>
+<table>
+<thead>
+<tr>
+<th>Do</th>
+<th>Don’t</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Keychain / Keystore</td>
+<td>CBL, logs, <code>tmp</code>, screenshots of the password field (<code>secureTextEntry</code>)</td>
+</tr>
+<tr>
+<td><code>wss://</code> + system CAs in prod</td>
+<td>Basic auth on cleartext <code>ws://</code> in prod</td>
+</tr>
+<tr>
+<td>RS256 ID tokens (SG requirement)</td>
+<td>HS256 / unsigned JWT</td>
+</tr>
+<tr>
+<td>Rebuild replicator on new session</td>
+<td>Leave a STOPPED replicator running retries (it won’t; 401 is fatal)</td>
+</tr>
+<tr>
+<td>Pre-refresh at T−5 min</td>
+<td>Wait for 401 in the basement with no radio if you could have refreshed in coverage</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="feature-flags">Feature flags</h2>
+<p>Auth env is listed here; <strong>every</strong> app setting (Profile, debug, Keychain, map, tracking, replication schema) is in <a href="settings.html">guides/SETTINGS.md</a>.</p>
+<pre><code>EXPO_PUBLIC_AUTH_STRATEGY=basic|oidc_implicit|oidc_code|demo
+EXPO_PUBLIC_SG_URL=wss://…
+EXPO_PUBLIC_SG_DB=mfs
+EXPO_PUBLIC_OIDC_ISSUER=          # implicit / code (not read by src/ yet)
+EXPO_PUBLIC_OIDC_CLIENT_ID=
+EXPO_PUBLIC_OIDC_SCOPES=openid email profile
+EXPO_PUBLIC_AUTH_BEARER_ON_REPL=false   # true → custom header instead of SessionAuthenticator
+EXPO_PUBLIC_SESSION_REFRESH_SKEW_SEC=300</code></pre>
+<p>Lab SG: <code>POST /mfs/_session</code>, guest disabled, optional <code>oidc.providers</code> when building <code>oidc_*</code>.</p>
+    </article>
+    <aside class="toc" aria-label="On this page">
+      <p class="eyebrow">On this page</p>
+<ul>
+<li><a href="#auth--login-page-and-replicator" id="toc-auth--login-page-and-replicator">Auth — login page and replicator</a>
+<ul>
+<li><a href="#build-time-choice-not-a-runtime-toggle-in-v1" id="toc-build-time-choice-not-a-runtime-toggle-in-v1">Build-time choice (not a runtime toggle in v1)</a></li>
+<li><a href="#login-page-applogintsx" id="toc-login-page-applogintsx">Login page (<code>app/login.tsx</code>)</a></li>
+<li><a href="#three-ways-onto-the-replicator" id="toc-three-ways-onto-the-replicator">Three ways onto the replicator</a></li>
+<li><a href="#what-lives-in-the-secure-enclave" id="toc-what-lives-in-the-secure-enclave">What lives in the secure enclave</a></li>
+<li><a href="#expiry--honor-it" id="toc-expiry--honor-it">Expiry — honor it</a></li>
+<li><a href="#operations-catalog" id="toc-operations-catalog">Operations (catalog)</a></li>
+<li><a href="#login-screen-copy-basic" id="toc-login-screen-copy-basic">Login screen copy (basic)</a></li>
+<li><a href="#security-notes" id="toc-security-notes">Security notes</a></li>
+<li><a href="#feature-flags" id="toc-feature-flags">Feature flags</a></li>
+</ul></li>
+</ul>
+    </aside>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>© <span id="year">2026</span> Fujio-Turner. Apache License 2.0.</p>
+      <p><a href="https://github.com/Fujio-Turner/mobile_field_service">Application</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_pages">This site</a></p>
+    </div>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="../js/site.js"></script>
+</body>
+</html>

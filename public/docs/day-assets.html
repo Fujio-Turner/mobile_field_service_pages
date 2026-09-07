@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Assets walkthrough — Mobile Field Service</title>
+  <meta name="description" content="Mobile Field Service documentation." />
+  <meta name="theme-color" content="#0f766e" />
+  <link rel="icon" type="image/svg+xml" href="../images/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/site.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="../index.html">
+        <img src="../images/favicon.svg" alt="" width="32" height="32" />
+        Mobile Field Service
+      </a>
+      <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../index.html#product">Product</a></li>
+        <li><a href="../index.html#screens">Screens</a></li>
+        <li><a href="../docs/index.html" aria-current="page">Docs</a></li>
+        <li><a href="https://github.com/Fujio-Turner/mobile_field_service">App repo</a></li>
+      </ul>
+      <a class="btn btn-primary" href="https://github.com/Fujio-Turner/mobile_field_service">GitHub</a>
+    </div>
+  </header>
+  <main class="wrap doc-layout">
+    <article class="prose">
+      <p class="crumb"><a href="../index.html">Home</a> · <a href="../docs/index.html">Docs</a> · Assets walkthrough</p>
+<h1 id="day-in-the-life--corporate-assets">Day in the life — corporate assets</h1>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Title</td>
+<td>Inspect, repair, move company assets</td>
+</tr>
+<tr>
+<td>Mode</td>
+<td><code>assets</code></td>
+</tr>
+<tr>
+<td>Repo</td>
+<td><a href="https://github.com/Fujio-Turner/mobile_field_service">Fujio-Turner/mobile_field_service</a></td>
+</tr>
+<tr>
+<td>Author</td>
+<td>Fujio-Turner / mobile_field_service</td>
+</tr>
+<tr>
+<td>Date</td>
+<td>2026-09-06</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>Demo seed: Jon Hale <code>E-4412</code>, inspect/repair/move + WO-10460 reassigned leftover. Login <code>jon.hale@example.com</code>.</td>
+</tr>
+<tr>
+<td>Index</td>
+<td><a href="day-in-the-life.html">DAY_IN_LIFE.md</a></td>
+</tr>
+<tr>
+<td>Architecture</td>
+<td><a href="architecture.html">DESIGN.md</a></td>
+</tr>
+</tbody>
+</table>
+<p>Collections in play: <code>workordersin</code>, <code>workordersout</code>, <code>assets</code>, <code>inventory</code>, <code>tasks</code>, <code>notes</code>, <code>messages</code>.<br />
+Not the center of this day: <code>orders</code>, <code>rates</code>, <code>taxes</code> (those are customer/sales).</p>
+<hr />
+<h2 id="persona">Persona</h2>
+<table>
+<tbody>
+<tr>
+<td>Name</td>
+<td>Jon Hale</td>
+</tr>
+<tr>
+<td>Role</td>
+<td>Facilities technician</td>
+</tr>
+<tr>
+<td><code>employeeId</code></td>
+<td><code>E-4412</code></td>
+</tr>
+<tr>
+<td>Email</td>
+<td><code>jon.hale@example.com</code></td>
+</tr>
+<tr>
+<td><code>workModes</code></td>
+<td><code>["assets"]</code></td>
+</tr>
+<tr>
+<td>Crew / van</td>
+<td>North, <code>van:12</code></td>
+</tr>
+<tr>
+<td>Day</td>
+<td>Friday 4 September 2026</td>
+</tr>
+</tbody>
+</table>
+<p><strong>How work reaches the phone.</strong> Channel <code>emp:E-4412</code> (SG login <code>jon.hale@example.com</code>). Dispatch <strong>or Jon</strong> can create inbound jobs. Dispatch inbound is never patched. Jon may <code>CreateWorkOrderIn</code> (<code>origin: field</code>) for a walk-up inspect. He copies inbound → outbound, works offline, pushes <strong>his copy</strong>. Asset master stays pull-only.</p>
+<hr />
+<h2 id="screen-map">Screen map</h2>
+<table>
+<thead>
+<tr>
+<th>When</th>
+<th>Route</th>
+<th>Collection(s)</th>
+<th>Operation(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Login</td>
+<td><code>app/login.tsx</code></td>
+<td>—</td>
+<td><code>LoginRemote</code></td>
+</tr>
+<tr>
+<td>Today</td>
+<td><code>app/(tabs)/index.tsx</code></td>
+<td><code>workordersin</code>, <code>workordersout</code></td>
+<td><code>ListTodayWork</code>, clock. Walk-up <code>CreateWorkOrderIn</code>.</td>
+</tr>
+<tr>
+<td>Job</td>
+<td><code>app/wo/in/[id]</code> / <code>out/[id]</code></td>
+<td>KV</td>
+<td><code>GetWorkOrderIn</code> / <code>StartWork</code>; ops/checklist <code>DoneToggle</code></td>
+</tr>
+<tr>
+<td>Assets</td>
+<td><code>app/(tabs)/map.tsx</code></td>
+<td><code>assets</code></td>
+<td><code>QueryAssetsInBBox</code>, <code>LinkAssetToWork</code></td>
+</tr>
+<tr>
+<td>Parts</td>
+<td><code>app/(tabs)/inventory.tsx</code></td>
+<td><code>inventory</code> txs</td>
+<td><code>ConsumeInventoryOnWork</code></td>
+</tr>
+<tr>
+<td>Chat</td>
+<td><code>app/(tabs)/chat.tsx</code></td>
+<td><code>messages</code></td>
+<td><code>SendMessage</code></td>
+</tr>
+<tr>
+<td>Notes</td>
+<td><code>app/(tabs)/notes.tsx</code></td>
+<td><code>notes</code></td>
+<td><code>CreateNote</code> (general)</td>
+</tr>
+<tr>
+<td>Profile</td>
+<td><code>app/(tabs)/profile.tsx</code></td>
+<td>—</td>
+<td>Thumb zone, crumbs count, Settings / debug</td>
+</tr>
+<tr>
+<td>Search</td>
+<td><code>app/search/index.tsx</code></td>
+<td>notes / products / assets FTS</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="timeline">Timeline</h2>
+<pre class="mermaid"><code>sequenceDiagram
+  actor Jon
+  participant Phone
+  participant CBL as CBL local
+  participant SG as Sync Gateway
+  participant Dispatch
+
+  Dispatch-&gt;&gt;SG: assign inspect P-12, repair P-12, move spare motor
+  SG-&gt;&gt;CBL: PULL workordersin + assets (emp:E-4412)
+  Jon-&gt;&gt;Phone: StartWork inspect
+  Note over Phone: copy woin → woout, never mutate inbound or asset
+  Jon-&gt;&gt;Phone: checklist + photo + CompleteWork + SubmitWork
+  Jon-&gt;&gt;Phone: StartWork repair on same asset
+  Jon-&gt;&gt;Phone: consume valve, photos, CompleteWork
+  Jon-&gt;&gt;Phone: StartWork move — scan from/to locations
+  Phone-&gt;&gt;SG: PUSH three woout copies</code></pre>
+<h3 id="0640--login-and-today">06:40 — Login and Today</h3>
+<p>Demo login (<code>EXPO_PUBLIC_AUTH_STRATEGY=demo</code>) with Jon’s email maps to Jon. Today is <strong>work orders</strong> (<code>workModes: assets</code> hides the orders card). The header is a <strong>live clock</strong> and a seconds countdown (next start / late-by / end of day). Rows show number · kind, site, summary, priority stripe, time.</p>
+<p>v1 seed board (device-local <code>scheduled.day</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Number</th>
+<th>Kind</th>
+<th>Asset</th>
+<th>Badge</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>WO-10470</td>
+<td>inspect</td>
+<td>Pump P-12</td>
+<td>—</td>
+</tr>
+<tr>
+<td>WO-10482</td>
+<td>repair</td>
+<td>Pump P-12</td>
+<td>—</td>
+</tr>
+<tr>
+<td>WO-10490</td>
+<td>move</td>
+<td>Motor M-7 yard → Riverside</td>
+<td>—</td>
+</tr>
+<tr>
+<td>WO-10460</td>
+<td>repair</td>
+<td>leftover</td>
+<td><strong>Reassigned</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Tap a row → inbound KV. <strong>Start work</strong> is the filled button in the <strong>bottom dock</strong> (not a row cycle). Hermes has no <code>crypto</code>; the new <code>woout:</code> id uses expo-crypto.</p>
+<h3 id="0700--inspect-wo-10470">07:00 — Inspect (WO-10470)</h3>
+<p>Tap → inbound KV (read-only kit). <strong>Start work</strong> copies to <code>woout:</code>. Operations (<strong>Site check</strong>, <strong>Close out</strong>) and checklist (<strong>PPE on</strong>) are <strong>outline buttons</strong>; tap fills them (<code>status: done</code> / <code>done: true</code>). On the map, pins come from local <code>assets</code>. Photos as blobs on <strong>outbound</strong>. <code>CompleteWork</code> (dock) freezes that copy; <code>SubmitWork</code> queues push. Asset master is <strong>not</strong> edited — findings live on the WO.</p>
+<h3 id="0745--repair-wo-10482">07:45 — Repair (WO-10482)</h3>
+<p>Same pump. Start copy. Basement, no radio. Photo seized valve, consume <code>VLV-CHK-4</code> (<code>inventory_tx</code> + materials line, <strong>no stock <code>save</code></strong>), lockout task, chat dispatch for a lift. Complete + submit when LTE returns. Forgotten nameplate photo → <strong>Add follow-up</strong> (<code>CreateAmendment</code>), not an edit of the frozen repair copy.</p>
+<h3 id="1100--move-wo-10490">11:00 — Move (WO-10490)</h3>
+<p>Inbound kit: asset M-7, <code>from</code> geo (yard), <code>to</code> geo (Riverside). Start copy. Scan / confirm asset, photo on truck, photo at destination, <code>history[]</code> rows at both ends (lat/lon/dt). Driving between sites also writes <code>tracking</code> crumbs when he moves ≥ threshold. Complete. Backend owns the completed move; CMMS updates location from <strong>that document</strong>, not from Jon mutating <code>assets</code>.</p>
+<h3 id="1400--reassigned-leftover">14:00 — Reassigned leftover</h3>
+<p>WO-10460 still on his outbound list, badge <strong>Reassigned</strong>. He finishes safety work he already started, completes <strong>his</strong> copy. Priya may have her own copy. Two documents, one WO number.</p>
+<h3 id="1630--out">16:30 — Out</h3>
+<p>Profile, sync idle, logout.</p>
+<hr />
+<h2 id="rules-this-day-proves">Rules this day proves</h2>
+<ol type="1">
+<li>Company assets are <strong>pull catalogs</strong>. Work (inspect / repair / move) is <strong>workordersout</strong>.</li>
+<li>Copy-on-write, freeze-on-complete, amendments, reassignment — same as the general design.</li>
+<li><code>history[]</code> lat/lon/time + field diffs on inspect checks, consume, move drop-off. Driving crumbs go to <code>tracking</code>.</li>
+<li>No <code>orders</code> / money on this mode unless the company also enabled customer/sales.</li>
+</ol>
+<h2 id="beat-sheet">Beat sheet</h2>
+<ol type="1">
+<li>Login <code>jon.hale@example.com</code>, <code>workModes</code> includes <code>assets</code>.</li>
+<li>Today shows inspect + repair + move inbound, <code>kind</code> visible.</li>
+<li>Inspect: Start → checklist + photo → complete → inbound JSON unchanged, asset JSON unchanged.</li>
+<li>Repair offline: photo, consume, complete, submit.</li>
+<li>Amendment after freeze.</li>
+<li>Move: from/to photos + two <code>history[]</code> points (and tracking crumbs in between).</li>
+<li>Reassigned row still submittable.</li>
+</ol>
+    </article>
+    <aside class="toc" aria-label="On this page">
+      <p class="eyebrow">On this page</p>
+<ul>
+<li><a href="#day-in-the-life--corporate-assets" id="toc-day-in-the-life--corporate-assets">Day in the life — corporate assets</a>
+<ul>
+<li><a href="#persona" id="toc-persona">Persona</a></li>
+<li><a href="#screen-map" id="toc-screen-map">Screen map</a></li>
+<li><a href="#timeline" id="toc-timeline">Timeline</a></li>
+<li><a href="#rules-this-day-proves" id="toc-rules-this-day-proves">Rules this day proves</a></li>
+<li><a href="#beat-sheet" id="toc-beat-sheet">Beat sheet</a></li>
+</ul></li>
+</ul>
+    </aside>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>© <span id="year">2026</span> Fujio-Turner. Apache License 2.0.</p>
+      <p><a href="https://github.com/Fujio-Turner/mobile_field_service">Application</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_pages">This site</a></p>
+    </div>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="../js/site.js"></script>
+</body>
+</html>

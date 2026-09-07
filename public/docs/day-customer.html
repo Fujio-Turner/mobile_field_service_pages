@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Customer walkthrough — Mobile Field Service</title>
+  <meta name="description" content="Mobile Field Service documentation." />
+  <meta name="theme-color" content="#0f766e" />
+  <link rel="icon" type="image/svg+xml" href="../images/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/site.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="../index.html">
+        <img src="../images/favicon.svg" alt="" width="32" height="32" />
+        Mobile Field Service
+      </a>
+      <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../index.html#product">Product</a></li>
+        <li><a href="../index.html#screens">Screens</a></li>
+        <li><a href="../docs/index.html" aria-current="page">Docs</a></li>
+        <li><a href="https://github.com/Fujio-Turner/mobile_field_service">App repo</a></li>
+      </ul>
+      <a class="btn btn-primary" href="https://github.com/Fujio-Turner/mobile_field_service">GitHub</a>
+    </div>
+  </header>
+  <main class="wrap doc-layout">
+    <article class="prose">
+      <p class="crumb"><a href="../index.html">Home</a> · <a href="../docs/index.html">Docs</a> · Customer walkthrough</p>
+<h1 id="day-in-the-life--customer-site">Day in the life — customer site</h1>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Title</td>
+<td>Deliver / service a work order, then take a new order (maybe a new customer)</td>
+</tr>
+<tr>
+<td>Mode</td>
+<td><code>customer</code></td>
+</tr>
+<tr>
+<td>Repo</td>
+<td><a href="https://github.com/Fujio-Turner/mobile_field_service">Fujio-Turner/mobile_field_service</a></td>
+</tr>
+<tr>
+<td>Author</td>
+<td>Fujio-Turner / mobile_field_service</td>
+</tr>
+<tr>
+<td>Date</td>
+<td>2026-09-06</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>Demo login <code>maya.chen@example.com</code> (<code>E-7703</code>). Seed delivery WO-2201 + ORD-2201. Walk-up customer at <code>/customer/new</code>.</td>
+</tr>
+<tr>
+<td>Index</td>
+<td><a href="day-in-the-life.html">DAY_IN_LIFE.md</a></td>
+</tr>
+<tr>
+<td>Orders schema</td>
+<td><a href="schema/orders.html">schema/SCHEMA_ORDERS.md</a></td>
+</tr>
+<tr>
+<td>Rates / taxes</td>
+<td><a href="schema/rates.html">schema/SCHEMA_RATES.md</a>, <a href="schema/taxes.html">schema/SCHEMA_TAXES.md</a></td>
+</tr>
+</tbody>
+</table>
+<p>Collections in play: <code>workordersin</code> / <code>workordersout</code>, <code>orders</code>, <code>products</code>, <code>customers</code>, <code>rates</code>, <code>taxes</code>, <code>inventory</code>, <code>messages</code>.</p>
+<p>This is the <strong>overlap</strong> day: labor is a work order; money is an order. Maya may finish a delivery WO, write a <strong>new order</strong> for more product/service (later date or while still on site), or a <strong>neighbor / walk-up</strong> wants work — brand-new customer + order. <strong>No credit card payment</strong> in this version — catalog prices are snapshotted. Assume the product is on the truck; do not reserve stock at quote time. She may <code>CreateWorkOrderIn</code> for a same-day job ticket, then <code>StartWork</code>.</p>
+<hr />
+<h2 id="persona">Persona</h2>
+<table>
+<tbody>
+<tr>
+<td>Name</td>
+<td>Maya Chen</td>
+</tr>
+<tr>
+<td>Role</td>
+<td>Customer field tech</td>
+</tr>
+<tr>
+<td><code>employeeId</code></td>
+<td><code>E-7703</code></td>
+</tr>
+<tr>
+<td>Email</td>
+<td><code>maya.chen@example.com</code></td>
+</tr>
+<tr>
+<td><code>workModes</code></td>
+<td><code>["customer"]</code></td>
+</tr>
+<tr>
+<td>Day</td>
+<td>Friday 4 September 2026</td>
+</tr>
+</tbody>
+</table>
+<p>Channel <code>emp:E-7703</code>. Dispatch sends <strong>delivery / service</strong> work orders that point at an existing <code>order</code> (<code>orderId</code>) and <code>customerId</code>. Maya copies the WO, delivers, freezes the WO. Commercial follow-up is a <strong>new</strong> <code>orders</code> document — she does not reopen the WO or mutate a pulled order.</p>
+<hr />
+<h2 id="screen-map">Screen map</h2>
+<table>
+<thead>
+<tr>
+<th>When</th>
+<th>Route</th>
+<th>Collection(s)</th>
+<th>Operation(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Today</td>
+<td><code>app/(tabs)/index.tsx</code></td>
+<td>workorders + working orders</td>
+<td><code>ListTodayWork</code>, <code>ListTodayOrders</code></td>
+</tr>
+<tr>
+<td>Delivery WO</td>
+<td><code>app/wo/out/[id]</code></td>
+<td><code>workordersout</code></td>
+<td><code>StartWork</code>, <code>CompleteWork</code></td>
+</tr>
+<tr>
+<td>Catalog</td>
+<td><code>app/(tabs)/inventory.tsx</code> / products</td>
+<td><code>products</code>, <code>rates</code>, <code>taxes</code></td>
+<td><code>SearchProducts</code>, <code>PriceLines</code></td>
+</tr>
+<tr>
+<td>New / existing customer</td>
+<td><code>app/customer/[id].tsx</code> (<code>new</code> or KV)</td>
+<td><code>customers</code></td>
+<td><code>GetCustomer</code>, <code>CreateCustomer</code></td>
+</tr>
+<tr>
+<td>New order</td>
+<td><code>app/order/[id].tsx</code></td>
+<td><code>orders</code></td>
+<td><code>CreateOrder</code>, <code>AddOrderLine</code>, <code>SubmitOrder</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="timeline">Timeline</h2>
+<pre class="mermaid"><code>sequenceDiagram
+  actor Maya
+  participant Phone
+  participant CBL as CBL local
+  participant SG as Sync Gateway
+
+  SG-&gt;&gt;CBL: PULL woin delivery ORD-2201, customer, products, rates, taxes
+  Maya-&gt;&gt;Phone: StartWork WO-2201 (deliver 4in valves)
+  Maya-&gt;&gt;Phone: CompleteWork + SubmitWork (WO frozen, backend owns labor)
+  Maya-&gt;&gt;Phone: CreateOrder from same customer (more service next week)
+  Note over Phone: new ord: working, origin field, rates+taxes snapshotted on lines
+  Maya-&gt;&gt;Phone: walk-up neighbor → CreateCustomer + CreateOrder
+  Phone-&gt;&gt;SG: PUSH woout + field customers + working orders</code></pre>
+<h3 id="0730--deliver-against-an-existing-order-wo-2201">07:30 — Deliver against an existing order (WO-2201)</h3>
+<p>Today: <strong>Deliver</strong> WO-2201 for Hartford Water Works, linked <code>orderId: ord:…</code> (inbound order, <code>role: inbound</code>, pull-only). Maya <strong>StartWork</strong> on the WO (not on the order). She confirms lines vs the order snapshot on the WO, hands over product, photos POD, <code>history[]</code> at the dock (qty 10 → 5 is a row with from/to). <code>CompleteWork</code> + <code>SubmitWork</code>. The <strong>inbound order is untouched</strong>. Backend will mark fulfillment from the completed WO.</p>
+<h3 id="0900--same-site-more-work-later-new-order">09:00 — Same site, more work later (new order)</h3>
+<p>Site supervisor: “Come back Tuesday for a service visit.” Maya <strong>does not</strong> edit the frozen WO. <strong>New order</strong> (<code>CreateOrder</code>):</p>
+<ul>
+<li><code>origin: field</code>, <code>role: working</code>, <code>customerId</code> = existing <code>cus:</code></li>
+<li>Lines from catalog: service SKU, <code>rateId</code> labor-hour, <code>taxIds</code> CT</li>
+<li><code>PriceLines</code> snapshots unit price + tax onto each line (rates/taxes are pull catalogs; if they change tomorrow the order still has what she quoted)</li>
+<li><code>scheduled.day</code> = next Tuesday</li>
+<li>Optional: request a future WO (<code>needsWorkOrder: true</code>) — backend spawns <code>workordersin</code> after the order is accepted</li>
+</ul>
+<p>She completes/submits the <strong>order</strong>. Freeze + backend ownership — same rule as WOs. If she forgot a line, <strong>amendment order</strong> (<code>amends.id</code>), not a patch.</p>
+<h3 id="1030--walk-up-new-customer">10:30 — Walk-up new customer</h3>
+<p>Neighbor business wants the same service. <strong>No customer master on the phone.</strong></p>
+<ol type="1">
+<li><code>CreateCustomer</code> → new <code>cus:&lt;ulid&gt;</code>, <code>origin: field</code>, <code>readyToPush: true</code>. She does <strong>not</strong> edit Hartford Water Works.</li>
+<li><code>CreateOrder</code> against that new customer, lines + rates + taxes, first <code>history[]</code> row at their doorway.</li>
+<li>Either schedule later (<code>scheduled</code>) or convert to a same-day WO if dispatch / rules allow (<code>CreateWorkOrderFromOrder</code> is backend or a later op). v1: field creates the <strong>order</strong>; dispatch turns accepted orders into WOs.</li>
+</ol>
+<h3 id="1500--radio-back">15:00 — Radio back</h3>
+<p>Push: completed delivery <code>woout</code>, field <code>customers</code>, working <code>orders</code>. Pulled <code>rates</code> / <code>taxes</code> / inbound <code>orders</code> / inbound <code>workordersin</code> never pushed.</p>
+<hr />
+<h2 id="rules-this-day-proves">Rules this day proves</h2>
+<ol type="1">
+<li><strong>WO = labor/delivery event.</strong> <strong>Order = commercial document.</strong> Link them (<code>orderId</code> on WO, <code>fulfillment.workOrderOutId</code> on order) — do not merge into one JSON.</li>
+<li>Pulled orders and pulled customers are <strong>not mutated</strong>. New business = new documents.</li>
+<li>Prices and tax <strong>snapshot onto lines</strong> from <code>rates</code> / <code>taxes</code> at add-line time.</li>
+<li>Freeze + amendment applies to orders the same way as workorders.</li>
+<li>Walk-up customer is <code>origin: field</code> and is allowed to <strong>push</strong>.</li>
+</ol>
+<h2 id="beat-sheet">Beat sheet</h2>
+<ol type="1">
+<li>Login Maya, <code>workModes</code> includes <code>customer</code>.</li>
+<li>Delivery WO Start → POD photo → complete; inbound order JSON unchanged.</li>
+<li><code>CreateOrder</code> for same customer, line priced from <code>rate:</code> + <code>tax:</code>.</li>
+<li><code>CreateCustomer</code> + <code>CreateOrder</code> for walk-up; two new ids.</li>
+<li>After order complete, body frozen; Add follow-up creates amendment <code>ord:</code>.</li>
+</ol>
+    </article>
+    <aside class="toc" aria-label="On this page">
+      <p class="eyebrow">On this page</p>
+<ul>
+<li><a href="#day-in-the-life--customer-site" id="toc-day-in-the-life--customer-site">Day in the life — customer site</a>
+<ul>
+<li><a href="#persona" id="toc-persona">Persona</a></li>
+<li><a href="#screen-map" id="toc-screen-map">Screen map</a></li>
+<li><a href="#timeline" id="toc-timeline">Timeline</a></li>
+<li><a href="#rules-this-day-proves" id="toc-rules-this-day-proves">Rules this day proves</a></li>
+<li><a href="#beat-sheet" id="toc-beat-sheet">Beat sheet</a></li>
+</ul></li>
+</ul>
+    </aside>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>© <span id="year">2026</span> Fujio-Turner. Apache License 2.0.</p>
+      <p><a href="https://github.com/Fujio-Turner/mobile_field_service">Application</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_pages">This site</a></p>
+    </div>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="../js/site.js"></script>
+</body>
+</html>

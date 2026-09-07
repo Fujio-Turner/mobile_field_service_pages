@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sales walkthrough — Mobile Field Service</title>
+  <meta name="description" content="Mobile Field Service documentation." />
+  <meta name="theme-color" content="#0f766e" />
+  <link rel="icon" type="image/svg+xml" href="../images/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/site.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="../index.html">
+        <img src="../images/favicon.svg" alt="" width="32" height="32" />
+        Mobile Field Service
+      </a>
+      <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../index.html#product">Product</a></li>
+        <li><a href="../index.html#screens">Screens</a></li>
+        <li><a href="../docs/index.html" aria-current="page">Docs</a></li>
+        <li><a href="https://github.com/Fujio-Turner/mobile_field_service">App repo</a></li>
+      </ul>
+      <a class="btn btn-primary" href="https://github.com/Fujio-Turner/mobile_field_service">GitHub</a>
+    </div>
+  </header>
+  <main class="wrap doc-layout">
+    <article class="prose">
+      <p class="crumb"><a href="../index.html">Home</a> · <a href="../docs/index.html">Docs</a> · Sales walkthrough</p>
+<h1 id="day-in-the-life--sales-route">Day in the life — sales route</h1>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Title</td>
+<td>Order, deliver, next stop</td>
+</tr>
+<tr>
+<td>Mode</td>
+<td><code>sales</code></td>
+</tr>
+<tr>
+<td>Repo</td>
+<td><a href="https://github.com/Fujio-Turner/mobile_field_service">Fujio-Turner/mobile_field_service</a></td>
+</tr>
+<tr>
+<td>Author</td>
+<td>Fujio-Turner / mobile_field_service</td>
+</tr>
+<tr>
+<td>Date</td>
+<td>2026-09-06</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>Demo login <code>priya.shah@example.com</code> (<code>E-8801</code>). Today is orders (ORD-3301). Map tab hidden.</td>
+</tr>
+<tr>
+<td>Index</td>
+<td><a href="day-in-the-life.html">DAY_IN_LIFE.md</a></td>
+</tr>
+<tr>
+<td>Orders schema</td>
+<td><a href="schema/orders.html">schema/SCHEMA_ORDERS.md</a></td>
+</tr>
+<tr>
+<td>Rates / taxes</td>
+<td><a href="schema/rates.html">schema/SCHEMA_RATES.md</a>, <a href="schema/taxes.html">schema/SCHEMA_TAXES.md</a></td>
+</tr>
+</tbody>
+</table>
+<p>Collections in play: <code>orders</code>, <code>products</code>, <code>customers</code>, <code>rates</code>, <code>taxes</code>, <code>inventory</code>, <code>messages</code>.<br />
+Work orders are <strong>optional</strong> here. Pure sales is: quote/order → deliver product or service → freeze the order → next customer. <strong>No credit card payment</strong> in this version. Catalog prices are <strong>snapshotted</strong>; assume stock is available. POD is a <strong>photo</strong>; signature pad is later. If she needs a labor ticket, she <code>CreateWorkOrderIn</code> on the phone.</p>
+<hr />
+<h2 id="persona">Persona</h2>
+<table>
+<tbody>
+<tr>
+<td>Name</td>
+<td>Priya Shah</td>
+</tr>
+<tr>
+<td>Role</td>
+<td>Route sales</td>
+</tr>
+<tr>
+<td><code>employeeId</code></td>
+<td><code>E-8801</code></td>
+</tr>
+<tr>
+<td>Email</td>
+<td><code>priya.shah@example.com</code></td>
+</tr>
+<tr>
+<td><code>workModes</code></td>
+<td><code>["sales"]</code></td>
+</tr>
+<tr>
+<td>Day</td>
+<td>Friday 4 September 2026</td>
+</tr>
+</tbody>
+</table>
+<p>Channel <code>emp:E-8801</code>. Today’s board is <strong>orders</strong> assigned to her (<code>role: inbound</code> pull, or her own <code>role: working</code> drafts). Same copy-on-write: she never mutates a pulled order; she copies to <code>role: working</code> (<code>StartOrder</code>) or creates <code>origin: field</code>.</p>
+<hr />
+<h2 id="screen-map">Screen map</h2>
+<table>
+<thead>
+<tr>
+<th>When</th>
+<th>Route</th>
+<th>Collection(s)</th>
+<th>Operation(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Today</td>
+<td><code>app/(tabs)/index.tsx</code> (orders)</td>
+<td><code>orders</code></td>
+<td><code>ListTodayOrders</code></td>
+</tr>
+<tr>
+<td>Order</td>
+<td><code>app/order/[id].tsx</code></td>
+<td>KV</td>
+<td><code>GetOrder</code>, <code>StartOrder</code></td>
+</tr>
+<tr>
+<td>Catalog</td>
+<td>products search</td>
+<td><code>products</code>, <code>rates</code>, <code>taxes</code></td>
+<td><code>AddOrderLine</code>, <code>PriceLines</code></td>
+</tr>
+<tr>
+<td>Customer</td>
+<td><code>app/customer/[id].tsx</code></td>
+<td><code>customers</code></td>
+<td><code>GetCustomer</code>, <code>CreateCustomer</code></td>
+</tr>
+<tr>
+<td>Deliver</td>
+<td>same order editor</td>
+<td>blobs + inventory</td>
+<td><code>CommitPhoto</code>, <code>ConsumeInventoryOnWork</code> (order-scoped)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="timeline">Timeline</h2>
+<pre class="mermaid"><code>sequenceDiagram
+  actor Priya
+  participant Phone
+  participant CBL as CBL local
+  participant SG as Sync Gateway
+
+  SG-&gt;&gt;CBL: PULL inbound orders, customers, products, rates, taxes
+  Priya-&gt;&gt;Phone: StartOrder ORD-3301 (copy inbound → working)
+  Priya-&gt;&gt;Phone: deliver lines, photo POD, CompleteOrder + SubmitOrder
+  Note over Phone: working order frozen, owner backend
+  Priya-&gt;&gt;Phone: next stop — CreateOrder origin field
+  Priya-&gt;&gt;Phone: walk-up — CreateCustomer + CreateOrder
+  Phone-&gt;&gt;SG: PUSH working orders + field customers</code></pre>
+<h3 id="0800--assigned-order-ord-3301">08:00 — Assigned order (ORD-3301)</h3>
+<p>Today lists inbound orders for the signed-in employee, <code>scheduled.day</code> today (SQL++ uses equality/<code>OR</code>, not <code>IN</code>, and a numeric LIMIT). Tap is KV. <strong>Start order</strong> copies inbound JSON to a new <code>ord:&lt;ulid&gt;</code> with <code>role: working</code>, <code>source.id</code> = inbound id. Inbound never written. Demo seed: ORD-3301 on Priya’s Today.</p>
+<p>She delivers the catalog lines already on the snapshot, adjusts qty only on <strong>her</strong> copy (qty 10 → 5 is a <code>history[]</code> row), photo POD. <code>CompleteOrder</code> freezes the working copy (<code>owner: backend</code>). <code>SubmitOrder</code> sets <code>ready_to_push</code>. Backend invoices from <strong>that</strong> document. Driving between stops writes <code>tracking</code> crumbs.</p>
+<h3 id="1000--next-stop-sell-on-the-doorstep">10:00 — Next stop, sell on the doorstep</h3>
+<p>No inbound order. <code>CreateOrder</code> <code>origin: field</code>, pick existing customer, add lines (product + service hour). <code>PriceLines</code> applies current <code>rates</code> + <code>taxes</code> and <strong>snapshots</strong> amounts onto the lines. Customer signs / she completes + submits. Next.</p>
+<h3 id="1130--new-logo-new-customer">11:30 — New logo, new customer</h3>
+<p>Walk-up. <code>CreateCustomer</code> (<code>origin: field</code>) then <code>CreateOrder</code>. She does not patch some other company’s customer doc.</p>
+<h3 id="1300--forgot-a-sku-after-complete">13:00 — Forgot a SKU after complete</h3>
+<p>Frozen. <strong>Add follow-up</strong> → amendment <code>ord:</code> with <code>amends.id</code>. Backend consolidates. Same “second sheet of paper” as work orders.</p>
+<h3 id="1315--dispatch-reassigned-ord-3290-while-she-was-offline">13:15 — Dispatch reassigned ORD-3290 while she was offline</h3>
+<p>Today badge <strong>Reassigned</strong>. Her working copy still submits. The new assignee may <code>StartOrder</code> their own working copy. Multiple <code>ord:</code> docs, one order number, eventual consistency.</p>
+<hr />
+<h2 id="rules-this-day-proves">Rules this day proves</h2>
+<ol type="1">
+<li>Sales can run <strong>without</strong> workorders. Delivery proof lives on the <strong>order</strong>.</li>
+<li>Inbound orders are pull-only; working copies are what push.</li>
+<li>Rates and taxes are catalogs; money on the order is a <strong>snapshot</strong>.</li>
+<li>Freeze, amendment, reassignment, <code>history[]</code> — same as WOs. Movement crumbs in <code>tracking</code>.</li>
+<li>Next stop = new document or a new StartOrder, never reopen frozen.</li>
+</ol>
+<h2 id="beat-sheet">Beat sheet</h2>
+<ol type="1">
+<li>Login Priya, <code>workModes: ["sales"]</code>, Today is orders not WOs.</li>
+<li>StartOrder copy; inbound JSON unchanged.</li>
+<li>Deliver + POD + CompleteOrder + SubmitOrder.</li>
+<li>Field <code>CreateOrder</code> priced from rates/taxes.</li>
+<li><code>CreateCustomer</code> + order.</li>
+<li>Amendment after freeze.</li>
+<li>Reassigned inbound still shows her working copy.</li>
+</ol>
+    </article>
+    <aside class="toc" aria-label="On this page">
+      <p class="eyebrow">On this page</p>
+<ul>
+<li><a href="#day-in-the-life--sales-route" id="toc-day-in-the-life--sales-route">Day in the life — sales route</a>
+<ul>
+<li><a href="#persona" id="toc-persona">Persona</a></li>
+<li><a href="#screen-map" id="toc-screen-map">Screen map</a></li>
+<li><a href="#timeline" id="toc-timeline">Timeline</a></li>
+<li><a href="#rules-this-day-proves" id="toc-rules-this-day-proves">Rules this day proves</a></li>
+<li><a href="#beat-sheet" id="toc-beat-sheet">Beat sheet</a></li>
+</ul></li>
+</ul>
+    </aside>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>© <span id="year">2026</span> Fujio-Turner. Apache License 2.0.</p>
+      <p><a href="https://github.com/Fujio-Turner/mobile_field_service">Application</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_pages">This site</a></p>
+    </div>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="../js/site.js"></script>
+</body>
+</html>

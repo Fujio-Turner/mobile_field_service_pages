@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Settings — Mobile Field Service</title>
+  <meta name="description" content="Mobile Field Service documentation." />
+  <meta name="theme-color" content="#0f766e" />
+  <link rel="icon" type="image/svg+xml" href="../images/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/site.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="../index.html">
+        <img src="../images/favicon.svg" alt="" width="32" height="32" />
+        Mobile Field Service
+      </a>
+      <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../index.html#product">Product</a></li>
+        <li><a href="../index.html#screens">Screens</a></li>
+        <li><a href="../docs/index.html" aria-current="page">Docs</a></li>
+        <li><a href="https://github.com/Fujio-Turner/mobile_field_service">App repo</a></li>
+      </ul>
+      <a class="btn btn-primary" href="https://github.com/Fujio-Turner/mobile_field_service">GitHub</a>
+    </div>
+  </header>
+  <main class="wrap doc-layout">
+    <article class="prose">
+      <p class="crumb"><a href="../index.html">Home</a> · <a href="../docs/index.html">Docs</a> · Settings</p>
+<h1 id="settings--where-they-live-and-what-they-mean">Settings — where they live and what they mean</h1>
+<p>One page for <strong>developers</strong>. Operators and field users only see Profile + <strong>Settings / debug</strong>.</p>
+<p>Restart Expo (and rebuild a native binary) after changing <code>EXPO_PUBLIC_*</code>. Device toggles persist in <strong>SecureStore</strong> (Keychain / Keystore) until you change them or wipe the app.</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>When it applies</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Build env</td>
+<td>Compile / Metro inline</td>
+<td><code>.env</code> (gitignored; copy <a href="../.env.example"><code>.env.example</code></a>)</td>
+</tr>
+<tr>
+<td>Profile</td>
+<td>Tech on the phone</td>
+<td><code>app/(tabs)/profile.tsx</code></td>
+</tr>
+<tr>
+<td>Settings / debug</td>
+<td>Lab / support</td>
+<td><code>app/debug/index.tsx</code></td>
+</tr>
+<tr>
+<td>Keychain</td>
+<td>Session + encryption</td>
+<td><code>src/session/enclave.ts</code>, <code>src/session/dbKey.ts</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="1-build-time-env-expo_public_">1. Build-time env (<code>EXPO_PUBLIC_*</code>)</h2>
+<p>Metro inlines these. Empty string is “unset” unless noted.</p>
+<h3 id="auth-and-sync-gateway">Auth and Sync Gateway</h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>EXPO_PUBLIC_AUTH_STRATEGY</code></td>
+<td><code>basic</code> in code; <strong><code>demo</code> in <code>.env.example</code></strong></td>
+<td><code>demo</code> — no network, replicator never starts. Known emails/usernames: Jon Hale, Maya Chen, Priya Shah, Maya Dispatch. Any other non-empty id signs in as Jon. Empty field is rejected. <code>basic</code> — email + password → SG session. <code>oidc_implicit</code> / <code>oidc_code</code> — IdP button (screens stubbed; issuer env is <strong>not</strong> read by <code>src/</code> yet).</td>
+</tr>
+<tr>
+<td><code>EXPO_PUBLIC_SG_URL</code></td>
+<td>empty</td>
+<td>Sync Gateway / App Services WebSocket URL (<code>wss://…</code>). Required for <code>basic</code>. Demo ignores it.</td>
+</tr>
+<tr>
+<td><code>EXPO_PUBLIC_SG_DB</code></td>
+<td><code>mfs</code></td>
+<td>SG database name (<code>POST /{db}/_session</code>).</td>
+</tr>
+<tr>
+<td><code>EXPO_PUBLIC_SG_SELF_SIGNED</code></td>
+<td>unset</td>
+<td><code>true</code> allows self-signed TLS (also implied by <code>ws://</code>). Lab only.</td>
+</tr>
+<tr>
+<td><code>EXPO_PUBLIC_SG_CHANNELS</code></td>
+<td>empty</td>
+<td>Optional pull-channel list applied to <strong>every</strong> <code>field.*</code> collection when nothing is saved on Settings / debug. Empty = all channels the session can access (SG still grants).</td>
+</tr>
+<tr>
+<td><code>EXPO_PUBLIC_SESSION_REFRESH_SKEW_SEC</code></td>
+<td><code>300</code></td>
+<td>Mint a new SG session this many seconds <strong>before</strong> <code>expiresAt</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Documented for a later OIDC build (not wired in <code>src/</code> today): <code>EXPO_PUBLIC_OIDC_ISSUER</code>, <code>EXPO_PUBLIC_OIDC_CLIENT_ID</code>, <code>EXPO_PUBLIC_OIDC_SCOPES</code>, <code>EXPO_PUBLIC_AUTH_BEARER_ON_REPL</code>. See <a href="auth.html">AUTH.md</a>.</p>
+<h3 id="replication-schema-not-a-profile-toggle">Replication schema (not a Profile toggle)</h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>EXPO_PUBLIC_REPL_SCHEMA</code></td>
+<td><code>simple</code></td>
+<td><code>simple</code> — one continuous <code>PUSH_AND_PULL</code> replicator for all <code>field.*</code> except <code>tmp</code>. <code>oneshot</code> — one-shot <code>workordersin</code>+<code>orders</code> first, then one-shot all field collections on a timer and on foreground.</td>
+</tr>
+<tr>
+<td><code>EXPO_PUBLIC_REPL_ONESHOT_SEC</code></td>
+<td><code>300</code></td>
+<td>Seconds between follow-up oneshots. Floor <strong>30</strong>.</td>
+</tr>
+</tbody>
+</table>
+<p>Details: <a href="replication.html">REPLICATION.md</a>.</p>
+<h3 id="tracking-map-queries">Tracking, map, queries</h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>EXPO_PUBLIC_TRACK_MIN_MOVE_M</code></td>
+<td><code>100</code></td>
+<td>Meters of movement before a GPS crumb is stored (~328 ft). <code>152</code> ≈ 500 ft. OS <code>distanceInterval</code> uses the same value. Accuracy worse than this is skipped. Per-day docs <strong>TTL 30 days</strong>.</td>
+</tr>
+<tr>
+<td><code>EXPO_PUBLIC_MAP_STYLE_URL</code></td>
+<td>OpenFreeMap Liberty</td>
+<td>MapLibre style URL. Pins always come from local <code>field.assets</code>. Basemap needs network.</td>
+</tr>
+<tr>
+<td><code>EXPO_PUBLIC_QUERY_EXPLAIN</code></td>
+<td>unset</td>
+<td><code>1</code> runs CBL <code>query.explain()</code> (opt-in). Do not leave on in a ship build.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Not on this train:</strong> <code>VECTOR_SEARCH_ENABLED</code>, <code>VECTOR_BRUTE_FORCE_DEBUG</code> (S15). Do not add them to <code>.env</code> until the native model lands.</p>
+<hr />
+<h2 id="2-profile-field-user">2. Profile (field user)</h2>
+<p>Persisted in SecureStore. Sign-out does <strong>not</strong> clear these (or the DB encryption key).</p>
+<table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Key</th>
+<th>Default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Large screen optimize</strong></td>
+<td><code>mfs.ui.thumbOptimize</code></td>
+<td>off (<code>0</code>)</td>
+<td>Parks primary buttons in the easy thumb zone and sizes them for this viewport. Off = full-width 48pt buttons.</td>
+</tr>
+<tr>
+<td><strong>Left hand</strong></td>
+<td><code>mfs.ui.leftHand</code></td>
+<td>off</td>
+<td>Only shown when Large screen optimize is on. Mirrors the zone (and tab order / Back) for left-thumb reach.</td>
+</tr>
+</tbody>
+</table>
+<p>Also on Profile (read-only): username, email, <code>employeeId</code>, <code>workModes</code>, auth strategy, encrypted DB name, app version, <strong>Crumbs today</strong> (point count, not a map), sync activity.</p>
+<p><strong>Search</strong> (Profile button) is FTS over notes, products, and assets — not a setting.</p>
+<hr />
+<h2 id="3-settings--debug-lab">3. Settings / debug (lab)</h2>
+<p>Route: <code>/debug</code>. Do <strong>not</strong> show session cookies or the DB encryption string.</p>
+<h3 id="database-encryption-mfsdevdbencryption">Database encryption (<code>mfs.dev.dbEncryption</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>off</strong> (default, <code>'0'</code>)</td>
+<td>Open CBL <strong>without</strong> <code>setEncryptionKey</code>. Lab/default.</td>
+</tr>
+<tr>
+<td><strong>on</strong> (<code>'1'</code>)</td>
+<td>Mint/load <code>mfs.dbkey.&lt;employeeId&gt;</code> in Keychain and pass it to <code>setEncryptionKey</code> (AES-256).</td>
+</tr>
+</tbody>
+</table>
+<p>Switching <strong>deletes the local database and reseeds</strong> (encrypted vs plain files are not interchangeable). The key is never shown on this screen. If a leftover encrypted file cannot open with encryption off, the app closes any native handle, deletes the <code>.cblite2</code> folder, and opens a new file matching the toggle.</p>
+<h3 id="job-rules-mfsdevjobrules">Job rules (<code>mfs.dev.jobRules</code>)</h3>
+<p>JSON <code>{ reassign, inbound }</code>. Defaults: <strong>keep editing</strong> + <strong>local wins</strong>. Lab policy for how a started copy treats dispatch changes — not a production SG rule.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Values</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>reassign</code></td>
+<td><code>keep_editing</code> (default)</td>
+<td>Inbound went to someone else: banner, you may still edit your copy.</td>
+</tr>
+<tr>
+<td></td>
+<td><code>forbid_edits</code></td>
+<td>Same banner plus lock: dock gone, ops display-only, chat still works.</td>
+</tr>
+<tr>
+<td><code>inbound</code></td>
+<td><code>local_wins</code> (default)</td>
+<td>After you have edited, keep your fields; show a diff. <strong>Untouched</strong> copies still take new inbound (or hide if dispatch cancelled).</td>
+</tr>
+<tr>
+<td></td>
+<td><code>remote_wins</code></td>
+<td>After edits, inbound overwrites the changed kit fields.</td>
+</tr>
+<tr>
+<td></td>
+<td><code>prompt</code></td>
+<td>After edits, pick keep-mine / take-inbound per field.</td>
+</tr>
+</tbody>
+</table>
+<p>Try buttons and deep link <code>mfs://debug?demo=local\|prompt\|remote\|reassign\|untouched</code> run <code>simulateDispatchKitChange</code> on a seed job (lab only; never patch dispatch inbound on a product path).</p>
+<h3 id="pull-channels-mfssynccollectionchannels">Pull channels (<code>mfs.sync.collectionChannels</code>)</h3>
+<p>Per-collection <code>string[]</code> on the replicator config. <strong>Empty (default)</strong> = no client filter; SG grants <code>emp:</code> / <code>district:</code> / <code>public</code>. A non-empty list only <strong>narrows</strong> pull. Saved from the debug form; <code>EXPO_PUBLIC_SG_CHANNELS</code> is the fallback when nothing is stored.</p>
+<h3 id="sync-timestamps">Sync timestamps</h3>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mfs.sync.lastPullSuccessAt</code></td>
+<td>Unix seconds, last successful pull (memory + SecureStore).</td>
+</tr>
+<tr>
+<td><code>mfs.sync.lastPushSuccessAt</code></td>
+<td>Same for push.</td>
+</tr>
+</tbody>
+</table>
+<p>Today’s clock HUD (green / yellow / red + <code>12m</code>/<code>2h</code> + pending count) and the one-line bar on other screens use these timestamps plus replicator activity and pending-push count. Debug also shows software versions, CBL db name/path, replicator URL/status/progress, collection counts, schema (<code>simple</code>/<code>oneshot</code>). Demo never starts the replicator.</p>
+<hr />
+<h2 id="4-keychain-not-toggles">4. Keychain (not toggles)</h2>
+<p>Logout deletes <strong>auth.</strong>* and keeps <strong>dbkey</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mfs.auth.strategy</code></td>
+<td><code>demo</code> | <code>basic</code> | <code>oidc_*</code></td>
+</tr>
+<tr>
+<td><code>mfs.auth.username</code> / <code>email</code> / <code>employeeId</code></td>
+<td>Who this device is</td>
+</tr>
+<tr>
+<td><code>mfs.auth.password</code></td>
+<td><strong>basic only</strong>, to mint sessions</td>
+</tr>
+<tr>
+<td><code>mfs.auth.sessionId</code> / <code>cookieName</code> / <code>sessionExpiresAt</code></td>
+<td>SG session</td>
+</tr>
+<tr>
+<td><code>mfs.dbkey.&lt;employeeId&gt;</code></td>
+<td>CBL encryption string (base64 of 32 random bytes). Created only when encryption is <strong>on</strong>. <strong>Never log.</strong></td>
+</tr>
+<tr>
+<td><code>mfs.cbluid.&lt;employeeId&gt;</code></td>
+<td>Native CBL unique open-name (not a secret). Used to close leftover handles after Fast Refresh.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="5-deep-links-scheme-mfs">5. Deep links (scheme <code>mfs</code>)</h2>
+<p>Useful in the simulator: <code>xcrun simctl openurl booted 'mfs://…'</code>.</p>
+<table>
+<thead>
+<tr>
+<th>URL</th>
+<th>Screen</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mfs://</code></td>
+<td>Today</td>
+</tr>
+<tr>
+<td><code>mfs://notes</code> <code>map</code> <code>inventory</code> <code>chat</code> <code>profile</code></td>
+<td>Tabs</td>
+</tr>
+<tr>
+<td><code>mfs://search</code></td>
+<td>FTS</td>
+</tr>
+<tr>
+<td><code>mfs://debug</code></td>
+<td>Settings / debug</td>
+</tr>
+<tr>
+<td><code>mfs://debug?demo=local</code> (also <code>prompt</code>, <code>remote</code>, <code>reassign</code>, <code>untouched</code>)</td>
+<td>Lab inbound-merge demo</td>
+</tr>
+<tr>
+<td><code>mfs://wo/in/{id}</code> / <code>mfs://wo/out/{id}</code></td>
+<td>Job ticket / copy</td>
+</tr>
+<tr>
+<td><code>mfs://order/{id}</code> <code>customer/{id}</code> <code>note/{id}</code> <code>asset/{id}</code></td>
+<td>Other KV screens</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="6-os-permissions">6. OS permissions</h2>
+<table>
+<thead>
+<tr>
+<th>Permission</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Camera</td>
+<td>Job / order photos</td>
+</tr>
+<tr>
+<td>Location when in use</td>
+<td><code>history[]</code> geo (best-effort) + <code>field.tracking</code> crumbs while foreground</td>
+</tr>
+</tbody>
+</table>
+<p>Tracking is <strong>foreground / while-using</strong> only. Background trail is later.</p>
+<hr />
+<h2 id="what-is-not-a-setting">What is not a setting</h2>
+<ul>
+<li><strong>Credit card payment</strong> — not in this version. Orders snapshot catalog cents. ROADMAP item.</li>
+<li><strong>Replication schema</strong> — build env, not Profile.</li>
+<li><strong>Vector / CLIP</strong> — blocked (S15).</li>
+<li><strong><code>local.tmp</code></strong> — never in the replicator; 24 h expiration. Not user-visible.</li>
+</ul>
+    </article>
+    <aside class="toc" aria-label="On this page">
+      <p class="eyebrow">On this page</p>
+<ul>
+<li><a href="#settings--where-they-live-and-what-they-mean" id="toc-settings--where-they-live-and-what-they-mean">Settings — where they live and what they mean</a>
+<ul>
+<li><a href="#1-build-time-env-expo_public_" id="toc-1-build-time-env-expo_public_">1. Build-time env (<code>EXPO_PUBLIC_*</code>)</a></li>
+<li><a href="#2-profile-field-user" id="toc-2-profile-field-user">2. Profile (field user)</a></li>
+<li><a href="#3-settings--debug-lab" id="toc-3-settings--debug-lab">3. Settings / debug (lab)</a></li>
+<li><a href="#4-keychain-not-toggles" id="toc-4-keychain-not-toggles">4. Keychain (not toggles)</a></li>
+<li><a href="#5-deep-links-scheme-mfs" id="toc-5-deep-links-scheme-mfs">5. Deep links (scheme <code>mfs</code>)</a></li>
+<li><a href="#6-os-permissions" id="toc-6-os-permissions">6. OS permissions</a></li>
+<li><a href="#what-is-not-a-setting" id="toc-what-is-not-a-setting">What is not a setting</a></li>
+</ul></li>
+</ul>
+    </aside>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>© <span id="year">2026</span> Fujio-Turner. Apache License 2.0.</p>
+      <p><a href="https://github.com/Fujio-Turner/mobile_field_service">Application</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_pages">This site</a></p>
+    </div>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="../js/site.js"></script>
+</body>
+</html>
