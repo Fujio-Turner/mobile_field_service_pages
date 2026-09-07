@@ -1,2 +1,3 @@
 User-agent: *
 Allow: /
+Sitemap: https://mobile.fuj.io/sitemap.txt

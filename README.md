@@ -1,8 +1,8 @@
 # Mobile Field Service — official site
 
-Static HTML for **Mobile Field Service**. CloudFront (S3 origin) is the intended host: no app server, no bundler required at request time.
+**Live:** [https://mobile.fuj.io](https://mobile.fuj.io)
 
-Application code stays in [Fujio-Turner/mobile_field_service](https://github.com/Fujio-Turner/mobile_field_service). This repo is the public page and the HTML copy of `docs/` + `guides/`.
+Static HTML for **Mobile Field Service**. No app server; `public/` is the site root. Application code stays in [Fujio-Turner/mobile_field_service](https://github.com/Fujio-Turner/mobile_field_service).
 
 ## Local preview
 
@@ -16,7 +16,7 @@ python3 -m http.server 4173 --directory public
 
 | Path | What |
 | --- | --- |
-| `public/` | **CloudFront origin.** `index.html`, `faq.html`, `css/`, `js/`, `images/`, `docs/` |
+| `public/` | **Site root** (what [mobile.fuj.io](https://mobile.fuj.io) serves). `index.html`, `faq.html`, `css/`, `js/`, `images/`, `docs/` |
 | `public/hero-sync.html` | 1920×1080 type/save/sync film (13.2s). `?embed=1` in the homepage iframe. `?t=6.9` freeze. `?noscale=1` to record an MP4 |
 | `public/docs/schema/*.json` | JSON Schema 2020-12 files (`$schema` → json-schema.org) |
 | `content/` | Markdown copied from the app (`docs/`, `guides/`) |
@@ -25,7 +25,11 @@ python3 -m http.server 4173 --directory public
 | `scripts/build.py` | `content/*.md` → `public/docs/*.html` |
 | `deploy/s3-cloudfront.sh` | `s3 sync` + invalidation |
 
-## CloudFront
+## Live site
+
+[https://mobile.fuj.io](https://mobile.fuj.io) is connected to this repo. Push to `main` to publish `public/`.
+
+Optional S3 + CloudFront (same `public/` root):
 
 1. Create an S3 bucket (no public ACL required if the distribution uses OAC).
 2. Upload `public/` as the bucket root (`index.html` at `/`).

@@ -1,0 +1,13 @@
+https://mobile.fuj.io/
+https://mobile.fuj.io/faq.html
+https://mobile.fuj.io/docs/index.html
+https://mobile.fuj.io/docs/architecture.html
+https://mobile.fuj.io/docs/day-in-the-life.html
+https://mobile.fuj.io/docs/day-assets.html
+https://mobile.fuj.io/docs/day-customer.html
+https://mobile.fuj.io/docs/day-sales.html
+https://mobile.fuj.io/docs/auth.html
+https://mobile.fuj.io/docs/replication.html
+https://mobile.fuj.io/docs/schema/index.html
+https://mobile.fuj.io/docs/settings.html
+https://mobile.fuj.io/docs/roadmap.html
