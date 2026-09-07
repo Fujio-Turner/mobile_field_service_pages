@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Mobile Field Service — work offline, sync your copy</title>
-  <meta name="description" content="A phone app for people who inspect pumps, deliver parts, and take orders on a doorstep — even when there is no signal. Offline-first Couchbase Lite. Official docs site." />
+  <title>Mobile Field Service — sync today, chat, notes, maps, stock</title>
+  <meta name="description" content="Field work on the phone: fast sync for Today, team chat on jobs, notes that sync, maps for assets and customers, and a local catalog. Works without a signal." />
   <meta name="theme-color" content="#0f766e" />
   <meta property="og:title" content="Mobile Field Service" />
-  <meta property="og:description" content="Work in the field. Even when there is no signal. The office sees your copy of the work." />
+  <meta property="og:description" content="Sync today’s work. Chat with your team. Notes, maps, and a local catalog — even without a signal." />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="images/Home-Jobs-Workorders-Today.png" />
   <link rel="icon" type="image/svg+xml" href="images/favicon.svg" />
@@ -25,9 +25,9 @@
       </a>
       <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
       <ul class="nav-links">
-        <li><a href="#product">Product</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#product">Modes</a></li>
         <li><a href="#screens">Screens</a></li>
-        <li><a href="#sync">Sync</a></li>
         <li><a href="docs/index.html">Docs</a></li>
         <li><a href="faq.html">FAQ</a></li>
         <li><a href="https://github.com/Fujio-Turner/mobile_field_service">App repo</a></li>
@@ -43,9 +43,9 @@
           <p class="pill"><span class="dot" aria-hidden="true"></span> Official site · Expo + Couchbase Lite</p>
           <h1>Work in the field. Even when there is no signal.</h1>
           <p class="sub">
-            Inspect a pump, deliver parts, take an order on a doorstep. When the radio comes back,
-            the phone syncs with Couchbase. The office sees <strong>your copy</strong> of the work —
-            not a tug-of-war on the same document.
+            Sync today’s jobs fast. Chat with your team about work and customers.
+            Make notes that sync. Find assets or customers on the map.
+            Search your catalog locally — even without a signal.
           </p>
           <div class="hero-cta">
             <a class="btn btn-primary btn-lg" href="docs/index.html">Read the docs</a>
@@ -71,7 +71,56 @@
       </div>
     </section>
 
-    <section id="product" class="section alt">
+    <section id="features" class="section alt">
+      <div class="wrap">
+        <p class="eyebrow">What you get</p>
+        <h2>Five things you use every shift.</h2>
+        <div class="features-5">
+          <article class="card">
+            <div class="ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M8 7h8"/><path d="M5 10h14v9a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-9Z"/><path d="M9 14h6"/></svg>
+            </div>
+            <p class="kicker">Sync</p>
+            <h3>Easy, fast Today</h3>
+            <p>Today’s jobs and orders land on the phone and go back up when you have a signal. Green dot when you are connected.</p>
+          </article>
+          <article class="card">
+            <div class="ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h11a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3H9l-5 3v-3H4a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3Z"/></svg>
+            </div>
+            <p class="kicker">Chat</p>
+            <h3>Talk about the job</h3>
+            <p>Message the team about jobs and customers. Tag a work order or order. Completing a job does not freeze the thread.</p>
+          </article>
+          <article class="card">
+            <div class="ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4M9 12h6M9 16h4"/></svg>
+            </div>
+            <p class="kicker">Notes</p>
+            <h3>Write it down</h3>
+            <p>Make notes on the phone. They sync with the rest of your work — still there if you were in a basement.</p>
+          </article>
+          <article class="card">
+            <div class="ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z"/><circle cx="12" cy="10" r="2.2"/></svg>
+            </div>
+            <p class="kicker">Maps</p>
+            <h3>Find assets or customers</h3>
+            <p>Pins come from the local database, so they still show in airplane mode. The street map needs network.</p>
+          </article>
+          <article class="card">
+            <div class="ico" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16l-1.2 12H5.2L4 7Z"/><path d="M9 7V5a3 3 0 0 1 6 0v2M9 12h6"/></svg>
+            </div>
+            <p class="kicker">Stock</p>
+            <h3>Search locally</h3>
+            <p>Search your catalog of products or assets on the device. No waiting on a warehouse lookup to type a SKU.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="product" class="section">
       <div class="wrap">
         <p class="eyebrow">One app, three modes</p>
         <h2>Same phone. Different today board.</h2>
@@ -122,8 +171,8 @@
     <section id="screens" class="section alt">
       <div class="wrap">
         <p class="eyebrow">Screens</p>
-        <h2>Today, map, chat, profile.</h2>
-        <p class="lede">Tabs: Today · Notes · Map · Stock · Chat · Profile. Notes and Stock are lists. These four are the surfaces of a shift.</p>
+        <h2>Today, notes, map, stock, chat.</h2>
+        <p class="lede">The tab bar is Today · Notes · Map · Stock · Chat · Profile. Sync for the day, talk to the team, find a pin, search the catalog — on the device.</p>
         <div class="shots">
           <figure class="shot">
             <img src="images/Home-Jobs-Workorders-Today.png" alt="Today: clock, sync HUD, jobs" />

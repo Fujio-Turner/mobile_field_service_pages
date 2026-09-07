@@ -274,6 +274,18 @@ pre code { font-size: inherit; color: inherit; }
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
 }
+.features-5 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+}
+.features-5 .ico {
+  width: 36px;
+  height: 36px;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+.features-5 .ico svg { width: 36px; height: 36px; }
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -642,10 +654,11 @@ mark.faq-hit {
   .hero-grid { grid-template-columns: minmax(0, 1fr) 240px; gap: 28px; }
   .phone { max-width: 240px; max-height: 52vh; }
   .modes-dev, .docs-split { grid-template-columns: 1fr; }
+  .features-5 { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 900px) {
-  .hero-grid, .cards, .shots, .doc-grid, .doc-layout { grid-template-columns: 1fr; }
+  .hero-grid, .cards, .shots, .doc-grid, .doc-layout, .features-5 { grid-template-columns: 1fr; }
   .hero-visual { order: -1; }
   .phone { max-width: 220px; max-height: 46vh; }
   .toc { display: none; }
