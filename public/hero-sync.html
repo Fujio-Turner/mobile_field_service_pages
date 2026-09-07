@@ -7,7 +7,7 @@
 <!-- 1920×1080, 13.2s silent loop. ?embed=1 crop-fits a parent iframe. ?t=6.9 freeze. ?noscale=1 record. -->
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
   :root {
     --wash: #f1f5f9;
@@ -179,21 +179,24 @@
   .pkt-in {
     position: absolute;
     left: 50%;
-    top: 2px;
-    width: 10px;
-    height: 10px;
-    margin-left: -5px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, #fff, var(--pkt2) 38%, var(--pkt) 72%);
-    box-shadow: 0 0 8px 2px rgba(45, 212, 191, 0.7);
+    top: 0;
+    transform: translateX(-50%);
+    height: 16px;
+    padding: 0 5px;
+    border-radius: 6px;
+    background: var(--teal-soft);
+    color: var(--teal);
+    font: 600 9px/16px "IBM Plex Mono", ui-monospace, monospace;
+    box-shadow: 0 0 8px 2px rgba(45, 212, 191, 0.45);
     opacity: 0;
     pointer-events: none;
+    white-space: nowrap;
   }
   .pkt-in.is-fly { animation: pktIn 0.72s ease-in forwards; }
   @keyframes pktIn {
     0% { top: 0; opacity: 1; }
     75% { opacity: 1; }
-    100% { top: 22px; opacity: 0; }
+    100% { top: 16px; opacity: 0; }
   }
   .local-db {
     display: flex;
@@ -220,8 +223,35 @@
     border-color: #5eead4;
     box-shadow: 0 0 0 2px var(--pkt), 0 0 12px rgba(45, 212, 191, 0.35);
   }
+  .json-badge {
+    margin-left: auto;
+    flex-shrink: 0;
+    font: 600 11px/1 "IBM Plex Mono", ui-monospace, monospace;
+    color: var(--teal);
+    background: var(--teal-soft);
+    padding: 5px 7px;
+    border-radius: 6px;
+  }
+  .local-db.is-write .json-badge {
+    box-shadow: 0 0 0 2px var(--pkt);
+  }
   .card-title { font: 600 16px/1.2 "IBM Plex Sans", Inter, sans-serif; color: var(--ink); }
-  .card-status { font: 400 13px/1.3 "IBM Plex Sans", Inter, sans-serif; color: var(--muted); margin-top: 2px; }
+  .card-sub { font: 600 12px/1.3 "IBM Plex Sans", Inter, sans-serif; color: var(--teal); margin-top: 2px; }
+  .card-status { font: 400 12px/1.3 "IBM Plex Sans", Inter, sans-serif; color: var(--muted); margin-top: 4px; }
+  .dests { display: flex; flex-wrap: wrap; gap: 6px; }
+  .dest {
+    padding: 5px 8px;
+    border-radius: 8px;
+    background: #f8fafc;
+    border: 1px solid var(--line);
+    font: 600 12px/1.2 "IBM Plex Sans", Inter, sans-serif;
+    color: var(--ink);
+  }
+  .card-office.is-in .dest {
+    background: #f0fdf4;
+    border-color: #86efac;
+    color: var(--ok);
+  }
   .card-icon {
     flex: 0 0 28px; width: 28px; height: 28px; border-radius: 8px;
     background: #f0fdfa; display: grid; place-items: center;
@@ -235,13 +265,18 @@
 
   .packet {
     position: absolute; left: 0; top: 0; z-index: 4;
-    width: 16px; height: 16px; margin: -8px 0 0 -8px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, #fff, var(--pkt2) 38%, var(--pkt) 72%);
-    box-shadow: 0 0 10px 3px rgba(45,212,191,0.7), 0 0 22px 6px rgba(94,234,212,0.35);
+    height: 22px;
+    padding: 0 7px;
+    margin: -11px 0 0 -28px;
+    border-radius: 8px;
+    background: var(--teal-soft);
+    color: var(--teal);
+    font: 600 11px/22px "IBM Plex Mono", ui-monospace, monospace;
+    box-shadow: 0 0 12px 2px rgba(45, 212, 191, 0.55);
     opacity: 0; pointer-events: none;
+    white-space: nowrap;
   }
-  .packet-sm { width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px; }
+  .packet-sm { height: 18px; padding: 0 6px; margin: -9px 0 0 -24px; font-size: 10px; line-height: 18px; }
 
   .caption {
     position: absolute; left: 420px; width: 740px; top: 880px; z-index: 5;
@@ -289,7 +324,7 @@
         <span class="ripple" id="ripple"></span>
       </button>
       <div class="save-to-db" id="saveToDb" aria-hidden="true">
-        <span class="pkt-in" id="pktLocal"></span>
+        <span class="pkt-in" id="pktLocal">{JSON}</span>
         <svg viewBox="0 0 24 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 2 v18"/>
           <path d="M6 16 l6 6 6-6"/>
@@ -307,6 +342,7 @@
           <strong>Couchbase Lite database</strong>
           <span id="dbStatus">On this phone</span>
         </div>
+        <code class="json-badge">{JSON}</code>
       </div>
       <div class="keyboard" id="keyboard" aria-hidden="true">
         <div class="kb-row"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
@@ -336,28 +372,26 @@
     </div>
     <div class="card-copy">
       <div class="card-title">Sync Gateway</div>
+      <div class="card-sub">Couchbase Server</div>
       <div class="card-status" id="sgStatus">On the internet</div>
     </div>
   </div>
 
   <div class="card card-office" id="cardOffice">
     <div class="card-ring" data-ring="green"></div>
-    <div class="card-icon" aria-hidden="true">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M4 20V8l8-4 8 4v12"/>
-        <path d="M9 20v-6h6v6"/>
-        <path d="M9 10h.01M15 10h.01"/>
-      </svg>
-    </div>
     <div class="card-copy">
-      <div class="card-title">Office</div>
-      <div class="card-status" id="officeStatus">Couchbase Server</div>
+      <div class="dests">
+        <span class="dest">Office</span>
+        <span class="dest">Tablet</span>
+        <span class="dest">ERP</span>
+      </div>
+      <div class="card-status" id="officeStatus">Ready</div>
     </div>
   </div>
 
-  <div class="packet" id="pkt1"></div>
-  <div class="packet packet-sm" id="pkt2"></div>
-  <div class="packet" id="pkt3"></div>
+  <div class="packet" id="pkt1">{JSON}</div>
+  <div class="packet packet-sm" id="pkt2">{JSON}</div>
+  <div class="packet" id="pkt3">{JSON}</div>
   <p class="caption" id="caption">A note starts empty on the phone.</p>
 </div>
 </div>
@@ -375,9 +409,9 @@ const CAPTION = {
   typing: "Typing the job note.",
   aim: "Reach for Save.",
   tap: "Saved on the device.",
-  local: "Written to the Couchbase Lite database on the phone.",
-  push: "Pushing across the internet.",
-  synced: "On the phone, then across the internet.",
+  local: "Stored as JSON in the Couchbase Lite database.",
+  push: "JSON crossing the internet.",
+  synced: "Same JSON at Office, Tablet, and ERP.",
 };
 
 function typedCountAt(t) {
@@ -451,14 +485,15 @@ const Scene = {
     document.querySelector("#cardSg .card-ring").classList.toggle("on", state === "receiving");
   },
   setOffice(state){
-    const map = { idle:"Couchbase Server", waiting:"Waiting", note:"1 note in" };
+    const map = { idle:"Ready", waiting:"Waiting", note:"Got it" };
     document.getElementById("officeStatus").textContent = map[state];
+    document.getElementById("cardOffice").classList.toggle("is-in", state === "note");
     document.querySelector("#cardOffice .card-ring").classList.toggle("on", state === "note");
   },
   setDb(state){
     const node = document.getElementById("localDb");
     node.classList.toggle("is-write", state === "write");
-    document.getElementById("dbStatus").textContent = state === "write" ? "1 note in" : "On this phone";
+    document.getElementById("dbStatus").textContent = state === "write" ? "1 JSON doc" : "On this phone";
   },
   setPath(s){
     document.getElementById("saveToDb").classList.toggle("is-live", s.pathIn);
