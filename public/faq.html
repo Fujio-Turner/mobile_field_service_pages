@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>FAQ — Mobile Field Service</title>
-  <meta name="description" content="FAQ for Mobile Field Service: offline work, copy-on-write, sync HUD, three modes, Couchbase Lite, JSON Schema." />
+  <meta name="description" content="Searchable FAQ for Mobile Field Service: offline work, copy-on-write, sync HUD, three modes, Couchbase Lite, JSON Schema." />
   <meta name="theme-color" content="#0f766e" />
   <link rel="icon" type="image/svg+xml" href="images/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -35,17 +35,30 @@
     <p class="crumb"><a href="index.html">Home</a> · FAQ</p>
     <p class="eyebrow">FAQ</p>
     <h1>Common questions</h1>
-    <p class="lede">Short answers. Deeper detail lives in <a href="docs/index.html">Docs</a> and the <a href="https://github.com/Fujio-Turner/mobile_field_service">app repo</a>.</p>
+    <p class="lede">Type to filter. Matches highlight in yellow. Deeper detail: <a href="docs/index.html">Docs</a>.</p>
+
+    <form id="faq-search-form" class="faq-search" role="search">
+      <svg class="faq-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle>
+        <path d="M20 20l-3-3" stroke-linecap="round"></path>
+      </svg>
+      <label class="visually-hidden" for="faq-q">Search the FAQ</label>
+      <input id="faq-q" type="search" name="q" placeholder="Search questions, like offline, Reassigned, or schema…" autocomplete="off" enterkeyhint="search" />
+    </form>
+    <p id="faq-count" class="faq-count"></p>
     <nav class="faq-jump" aria-label="FAQ sections">
       <a href="#using">Using the app</a>
+      <a href="#jobs">Jobs and orders</a>
       <a href="#sync">Sync</a>
       <a href="#data">Data</a>
       <a href="#build">Building</a>
     </nav>
 
+    <div id="faq-root">
+    <section data-faq-group>
     <h2 id="using">Using the app</h2>
     <div class="faq-list">
-      <details class="faq-item" open>
+      <details class="faq-item">
         <summary>What is Mobile Field Service?</summary>
         <div class="faq-a">
           <p>A phone app for people who inspect pumps, deliver parts, and take orders on a doorstep — including with no signal. When the radio comes back, Couchbase Lite syncs to Sync Gateway. The office sees <strong>your copy</strong> of the work, not an edit war on the dispatch ticket.</p>
@@ -58,15 +71,15 @@
         </div>
       </details>
       <details class="faq-item">
-        <summary>Why can’t I edit the ticket the office sent?</summary>
+        <summary>How do I sign in?</summary>
         <div class="faq-a">
-          <p>Dispatch inbound is read-only. <strong>Start work</strong> copies it to your outbound document. You edit the copy. Completing <strong>freezes</strong> that copy; forgotten facts go on a new amendment that points at the original. See <a href="docs/architecture.html">Architecture</a>.</p>
+          <p>Work email (or company IdP). Demo: Jon Hale <code>jon.hale@example.com</code>, Maya Chen <code>maya.chen@example.com</code>, Priya Shah <code>priya.shah@example.com</code>. Any other non-empty id in demo is treated as Jon.</p>
         </div>
       </details>
       <details class="faq-item">
-        <summary>What does Reassigned mean?</summary>
+        <summary>Can two phones share one login?</summary>
         <div class="faq-a">
-          <p>Inbound went to someone else, and you already have a local copy. Keep the row. Your paper still completes and pushes. Chat still works. Job rules in Settings / debug choose keep-editing vs lock.</p>
+          <p>Not in this version. One person, one device. Two active outbound copies for the same inbound are reconciled by keeping the oldest <code>audit.cr.dt</code>.</p>
         </div>
       </details>
       <details class="faq-item">
@@ -86,8 +99,94 @@
           <p>No. Chat is employees only. Orders snapshot catalog prices. There is <strong>no credit card payment</strong> in this version. Proof of delivery is a photo for now.</p>
         </div>
       </details>
+      <details class="faq-item">
+        <summary>What is Large screen optimize and Left hand?</summary>
+        <div class="faq-a">
+          <p>Profile toggles. Large screen optimize moves primary buttons into the thumb zone (off by default = full width). Left hand mirrors that zone when optimize is on.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>Why is there no keyboard in the iOS Simulator?</summary>
+        <div class="faq-a">
+          <p>The Mac keyboard is attached. Toggle the software keyboard with <strong>⌘K</strong> (I/O → Keyboard → Toggle Software Keyboard).</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>Does the app track me all day?</summary>
+        <div class="faq-a">
+          <p>Foreground / while-using GPS only. Crumbs go to <code>track:{day}:{employeeId}</code> when you move about 100 m. TTL 30 days. Never logged as a map dump. You can deny location; saves still work without lat/lon.</p>
+        </div>
+      </details>
     </div>
+    </section>
 
+    <section data-faq-group>
+    <h2 id="jobs" class="mt-xl">Jobs and orders</h2>
+    <div class="faq-list">
+      <details class="faq-item">
+        <summary>Why can’t I edit the ticket the office sent?</summary>
+        <div class="faq-a">
+          <p>Dispatch inbound is read-only. <strong>Start work</strong> copies it to your outbound document. You edit the copy. Completing <strong>freezes</strong> that copy; forgotten facts go on a new amendment that points at the original. See <a href="docs/architecture.html">Architecture</a>.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>What is the difference between a work order and an order?</summary>
+        <div class="faq-a">
+          <p>A <strong>work order</strong> is labor on a site or asset (inspect, repair, move, deliver, service). An <strong>order</strong> is commercial: lines, rates, taxes, customer, money in integer cents. Customer-mode days often have both.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>Start work vs Complete vs Submit?</summary>
+        <div class="faq-a">
+          <p><strong>Start work</strong> copies inbound → outbound. <strong>Complete</strong> (or Cancel) freezes the body. <strong>Submit</strong> is required to push that frozen copy. Submit is not a mid-job checkpoint.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>I forgot a photo after Complete. Can I edit it?</summary>
+        <div class="faq-a">
+          <p>No. Use <strong>Add follow-up</strong> (amendment). That is a new <code>workordersout</code> with <code>amends.id</code>. You do not reopen the frozen document.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>What does Reassigned mean?</summary>
+        <div class="faq-a">
+          <p>Inbound went to someone else, and you already have a local copy. Keep the row. Your paper still completes and pushes. Chat still works. Job rules in Settings / debug choose keep-editing vs lock.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>What are job rules?</summary>
+        <div class="faq-a">
+          <p>Lab policy on Profile → Settings / debug. Reassign: keep editing (default) or forbid further edits. Inbound after you have edited: local wins, remote wins, or prompt per field. Untouched copies still take new inbound (or hide if dispatch cancelled).</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>How do walk-up jobs work?</summary>
+        <div class="faq-a">
+          <p>Today’s Walk-up job creates a <strong>field inbound</strong> ticket (<code>origin: field</code>) assigned to you. It is still a ticket, not labor. Labor starts after Start work on that inbound screen.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>Will overnight jobs disappear at midnight?</summary>
+        <div class="faq-a">
+          <p>No. Active outbound (assigned / in progress / blocked) is listed without a <code>scheduled.day</code> filter, so overnight work stays on Today until you complete it.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>Can I change the asset master from a job?</summary>
+        <div class="faq-a">
+          <p>No. Asset documents are pull-only. You <strong>link</strong> an asset to your outbound copy. Completing a job does not write the asset master. Moves copy from/to onto the working copy only.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>How do I tag a job in chat?</summary>
+        <div class="faq-a">
+          <p>Type <code>WO-10482</code> or <code>ORD-3301</code> in the message, or <code>@employeeId</code>. Job-screen chat is a separate thread (<code>thr:wo:{inbound id}</code>). Completing a job does not freeze threads.</p>
+        </div>
+      </details>
+    </div>
+    </section>
+
+    <section data-faq-group>
     <h2 id="sync" class="mt-xl">Sync</h2>
     <div class="faq-list">
       <details class="faq-item">
@@ -115,8 +214,28 @@
           <p>An explicit allow-list of <code>field.*</code> collections. <code>local.tmp</code> is never replicated. Push filters are per collection (for example outbound only when <code>syncState</code> is ready / pushed / error). Tracking crumbs push without waiting for Submit.</p>
         </div>
       </details>
+      <details class="faq-item">
+        <summary>What is simple vs oneshot replication?</summary>
+        <div class="faq-a">
+          <p>Build-time <code>EXPO_PUBLIC_REPL_SCHEMA</code>. <code>simple</code> (default) is one continuous replicator. <code>oneshot</code> pulls work orders and orders first, then one-shots all field collections on an interval and when the app comes to the foreground. Not a Profile toggle.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>What happens when my session expires?</summary>
+        <div class="faq-a">
+          <p>The app honors <code>sessionExpiresAt</code>. On replicator 401/404/10401 it stops, tries one refresh, then asks you to sign in again. Local work stays on the device.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>Sign out vs wipe?</summary>
+        <div class="faq-a">
+          <p>Sign out drops auth keys (session, password, tokens) and keeps the database key. <code>LogoutAndWipe</code> is explicit and deletes the local DB too. Offline re-entry after Logout is not supported; RestoreSession is process death with a still-valid session.</p>
+        </div>
+      </details>
     </div>
+    </section>
 
+    <section data-faq-group>
     <h2 id="data" class="mt-xl">Data</h2>
     <div class="faq-list">
       <details class="faq-item">
@@ -134,7 +253,7 @@
       <details class="faq-item">
         <summary>Is the database encrypted?</summary>
         <div class="faq-a">
-          <p>Lab default is <strong>off</strong>. Settings / debug can turn encryption on (AES-256, key in Keychain as a string CBL can read — not a non-exportable Secure Enclave key). Switching wipes and reseeds the local file.</p>
+          <p>Lab default is <strong>off</strong>. Settings / debug can turn encryption on (AES-256, key in Keychain as a string CBL can read — not a non-exportable Secure Enclave key). Switching wipes and reseeds the local file. Opening unencrypted over a leftover encrypted file is recovered by wipe + reseed.</p>
         </div>
       </details>
       <details class="faq-item">
@@ -143,8 +262,34 @@
           <p>Movement crumbs for the signed-in employee, document id <code>track:{YYYY-MM-DD}:{employeeId}</code>. TTL is 30 calendar days. Never log the <code>tracking</code> map. Schema: <a href="docs/schema/tracking.html">tracking</a>.</p>
         </div>
       </details>
+      <details class="faq-item">
+        <summary>Why is money in cents?</summary>
+        <div class="faq-a">
+          <p>Integer cents only. No floating-point prices on orders or catalog snapshots. No card capture in v1.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>What timezone is “today”?</summary>
+        <div class="faq-a">
+          <p>Device local calendar day <code>YYYY-MM-DD</code>. <code>scheduled.day</code> on documents uses that same convention from <code>scheduled.startDt</code>.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>How big can a photo be?</summary>
+        <div class="faq-a">
+          <p>Captured photos compress to about 200–800 KB JPEG, EXIF stripped. Capture above 8 MB pre-compress is rejected. Blobs live as top-level keys on the outbound doc (not nested arrays).</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>What is history[]?</summary>
+        <div class="faq-a">
+          <p>A field-level trail on user/device docs: path, from, to, time, optional GPS. Cap 100. There is no <code>lastAction</code> object. Sync-state bookkeeping does not append history.</p>
+        </div>
+      </details>
     </div>
+    </section>
 
+    <section data-faq-group>
     <h2 id="build" class="mt-xl">Building</h2>
     <div class="faq-list">
       <details class="faq-item">
@@ -156,7 +301,13 @@
       <details class="faq-item">
         <summary>How do I run the demo?</summary>
         <div class="faq-a">
-          <p>Node ≥ 20. Copy <code>.env.example</code>, <code>npm install</code>, <code>npx expo run:ios -d "iPhone 16 Pro"</code>. Sign in as Jon (<code>jon.hale@example.com</code>), Maya, or Priya. Details: <a href="https://github.com/Fujio-Turner/mobile_field_service">app README</a>.</p>
+          <p>Node ≥ 20. Copy <code>.env.example</code>, <code>npm install</code>, <code>npx expo run:ios -d "iPhone 16 Pro"</code>. Sign in as Jon, Maya, or Priya. Details: <a href="https://github.com/Fujio-Turner/mobile_field_service">app README</a>.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>Which Couchbase Lite plugin?</summary>
+        <div class="faq-a">
+          <p>The Fujio-Turner <a href="https://github.com/Fujio-Turner/cbl-reactnative">cbl-reactnative</a> fork (4.x + vector index on that fork), not official plugin 1.1 as source of truth. Lab/testing the module does not require an Enterprise license; shipping encryption + vector still does.</p>
         </div>
       </details>
       <details class="faq-item">
@@ -165,7 +316,23 @@
           <p>No. CLIP / vector (S15) is skipped until the native model and index land. Do not scaffold embed code in the app repo.</p>
         </div>
       </details>
+      <details class="faq-item">
+        <summary>Why do Today queries avoid SQL++ IN lists?</summary>
+        <div class="faq-a">
+          <p>CBL SQL++ for Mobile does not parse <code>IN ['a','b']</code> or parameterized <code>LIMIT $limit</code>. Use equality / <code>OR</code> and bake integer LIMIT/OFFSET into the SQL string.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>Where is the official website?</summary>
+        <div class="faq-a">
+          <p>This static site: <a href="https://github.com/Fujio-Turner/mobile_field_service_pages">mobile_field_service_pages</a>. Serve <code>public/</code> on S3 + CloudFront. The app repo keeps markdown for engineers.</p>
+        </div>
+      </details>
     </div>
+    </section>
+    </div>
+
+    <p id="faq-empty" class="faq-empty" hidden>No questions match that search. Try “offline”, “schema”, or “Submit”.</p>
   </main>
 
   <footer class="site-footer">
@@ -175,5 +342,7 @@
     </div>
   </footer>
   <script src="js/site.js"></script>
+  <script src="js/mark.min.js"></script>
+  <script src="js/faq-search.js"></script>
 </body>
 </html>
