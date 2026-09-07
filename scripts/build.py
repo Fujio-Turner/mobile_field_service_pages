@@ -295,13 +295,13 @@ HAND_PAGES: list[dict[str, str]] = [
         "changefreq": "weekly",
     },
     {
-        "path": "/faq.html",
+        "path": "/faq",
         "file": "faq.html",
         "priority": "0.8",
         "changefreq": "weekly",
     },
     {
-        "path": "/docs/index.html",
+        "path": "/docs/",
         "file": "docs/index.html",
         "priority": "0.8",
         "changefreq": "weekly",
@@ -436,8 +436,25 @@ def inject_db_tree(html: str) -> str:
     return inject_toc_item(html, "#database", "Database tree and collections")
 
 
+def pretty_path(rel: str) -> str:
+    """Public file path → live URL path (Cloudflare strips .html)."""
+    rel = rel.lstrip("/")
+    if rel in ("", "index.html"):
+        return "/"
+    if rel.endswith("/index.html"):
+        return "/" + rel[: -len("index.html")]
+    if rel.endswith(".html"):
+        return "/" + rel[:-5]
+    return "/" + rel
+
+
+def abs_url(rel: str) -> str:
+    path = pretty_path(rel)
+    return SITE + (path if path != "/" else "/")
+
+
 def page_url(dest_rel: str) -> str:
-    return f"{SITE}/docs/{dest_rel}"
+    return abs_url("docs/" + dest_rel)
 
 
 def iso_date(path: Path) -> str:
@@ -463,7 +480,7 @@ def doc_jsonld(page: dict[str, str]) -> dict:
     url = page_url(page["dest"])
     crumbs = [
         {"@type": "ListItem", "position": 1, "name": "Home", "item": f"{SITE}/"},
-        {"@type": "ListItem", "position": 2, "name": "Docs", "item": f"{SITE}/docs/index.html"},
+        {"@type": "ListItem", "position": 2, "name": "Docs", "item": f"{SITE}/docs/"},
     ]
     pos = 3
     section = page.get("section")
@@ -593,8 +610,8 @@ def write_faq_jsonld() -> None:
         "@graph": [
             {
                 "@type": "FAQPage",
-                "@id": f"{SITE}/faq.html#faq",
-                "url": f"{SITE}/faq.html",
+                "@id": f"{SITE}/faq#faq",
+                "url": f"{SITE}/faq",
                 "name": "FAQ — Mobile Field Service",
                 "inLanguage": "en-US",
                 "isPartOf": {"@id": f"{SITE}/#site"},
@@ -609,10 +626,10 @@ def write_faq_jsonld() -> None:
             },
             {
                 "@type": "BreadcrumbList",
-                "@id": f"{SITE}/faq.html#breadcrumb",
+                "@id": f"{SITE}/faq#breadcrumb",
                 "itemListElement": [
                     {"@type": "ListItem", "position": 1, "name": "Home", "item": f"{SITE}/"},
-                    {"@type": "ListItem", "position": 2, "name": "FAQ", "item": f"{SITE}/faq.html"},
+                    {"@type": "ListItem", "position": 2, "name": "FAQ", "item": f"{SITE}/faq"},
                 ],
             },
         ],

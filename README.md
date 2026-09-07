@@ -29,7 +29,7 @@ python3 -m http.server 4173 --directory public
 
 ## Live site
 
-[https://mobile.fuj.io](https://mobile.fuj.io) is connected to this repo. Push to `main` to publish `public/`.
+[https://mobile.fuj.io](https://mobile.fuj.io) is connected to this repo. Push to `main` to publish `public/`. Live URLs drop `.html` (`/faq`, `/docs/architecture`); canonicals and `sitemap.xml` use those paths.
 
 Optional S3 + CloudFront (same `public/` root):
 

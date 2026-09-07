@@ -16,12 +16,12 @@ Three modes (`users.workModes[]`): assets (Jon Hale), customer (Maya Chen), sale
 ## Docs
 
 - Home: https://mobile.fuj.io/
-- FAQ: https://mobile.fuj.io/faq.html
-- Docs hub: https://mobile.fuj.io/docs/index.html
-- Architecture: https://mobile.fuj.io/docs/architecture.html
-- Day in the life: https://mobile.fuj.io/docs/day-in-the-life.html
-- Replication: https://mobile.fuj.io/docs/replication.html
-- Auth: https://mobile.fuj.io/docs/auth.html
-- Settings: https://mobile.fuj.io/docs/settings.html
-- JSON Schema: https://mobile.fuj.io/docs/schema/index.html
-- Roadmap: https://mobile.fuj.io/docs/roadmap.html
+- FAQ: https://mobile.fuj.io/faq
+- Docs hub: https://mobile.fuj.io/docs/
+- Architecture: https://mobile.fuj.io/docs/architecture
+- Day in the life: https://mobile.fuj.io/docs/day-in-the-life
+- Replication: https://mobile.fuj.io/docs/replication
+- Auth: https://mobile.fuj.io/docs/auth
+- Settings: https://mobile.fuj.io/docs/settings
+- JSON Schema: https://mobile.fuj.io/docs/schema/
+- Roadmap: https://mobile.fuj.io/docs/roadmap

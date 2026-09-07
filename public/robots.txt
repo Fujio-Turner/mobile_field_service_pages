@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /hero-sync
 Disallow: /hero-sync.html
 Disallow: /_og.html
 

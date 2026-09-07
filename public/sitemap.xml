@@ -7,187 +7,187 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/faq.html</loc>
+    <loc>https://mobile.fuj.io/faq</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/index.html</loc>
+    <loc>https://mobile.fuj.io/docs/</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/architecture.html</loc>
+    <loc>https://mobile.fuj.io/docs/architecture</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/day-in-the-life.html</loc>
+    <loc>https://mobile.fuj.io/docs/day-in-the-life</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/day-assets.html</loc>
+    <loc>https://mobile.fuj.io/docs/day-assets</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/day-customer.html</loc>
+    <loc>https://mobile.fuj.io/docs/day-customer</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/day-sales.html</loc>
+    <loc>https://mobile.fuj.io/docs/day-sales</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/auth.html</loc>
+    <loc>https://mobile.fuj.io/docs/auth</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/roadmap.html</loc>
+    <loc>https://mobile.fuj.io/docs/roadmap</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/replication.html</loc>
+    <loc>https://mobile.fuj.io/docs/replication</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/settings.html</loc>
+    <loc>https://mobile.fuj.io/docs/settings</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/logging.html</loc>
+    <loc>https://mobile.fuj.io/docs/logging</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/html-css.html</loc>
+    <loc>https://mobile.fuj.io/docs/html-css</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/release.html</loc>
+    <loc>https://mobile.fuj.io/docs/release</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/schema/index.html</loc>
+    <loc>https://mobile.fuj.io/docs/schema/</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/schema/common.html</loc>
+    <loc>https://mobile.fuj.io/docs/schema/common</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/schema/workordersin.html</loc>
+    <loc>https://mobile.fuj.io/docs/schema/workordersin</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/schema/workordersout.html</loc>
+    <loc>https://mobile.fuj.io/docs/schema/workordersout</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/schema/assets.html</loc>
+    <loc>https://mobile.fuj.io/docs/schema/assets</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/schema/products.html</loc>
+    <loc>https://mobile.fuj.io/docs/schema/products</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/schema/inventory.html</loc>
+    <loc>https://mobile.fuj.io/docs/schema/inventory</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/schema/users.html</loc>
+    <loc>https://mobile.fuj.io/docs/schema/users</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/schema/customers.html</loc>
+    <loc>https://mobile.fuj.io/docs/schema/customers</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/schema/tasks.html</loc>
+    <loc>https://mobile.fuj.io/docs/schema/tasks</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/schema/notes.html</loc>
+    <loc>https://mobile.fuj.io/docs/schema/notes</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/schema/messages.html</loc>
+    <loc>https://mobile.fuj.io/docs/schema/messages</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/schema/orders.html</loc>
+    <loc>https://mobile.fuj.io/docs/schema/orders</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/schema/rates.html</loc>
+    <loc>https://mobile.fuj.io/docs/schema/rates</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/schema/taxes.html</loc>
+    <loc>https://mobile.fuj.io/docs/schema/taxes</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/schema/tracking.html</loc>
+    <loc>https://mobile.fuj.io/docs/schema/tracking</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://mobile.fuj.io/docs/schema/tmp.html</loc>
+    <loc>https://mobile.fuj.io/docs/schema/tmp</loc>
     <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.2</priority>
