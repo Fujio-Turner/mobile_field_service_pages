@@ -133,6 +133,9 @@ def extract_schema_json(md: str) -> str | None:
     return found
 
 
+DB_TREE = ROOT / "templates" / "db-tree.html"
+
+
 def inject_schema_bar(html: str, json_href: str) -> str:
     bar = (
         '<p class="schema-bar">'
@@ -142,6 +145,32 @@ def inject_schema_bar(html: str, json_href: str) -> str:
         "</p>\n"
     )
     return html.replace('<article class="prose">', '<article class="prose">\n' + bar, 1)
+
+
+def inject_after_crumb(html: str, snippet: str) -> str:
+    needle = '<p class="crumb">'
+    start = html.find(needle)
+    if start < 0:
+        return html.replace('<article class="prose">', '<article class="prose">\n' + snippet + "\n", 1)
+    end = html.find("</p>", start)
+    if end < 0:
+        return html
+    at = end + 4
+    return html[:at] + "\n" + snippet + html[at:]
+
+
+def inject_toc_item(html: str, href: str, label: str) -> str:
+    marker = '<p class="eyebrow">On this page</p>\n<ul>\n'
+    item = f'<li><a href="{href}">{label}</a></li>\n'
+    if marker not in html:
+        return html
+    return html.replace(marker, marker + item, 1)
+
+
+def inject_db_tree(html: str) -> str:
+    snippet = DB_TREE.read_text(encoding="utf-8").strip()
+    html = inject_after_crumb(html, snippet)
+    return inject_toc_item(html, "#database", "Database tree and collections")
 
 
 def render(src: Path, dest: Path, title: str, prefix: str) -> None:
@@ -179,10 +208,14 @@ def render(src: Path, dest: Path, title: str, prefix: str) -> None:
         raise
     finally:
         tmp.unlink(missing_ok=True)
+    html = dest.read_text(encoding="utf-8")
     if schema_json and dest.parent.name == "schema" and dest.name != "index.html":
         json_name = dest.with_suffix(".json").name
         dest.with_suffix(".json").write_text(schema_json + "\n", encoding="utf-8")
-        dest.write_text(inject_schema_bar(dest.read_text(encoding="utf-8"), json_name), encoding="utf-8")
+        html = inject_schema_bar(html, json_name)
+    if dest.name == "architecture.html":
+        html = inject_db_tree(html)
+    dest.write_text(html, encoding="utf-8")
 
 
 def main() -> int:

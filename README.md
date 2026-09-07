@@ -20,6 +20,7 @@ python3 -m http.server 4173 --directory public
 | `public/docs/schema/*.json` | JSON Schema 2020-12 files (`$schema` → json-schema.org) |
 | `content/` | Markdown copied from the app (`docs/`, `guides/`) |
 | `templates/doc.html` | Pandoc wrapper for doc pages |
+| `templates/db-tree.html` | Couchbase Lite collection tree injected at the top of Architecture |
 | `scripts/build.py` | `content/*.md` → `public/docs/*.html` |
 | `deploy/s3-cloudfront.sh` | `s3 sync` + invalidation |
 

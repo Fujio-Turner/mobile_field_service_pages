@@ -34,6 +34,50 @@
   <main class="wrap doc-layout">
     <article class="prose">
       <p class="crumb"><a href="../index.html">Home</a> · <a href="../docs/index.html">Docs</a> · Architecture</p>
+<div class="guide-panel" id="database">
+  <h2>Database tree and collections</h2>
+  <p>One Couchbase Lite file per employee: <code>mfs_{employeeId}_{sha256(employeeId)[0..8]}</code>. Scope <code>field</code> replicates; <code>local.tmp</code> never does. Click a collection for its <a href="https://json-schema.org/draft/2020-12/schema">JSON Schema 2020-12</a> document. Encryption is a lab toggle (off by default).</p>
+  <div class="docs-split">
+    <div class="db-tree" role="tree" aria-label="Couchbase Lite collections">
+      <div class="tree-root">mfs_E-4412_36649d06.cblite2</div>
+      <ul>
+        <li>
+          <span class="scope">scope field</span> <span class="meta">replicated · allow-list</span>
+          <ul>
+            <li><a href="schema/workordersin.html"><code>workordersin</code></a> <span class="id">woin:</span></li>
+            <li><a href="schema/workordersout.html"><code>workordersout</code></a> <span class="id">woout:</span></li>
+            <li><a href="schema/assets.html"><code>assets</code></a> <span class="id">ast:</span></li>
+            <li><a href="schema/products.html"><code>products</code></a> <span class="id">prd:</span></li>
+            <li><a href="schema/inventory.html"><code>inventory</code></a> <span class="id">inv: / invtx:</span></li>
+            <li><a href="schema/users.html"><code>users</code></a> <span class="id">usr:</span></li>
+            <li><a href="schema/customers.html"><code>customers</code></a> <span class="id">cus:</span></li>
+            <li><a href="schema/tasks.html"><code>tasks</code></a> <span class="id">tsk:</span></li>
+            <li><a href="schema/notes.html"><code>notes</code></a> <span class="id">nte:</span></li>
+            <li><a href="schema/messages.html"><code>messages</code></a> <span class="id">msg:</span></li>
+            <li><a href="schema/orders.html"><code>orders</code></a> <span class="id">ord:</span></li>
+            <li><a href="schema/rates.html"><code>rates</code></a> <span class="id">rate:</span></li>
+            <li><a href="schema/taxes.html"><code>taxes</code></a> <span class="id">tax:</span></li>
+            <li><a href="schema/tracking.html"><code>tracking</code></a> <span class="id">track:{day}:{employeeId}</span></li>
+          </ul>
+        </li>
+        <li>
+          <span class="scope">scope local</span> <span class="meta">never in the replicator</span>
+          <ul>
+            <li><a href="schema/tmp.html"><code>tmp</code></a> <span class="id">tmp:</span></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+    <div>
+      <h3>Open a collection</h3>
+      <pre><code>const col = await db.collection("workordersout", "field");
+const doc = await col.document("woout:01K4…");
+const body = doc.toDictionary(); // JSON Schema 2020-12</code></pre>
+      <p>Each schema page is a <a href="https://json-schema.org/draft/2020-12/schema">JSON Schema 2020-12</a> document (<code>$schema</code> + <code>$id</code> + <code>$defs</code>). Copy the JSON or download the <code>.json</code> file.</p>
+      <p><a href="schema/common.html">Shared envelope</a> (<code>type</code>, <code>audit</code>, <code>history[]</code>) · <a href="schema/index.html">All schema files</a></p>
+    </div>
+  </div>
+</div>
 <h1 id="mobile-field-service--design">Mobile Field Service — Design</h1>
 <table>
 <thead>
@@ -2847,6 +2891,7 @@ src/metrics/                  counters + timings</code></pre>
     <aside class="toc" aria-label="On this page">
       <p class="eyebrow">On this page</p>
 <ul>
+<li><a href="#database">Database tree and collections</a></li>
 <li><a href="#mobile-field-service--design" id="toc-mobile-field-service--design">Mobile Field Service — Design</a>
 <ul>
 <li><a href="#overview" id="toc-overview">Overview</a></li>
