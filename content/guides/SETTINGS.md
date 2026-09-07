@@ -6,7 +6,7 @@ Restart Expo (and rebuild a native binary) after changing `EXPO_PUBLIC_*`. Devic
 
 | Layer | When it applies | Where |
 | --- | --- | --- |
-| Build env | Compile / Metro inline | `.env` (gitignored; copy [`.env.example`](../.env.example)) |
+| Build env | Compile / Metro inline | `.env` (gitignored; copy [`.env.example`](https://github.com/Fujio-Turner/mobile_field_service/blob/main/.env.example)) |
 | Profile | Tech on the phone | `app/(tabs)/profile.tsx` |
 | Settings / debug | Lab / support | `app/debug/index.tsx` |
 | Keychain | Session + encryption | `src/session/enclave.ts`, `src/session/dbKey.ts` |
