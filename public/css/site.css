@@ -222,7 +222,7 @@ pre code { font-size: inherit; color: inherit; }
 .hero-film {
   position: relative;
   width: 100%;
-  aspect-ratio: 1500 / 860;
+  aspect-ratio: 900 / 840;
   background: var(--bg);
   border-radius: 16px;
   overflow: hidden;
