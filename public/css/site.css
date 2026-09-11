@@ -420,6 +420,21 @@ pre code { font-size: inherit; color: inherit; }
   max-height: calc(100vh - 120px);
   overflow: auto;
 }
+.doc-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.doc-actions a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+.doc-actions a:hover { text-decoration: underline; }
+.doc-actions .doc-issue { color: var(--muted); font-weight: 400; }
 .toc ul { list-style: none; padding: 0; margin: 0; }
 .toc li { margin: 6px 0; }
 .toc a { color: var(--muted); text-decoration: none; }

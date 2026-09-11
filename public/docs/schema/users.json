@@ -30,7 +30,13 @@
     "districtId": { "type": "string" },
     "vanId": { "type": "string" },
     "phone": { "type": "string" },
-    "active": { "type": "boolean" }
+    "active": { "type": "boolean" },
+    "routeId": { "type": "string" },
+    "routeIds": { "type": "array", "items": { "type": "string" } },
+    "customerIds": { "type": "array", "items": { "type": "string" } },
+    "assetTypes": { "type": "array", "items": { "type": "string" } },
+    "region": { "type": "string" },
+    "storeId": { "type": "string" }
   },
   "$defs": {
     "unixSeconds": { "type": "integer", "minimum": 0 },

@@ -7,6 +7,7 @@ import json
 import re
 import subprocess
 import sys
+from urllib.parse import quote
 from datetime import datetime, timezone
 from pathlib import Path
 from xml.sax.saxutils import escape as xml_escape
@@ -16,6 +17,7 @@ CONTENT = ROOT / "content"
 PUBLIC = ROOT / "public"
 TEMPLATE = ROOT / "templates" / "doc.html"
 SITE = "https://mobile.fuj.io"
+APP_REPO = "https://github.com/Fujio-Turner/mobile_field_service"
 OG_IMAGE = f"{SITE}/images/og.png"
 OG_ALT = "Mobile Field Service: Today list of field jobs on a phone"
 
@@ -430,6 +432,40 @@ def inject_toc_item(html: str, href: str, label: str) -> str:
     return html.replace(marker, marker + item, 1)
 
 
+def github_edit_url(src: str) -> str:
+    """Canonical markdown lives in the app repo (content/ is a copy)."""
+    return f"{APP_REPO}/blob/main/{src}"
+
+
+def github_issue_url(title: str, page_url: str, src: str) -> str:
+    t = quote(f"Docs: {title}")
+    body = quote(
+        f"Page: {page_url}\nSource: {github_edit_url(src)}\n\nWhat is wrong or missing?\n"
+    )
+    return f"{APP_REPO}/issues/new?title={t}&body={body}"
+
+
+def inject_doc_actions(html: str, edit: str, issue: str) -> str:
+    block = (
+        '<div class="doc-actions">\n'
+        f'        <a class="doc-edit" href="{html_lib.escape(edit, quote=True)}" rel="noopener noreferrer">Edit on GitHub</a>\n'
+        f'        <a class="doc-issue" href="{html_lib.escape(issue, quote=True)}" rel="noopener noreferrer">Open an issue</a>\n'
+        "      </div>\n"
+    )
+    marker = '<aside class="toc" aria-label="On this page">\n'
+    # Template already has placeholder links; replace the generated block if present.
+    html = re.sub(
+        r'<div class="doc-actions">.*?</div>\n',
+        block,
+        html,
+        count=1,
+        flags=re.S,
+    )
+    if '<div class="doc-actions">' not in html:
+        html = html.replace(marker, marker + block, 1)
+    return html
+
+
 def inject_db_tree(html: str) -> str:
     snippet = DB_TREE.read_text(encoding="utf-8").strip()
     html = inject_after_crumb(html, snippet)
@@ -555,6 +591,10 @@ def render(page: dict[str, str]) -> Path | None:
         f"description={description}",
         "--variable",
         f"canonical={canonical}",
+        "--variable",
+        "github_edit=#",
+        "--variable",
+        "github_issue=#",
         "--wrap",
         "none",
         "--output",
@@ -568,6 +608,11 @@ def render(page: dict[str, str]) -> Path | None:
     finally:
         tmp.unlink(missing_ok=True)
     html = dest.read_text(encoding="utf-8")
+    html = inject_doc_actions(
+        html,
+        github_edit_url(page["src"]),
+        github_issue_url(page["title"], canonical, page["src"]),
+    )
     if schema_json and dest.parent.name == "schema" and dest.name != "index.html":
         json_name = dest.with_suffix(".json").name
         dest.with_suffix(".json").write_text(schema_json + "\n", encoding="utf-8")

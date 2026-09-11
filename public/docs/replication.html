@@ -283,7 +283,7 @@
 <li>Device-owned crumbs; do not wait for Submit.</li>
 <li>Never log the <code>tracking</code> map. Channel <code>emp:{employeeId}</code>. Id uses employeeId, not email.</li>
 </ul>
-<p>Channels: <code>emp:{employeeId}</code> (SG username is <strong>email</strong>). See DESIGN matrix.</p>
+<p>Channels come from document fields: <code>emp:{employeeId}</code>, <code>email:{lowercase}</code>, <code>cus:{customerId}</code> (at least one on users / workorders* / orders / notes). Catalogs use <code>type:</code> / <code>sku:</code> / <code>loc:</code> / … — never <code>channel("!")</code>. See DESIGN matrix.</p>
 <h3 id="pull-channel-lists-optional">Pull channel lists (optional)</h3>
 <p>Each <code>CollectionConfig</code> has <code>channels: string[]</code>.</p>
 <table>
@@ -522,6 +522,10 @@
 </ul>
     </article>
     <aside class="toc" aria-label="On this page">
+      <div class="doc-actions">
+        <a class="doc-edit" href="https://github.com/Fujio-Turner/mobile_field_service/blob/main/guides/REPLICATION.md" rel="noopener noreferrer">Edit on GitHub</a>
+        <a class="doc-issue" href="https://github.com/Fujio-Turner/mobile_field_service/issues/new?title=Docs%3A%20Replication&amp;body=Page%3A%20https%3A//mobile.fuj.io/docs/replication%0ASource%3A%20https%3A//github.com/Fujio-Turner/mobile_field_service/blob/main/guides/REPLICATION.md%0A%0AWhat%20is%20wrong%20or%20missing%3F%0A" rel="noopener noreferrer">Open an issue</a>
+      </div>
       <p class="eyebrow">On this page</p>
 <ul>
 <li><a href="#couchbase-lite-replication--mobile_field_service" id="toc-couchbase-lite-replication--mobile_field_service">Couchbase Lite replication — mobile_field_service</a>
@@ -542,7 +546,7 @@
   <footer class="site-footer">
     <div class="wrap">
       <p>© <span id="year">2026</span> Fujio-Turner. Apache License 2.0.</p>
-      <p><a href="https://mobile.fuj.io/">mobile.fuj.io</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service">Application</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_pages">Source</a></p>
+      <p><a href="https://mobile.fuj.io/">mobile.fuj.io</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service">App</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_pages">Docs site</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_deployment">Deployment</a></p>
     </div>
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>

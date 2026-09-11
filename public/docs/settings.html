@@ -118,7 +118,7 @@
 <tr>
 <td>Build env</td>
 <td>Compile / Metro inline</td>
-<td><code>.env</code> (gitignored; copy <a href="https://github.com/Fujio-Turner/mobile_field_service/blob/main/.env.example"><code>.env.example</code></a>)</td>
+<td><code>.env</code> (gitignored; copy <a href="../.env.example"><code>.env.example</code></a>)</td>
 </tr>
 <tr>
 <td>Profile</td>
@@ -326,7 +326,7 @@
 </table>
 <p>Try buttons and deep link <code>mfs://debug?demo=local\|prompt\|remote\|reassign\|untouched</code> run <code>simulateDispatchKitChange</code> on a seed job (lab only; never patch dispatch inbound on a product path).</p>
 <h3 id="pull-channels-mfssynccollectionchannels">Pull channels (<code>mfs.sync.collectionChannels</code>)</h3>
-<p>Per-collection <code>string[]</code> on the replicator config. <strong>Empty (default)</strong> = no client filter; SG grants <code>emp:</code> / <code>district:</code> / <code>public</code>. A non-empty list only <strong>narrows</strong> pull. Saved from the debug form; <code>EXPO_PUBLIC_SG_CHANNELS</code> is the fallback when nothing is stored.</p>
+<p>Per-collection <code>string[]</code> on the replicator config. <strong>Empty (default)</strong> = no client filter; SG grants channels from document fields (<code>emp:</code> / <code>email:</code> / <code>cus:</code> / <code>type:</code>). A non-empty list only <strong>narrows</strong> pull. Saved from the debug form; <code>EXPO_PUBLIC_SG_CHANNELS</code> is the fallback when nothing is stored.</p>
 <h3 id="sync-timestamps">Sync timestamps</h3>
 <table>
 <thead>
@@ -456,6 +456,10 @@
 </ul>
     </article>
     <aside class="toc" aria-label="On this page">
+      <div class="doc-actions">
+        <a class="doc-edit" href="https://github.com/Fujio-Turner/mobile_field_service/blob/main/guides/SETTINGS.md" rel="noopener noreferrer">Edit on GitHub</a>
+        <a class="doc-issue" href="https://github.com/Fujio-Turner/mobile_field_service/issues/new?title=Docs%3A%20Settings&amp;body=Page%3A%20https%3A//mobile.fuj.io/docs/settings%0ASource%3A%20https%3A//github.com/Fujio-Turner/mobile_field_service/blob/main/guides/SETTINGS.md%0A%0AWhat%20is%20wrong%20or%20missing%3F%0A" rel="noopener noreferrer">Open an issue</a>
+      </div>
       <p class="eyebrow">On this page</p>
 <ul>
 <li><a href="#settings--where-they-live-and-what-they-mean" id="toc-settings--where-they-live-and-what-they-mean">Settings — where they live and what they mean</a>
@@ -474,7 +478,7 @@
   <footer class="site-footer">
     <div class="wrap">
       <p>© <span id="year">2026</span> Fujio-Turner. Apache License 2.0.</p>
-      <p><a href="https://mobile.fuj.io/">mobile.fuj.io</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service">Application</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_pages">Source</a></p>
+      <p><a href="https://mobile.fuj.io/">mobile.fuj.io</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service">App</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_pages">Docs site</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_deployment">Deployment</a></p>
     </div>
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>

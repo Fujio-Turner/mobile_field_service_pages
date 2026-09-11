@@ -180,14 +180,11 @@
 </tr>
 <tr>
 <td><code>jurisdiction</code></td>
-<td><code>{ country, region?, city? }</code> e.g. <code>US</code> / <code>CT</code></td>
-</tr>
-<tr>
-<td><code>effectiveFromDt</code> / <code>effectiveToDt</code></td>
-<td>Unix seconds</td>
+<td><code>{ country, region? (state), county?, city? }</code> e.g. <code>US</code> / <code>CT</code> / <code>Hartford</code></td>
 </tr>
 </tbody>
 </table>
+<p>Channels: <code>state:{jurisdiction.region}</code> <code>county:</code> <code>city:</code>. | <code>effectiveFromDt</code> / <code>effectiveToDt</code> | Unix seconds |</p>
 <p>v1 <code>PriceLines</code> (exclusive, non-compound — the default):</p>
 <pre><code>lineTax = round_half_up(lineSubtotal * rateBps / 10000)</code></pre>
 <p>Inclusive:</p>
@@ -300,6 +297,10 @@
 <span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
     </article>
     <aside class="toc" aria-label="On this page">
+      <div class="doc-actions">
+        <a class="doc-edit" href="https://github.com/Fujio-Turner/mobile_field_service/blob/main/docs/schema/SCHEMA_TAXES.md" rel="noopener noreferrer">Edit on GitHub</a>
+        <a class="doc-issue" href="https://github.com/Fujio-Turner/mobile_field_service/issues/new?title=Docs%3A%20Schema%20%E2%80%94%20taxes&amp;body=Page%3A%20https%3A//mobile.fuj.io/docs/schema/taxes%0ASource%3A%20https%3A//github.com/Fujio-Turner/mobile_field_service/blob/main/docs/schema/SCHEMA_TAXES.md%0A%0AWhat%20is%20wrong%20or%20missing%3F%0A" rel="noopener noreferrer">Open an issue</a>
+      </div>
       <p class="eyebrow">On this page</p>
 <ul>
 <li><a href="#schema--fieldtaxes" id="toc-schema--fieldtaxes">Schema — <code>field.taxes</code></a>
@@ -317,7 +318,7 @@
   <footer class="site-footer">
     <div class="wrap">
       <p>© <span id="year">2026</span> Fujio-Turner. Apache License 2.0.</p>
-      <p><a href="https://mobile.fuj.io/">mobile.fuj.io</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service">Application</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_pages">Source</a></p>
+      <p><a href="https://mobile.fuj.io/">mobile.fuj.io</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service">App</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_pages">Docs site</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_deployment">Deployment</a></p>
     </div>
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>

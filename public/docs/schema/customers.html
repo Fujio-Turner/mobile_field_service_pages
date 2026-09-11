@@ -129,7 +129,8 @@
 </tbody>
 </table>
 <p><strong>Required:</strong> <code>type</code>, <code>audit</code>, <code>name</code>. Field-created also <code>history[]</code>.</p>
-<p><strong>Optional:</strong> <code>origin</code> (<code>dispatch</code> | <code>field</code>), <code>accountNumber</code>, <code>contacts[]</code>, <code>sites[]</code>, <code>readyToPush</code>, <code>assignedTo</code>.</p>
+<p><strong>Optional:</strong> <code>origin</code> (<code>dispatch</code> | <code>field</code>), <code>accountNumber</code>, <code>contacts[]</code>, <code>sites[]</code>, <code>readyToPush</code>, <code>assignedTo</code>, <strong><code>routeId</code></strong>, <strong><code>region</code></strong>.</p>
+<p>Channels: <code>emp:</code> <code>route:</code> <code>region:</code> <code>cus:{id}</code>.</p>
 <p><strong>Never patch</strong> <code>origin: dispatch</code>. Walk-up → <code>CreateCustomer</code> new id, <code>origin: field</code>.</p>
 <p><strong>Indexes:</strong> <code>idx_cus_name</code>; <code>idx_cus_account</code>; <code>idx_cus_origin</code>.</p>
 <p><strong>Replication:</strong> PULL master. PUSH if <code>origin == 'field' &amp;&amp; readyToPush</code>.</p>
@@ -218,6 +219,10 @@
 <span id="cb1-80"><a href="#cb1-80" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
     </article>
     <aside class="toc" aria-label="On this page">
+      <div class="doc-actions">
+        <a class="doc-edit" href="https://github.com/Fujio-Turner/mobile_field_service/blob/main/docs/schema/SCHEMA_CUSTOMERS.md" rel="noopener noreferrer">Edit on GitHub</a>
+        <a class="doc-issue" href="https://github.com/Fujio-Turner/mobile_field_service/issues/new?title=Docs%3A%20Schema%20%E2%80%94%20customers&amp;body=Page%3A%20https%3A//mobile.fuj.io/docs/schema/customers%0ASource%3A%20https%3A//github.com/Fujio-Turner/mobile_field_service/blob/main/docs/schema/SCHEMA_CUSTOMERS.md%0A%0AWhat%20is%20wrong%20or%20missing%3F%0A" rel="noopener noreferrer">Open an issue</a>
+      </div>
       <p class="eyebrow">On this page</p>
 <ul>
 <li><a href="#schema--fieldcustomers" id="toc-schema--fieldcustomers">Schema — <code>field.customers</code></a>
@@ -230,7 +235,7 @@
   <footer class="site-footer">
     <div class="wrap">
       <p>© <span id="year">2026</span> Fujio-Turner. Apache License 2.0.</p>
-      <p><a href="https://mobile.fuj.io/">mobile.fuj.io</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service">Application</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_pages">Source</a></p>
+      <p><a href="https://mobile.fuj.io/">mobile.fuj.io</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service">App</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_pages">Docs site</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_deployment">Deployment</a></p>
     </div>
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>

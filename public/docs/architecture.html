@@ -148,6 +148,7 @@ const body = doc.toDictionary(); // JSON Schema 2020-12</code></pre>
   </div>
 </div>
 <h1 id="mobile-field-service--design">Mobile Field Service — Design</h1>
+<p>Public HTML: <a href="https://mobile.fuj.io/docs/architecture.html"><span>https://mobile.fuj.io/docs/architecture.html</span></a>. This file stays the in-repo spec for engineers.</p>
 <table>
 <thead>
 <tr>
@@ -2291,7 +2292,7 @@ src/metrics/                  counters + timings</code></pre>
 <tr>
 <th>Collection</th>
 <th>Direction</th>
-<th>Channels</th>
+<th>Channels (from document fields; never <code>type:</code> / <code>!</code>)</th>
 <th>Push filter (v1)</th>
 </tr>
 </thead>
@@ -2299,86 +2300,86 @@ src/metrics/                  counters + timings</code></pre>
 <tr>
 <td><code>field.workordersin</code></td>
 <td>PUSH_AND_PULL</td>
-<td><code>emp:{employeeId}</code></td>
-<td><code>origin == 'field' &amp;&amp; readyToPush</code> (dispatch inbound never pushes)</td>
+<td><code>emp:</code> <code>email:</code> <code>cus:</code> <code>route:</code> (≥1 required)</td>
+<td><code>origin == 'field' &amp;&amp; readyToPush</code></td>
 </tr>
 <tr>
 <td><code>field.workordersout</code></td>
 <td>PUSH_AND_PULL</td>
-<td><code>emp:{employeeId}</code></td>
+<td><code>emp:</code> <code>email:</code> <code>cus:</code> <code>route:</code> (≥1 required)</td>
 <td><code>syncState</code> in <code>ready_to_push</code> | <code>pushed</code> | <code>push_error</code></td>
 </tr>
 <tr>
-<td><code>field.assets</code></td>
-<td>PULL</td>
-<td><code>district:{id}</code></td>
-<td><strong>false</strong></td>
-</tr>
-<tr>
-<td><code>field.products</code></td>
-<td>PULL</td>
-<td><code>public</code> or <code>district:{id}</code></td>
-<td><strong>false</strong></td>
-</tr>
-<tr>
-<td><code>field.inventory</code></td>
+<td><code>field.orders</code></td>
 <td>PUSH_AND_PULL</td>
-<td><code>emp:{employeeId}</code></td>
-<td><code>type == 'inventory_tx' &amp;&amp; readyToPush</code> (stock never pushes)</td>
+<td><code>emp:</code> <code>email:</code> <code>cus:</code> <code>route:</code> (≥1 required)</td>
+<td><code>role != 'inbound' &amp;&amp; syncState</code> in <code>ready_to_push</code> | <code>pushed</code> | <code>push_error</code></td>
+</tr>
+<tr>
+<td><code>field.notes</code></td>
+<td>PUSH_AND_PULL</td>
+<td><code>emp:</code> <code>email:</code> <code>cus:</code> <code>route:</code> (≥1 required)</td>
+<td><strong>true</strong> (phone + tablet)</td>
 </tr>
 <tr>
 <td><code>field.users</code></td>
 <td>PULL</td>
-<td><code>emp:{employeeId}</code>, <code>crew:{id}</code></td>
+<td><code>emp:</code> <code>email:</code> <code>routeIds[]</code> <code>customerIds[]</code> <code>assetTypes[]</code> <code>region:</code> <code>store:</code></td>
 <td><strong>false</strong></td>
 </tr>
 <tr>
 <td><code>field.customers</code></td>
 <td>PUSH_AND_PULL</td>
-<td><code>district:{id}</code>, <code>emp:{id}</code></td>
-<td><code>origin == 'field' &amp;&amp; readyToPush</code> (master never pushes)</td>
+<td><code>emp:</code> <code>route:</code> <code>region:</code> <code>cus:{_id}</code></td>
+<td><code>origin == 'field' &amp;&amp; readyToPush</code></td>
 </tr>
 <tr>
-<td><code>field.orders</code></td>
+<td><code>field.tasks</code></td>
 <td>PUSH_AND_PULL</td>
-<td><code>emp:{employeeId}</code></td>
-<td><code>role != 'inbound' &amp;&amp; syncState</code> in <code>ready_to_push</code> | <code>pushed</code> | <code>push_error</code></td>
+<td><code>emp:</code> <code>email:</code> <code>route:</code></td>
+<td>instances <code>readyToPush</code>; templates never</td>
+</tr>
+<tr>
+<td><code>field.products</code></td>
+<td>PULL</td>
+<td><code>class:{online|store}</code> <code>store:</code> <code>region:</code></td>
+<td><strong>false</strong></td>
 </tr>
 <tr>
 <td><code>field.rates</code></td>
 <td>PULL</td>
-<td><code>district:{id}</code>, <code>public</code></td>
+<td><code>store:</code> <code>cus:</code> <code>region:</code></td>
 <td><strong>false</strong></td>
 </tr>
 <tr>
 <td><code>field.taxes</code></td>
 <td>PULL</td>
-<td><code>district:{id}</code>, <code>public</code></td>
+<td><code>state:</code> <code>county:</code> <code>city:</code></td>
 <td><strong>false</strong></td>
 </tr>
 <tr>
-<td><code>field.tasks</code></td>
-<td>PUSH_AND_PULL</td>
-<td><code>emp:{employeeId}</code></td>
-<td><code>type == 'task' &amp;&amp; readyToPush</code> (templates never push)</td>
+<td><code>field.assets</code></td>
+<td>PULL</td>
+<td><code>region:</code> <code>store:</code> <code>loc:</code> <code>assetType:</code></td>
+<td><strong>false</strong></td>
 </tr>
 <tr>
-<td><code>field.notes</code></td>
+<td><code>field.inventory</code></td>
 <td>PUSH_AND_PULL</td>
-<td><code>emp:{employeeId}</code></td>
-<td><code>readyToPush === true</code></td>
+<td><code>loc:</code> <code>store:</code> <code>region:</code> <code>emp:</code></td>
+<td><code>inventory_tx &amp;&amp; readyToPush</code></td>
 </tr>
 <tr>
 <td><code>field.messages</code></td>
 <td>PUSH_AND_PULL</td>
-<td><code>emp:{employeeId}</code>, <code>wo:{woinId}</code></td>
+<td><code>emp:</code> <code>email:</code> <code>route:</code> <code>wo:</code></td>
 <td><code>readyToPush === true</code></td>
 </tr>
 <tr>
 <td><code>field.tracking</code></td>
 <td>PUSH_AND_PULL</td>
-<td><code>emp:{employeeId}</code></td>
-<td><strong>true</strong> (always; device-owned crumbs)</td>
+<td><code>emp:</code> <code>email:</code></td>
+<td><strong>true</strong></td>
 </tr>
 <tr>
 <td><code>local.tmp</code></td>
@@ -2482,51 +2483,76 @@ src/metrics/                  counters + timings</code></pre>
 <li>skip if <code>syncState</code> already equals the target (avoid listener loops).</li>
 </ul>
 <h3 id="channels">Channels</h3>
-<p>Durable key is <strong><code>employeeId</code></strong>. Email is login / alias, not the channel name (emails change).</p>
+<p>Channels are <strong>read from the document</strong>. Never <code>channel("!")</code> and never <code>type:</code> (the collection already is that type). Users, workorders*, orders, and notes must have at least one of <code>employeeId</code>, <code>email</code>, <code>customerId</code>, or <code>routeId</code>.</p>
 <table>
 <thead>
 <tr>
 <th>Channel</th>
-<th>Who</th>
+<th>Source field</th>
 <th>What</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>emp:{employeeId}</code></td>
+<td><code>assignedTo.employeeId</code> / <code>employeeId</code> / <code>from.employeeId</code></td>
 <td>That person</td>
-<td>Inbound assigned to them, their outbound copies, van txs, their messages, their tracking day docs, their user profile</td>
 </tr>
 <tr>
-<td><code>email:{lowercase email}</code></td>
-<td>Optional alias</td>
-<td>SG user mapping at login only; documents still tagged <code>emp:</code></td>
+<td><code>email:{lowercase}</code></td>
+<td><code>assignedTo.email</code> / <code>email</code> / <code>from.email</code></td>
+<td>Login alias</td>
+</tr>
+<tr>
+<td><code>cus:{customerId}</code></td>
+<td><code>customerId</code> or customer <code>_id</code></td>
+<td>That account</td>
+</tr>
+<tr>
+<td><code>route:{routeId}</code></td>
+<td><code>routeId</code> / <code>routeIds[]</code></td>
+<td>Jobs/orders/notes/tasks for a route (no employee yet)</td>
+</tr>
+<tr>
+<td><code>region:{region}</code></td>
+<td><code>region</code></td>
+<td>Assets, products, rates, customers</td>
+</tr>
+<tr>
+<td><code>store:{storeId}</code></td>
+<td><code>storeId</code></td>
+<td>Store-level catalog / assets / promos</td>
+</tr>
+<tr>
+<td><code>class:{online|store}</code></td>
+<td><code>class</code></td>
+<td>Website vs in-store products</td>
+</tr>
+<tr>
+<td><code>state:</code> <code>county:</code> <code>city:</code></td>
+<td><code>jurisdiction</code></td>
+<td>Taxes</td>
+</tr>
+<tr>
+<td><code>loc:{locationId}</code></td>
+<td><code>locationId</code></td>
+<td>Van / warehouse</td>
+</tr>
+<tr>
+<td><code>assetType:{assetType}</code></td>
+<td><code>assetTypes[]</code> on user, <code>assetType</code> on asset</td>
+<td>What this person may see</td>
 </tr>
 <tr>
 <td><code>wo:{woinId}</code></td>
-<td>Current + recent assignees, dispatch</td>
-<td>Job chat thread</td>
-</tr>
-<tr>
-<td><code>crew:{crewId}</code></td>
-<td>Crew</td>
-<td>Directory slice</td>
-</tr>
-<tr>
-<td><code>district:{districtId}</code></td>
-<td>District</td>
-<td>Assets, customers, catalog</td>
-</tr>
-<tr>
-<td><code>public</code></td>
-<td>Everyone</td>
-<td>Global products</td>
+<td><code>workOrderInId</code></td>
+<td>Job chat</td>
 </tr>
 </tbody>
 </table>
 <p>Assigning a work order <strong>adds</strong> <code>emp:{employeeId}</code> on inbound. Reassigning <strong>moves</strong> that access to the new employee (old phone may auto-purge inbound). Outbound copies <strong>stay</strong> on the original tech’s <code>emp:</code> channel until they complete and the backend ages them out — that is how offline work still syncs after reassignment.</p>
 <p>Hard rule: <strong>no full enterprise asset dump on every phone</strong>.</p>
-<p>v1 replicator <strong>defaults to no client channel filter</strong> (<code>channels: []</code> on each <code>CollectionConfig</code> — do not call <code>setChannels</code>). The SG sync function grants <code>emp:</code> / <code>district:</code> / <code>public</code>. A non-empty per-collection <code>string[]</code> is optional (lab/debug, or <code>EXPO_PUBLIC_SG_CHANNELS</code>) and only <strong>narrows</strong> pull; SG still ignores channels the user cannot access. Edit from Profile → <strong>Settings / debug</strong>.</p>
+<p>v1 replicator <strong>defaults to no client channel filter</strong> (<code>channels: []</code> on each <code>CollectionConfig</code> — do not call <code>setChannels</code>). The SG sync function grants channels from document fields (<code>emp:</code> / <code>email:</code> / <code>cus:</code> / <code>type:</code> / …). A non-empty per-collection <code>string[]</code> is optional (lab/debug, or <code>EXPO_PUBLIC_SG_CHANNELS</code>) and only <strong>narrows</strong> pull; SG still ignores channels the user cannot access. Edit from Profile → <strong>Settings / debug</strong>.</p>
 <h3 id="lab-sync-gateway-fixture-docs-only-phase-8-prerequisite">Lab Sync Gateway fixture (docs-only, Phase 8 prerequisite)</h3>
 <p>Not application code. Lab target is <strong>either</strong> Sync Gateway or Capella App Services (<code>wss</code> replicator is the same). Minimal contract:</p>
 <ul>
@@ -2958,6 +2984,10 @@ src/metrics/                  counters + timings</code></pre>
 </ul>
     </article>
     <aside class="toc" aria-label="On this page">
+      <div class="doc-actions">
+        <a class="doc-edit" href="https://github.com/Fujio-Turner/mobile_field_service/blob/main/docs/DESIGN.md" rel="noopener noreferrer">Edit on GitHub</a>
+        <a class="doc-issue" href="https://github.com/Fujio-Turner/mobile_field_service/issues/new?title=Docs%3A%20Architecture&amp;body=Page%3A%20https%3A//mobile.fuj.io/docs/architecture%0ASource%3A%20https%3A//github.com/Fujio-Turner/mobile_field_service/blob/main/docs/DESIGN.md%0A%0AWhat%20is%20wrong%20or%20missing%3F%0A" rel="noopener noreferrer">Open an issue</a>
+      </div>
       <p class="eyebrow">On this page</p>
 <ul>
 <li><a href="#database">Database tree and collections</a></li>
@@ -2990,7 +3020,7 @@ src/metrics/                  counters + timings</code></pre>
   <footer class="site-footer">
     <div class="wrap">
       <p>© <span id="year">2026</span> Fujio-Turner. Apache License 2.0.</p>
-      <p><a href="https://mobile.fuj.io/">mobile.fuj.io</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service">Application</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_pages">Source</a></p>
+      <p><a href="https://mobile.fuj.io/">mobile.fuj.io</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service">App</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_pages">Docs site</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_deployment">Deployment</a></p>
     </div>
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>

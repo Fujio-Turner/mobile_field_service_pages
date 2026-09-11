@@ -6,7 +6,7 @@ Restart Expo (and rebuild a native binary) after changing `EXPO_PUBLIC_*`. Devic
 
 | Layer | When it applies | Where |
 | --- | --- | --- |
-| Build env | Compile / Metro inline | `.env` (gitignored; copy [`.env.example`](https://github.com/Fujio-Turner/mobile_field_service/blob/main/.env.example)) |
+| Build env | Compile / Metro inline | `.env` (gitignored; copy [`.env.example`](../.env.example)) |
 | Profile | Tech on the phone | `app/(tabs)/profile.tsx` |
 | Settings / debug | Lab / support | `app/debug/index.tsx` |
 | Keychain | Session + encryption | `src/session/enclave.ts`, `src/session/dbKey.ts` |
@@ -95,7 +95,7 @@ Try buttons and deep link `mfs://debug?demo=local\|prompt\|remote\|reassign\|unt
 
 ### Pull channels (`mfs.sync.collectionChannels`)
 
-Per-collection `string[]` on the replicator config. **Empty (default)** = no client filter; SG grants `emp:` / `district:` / `public`. A non-empty list only **narrows** pull. Saved from the debug form; `EXPO_PUBLIC_SG_CHANNELS` is the fallback when nothing is stored.
+Per-collection `string[]` on the replicator config. **Empty (default)** = no client filter; SG grants channels from document fields (`emp:` / `email:` / `cus:` / `type:`). A non-empty list only **narrows** pull. Saved from the debug form; `EXPO_PUBLIC_SG_CHANNELS` is the fallback when nothing is stored.
 
 ### Sync timestamps
 

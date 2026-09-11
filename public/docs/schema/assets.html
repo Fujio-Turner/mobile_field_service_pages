@@ -129,7 +129,8 @@
 </tbody>
 </table>
 <p><strong>Required:</strong> <code>type</code>, <code>audit</code>, <code>name</code>, <code>assetType</code>, <code>geo</code> <code>{ lat, lon }</code>.</p>
-<p><strong>Optional:</strong> <code>code</code>, <code>status</code>, <code>ownership</code> (<code>company</code> | <code>customer</code>), <code>customerId</code>, <code>address</code>, <code>parentAssetId</code>, <code>tags[]</code>, <code>embedding</code>.</p>
+<p><strong>Optional:</strong> <code>code</code>, <code>status</code>, <code>ownership</code> (<code>company</code> | <code>customer</code>), <code>customerId</code>, <code>address</code>, <code>parentAssetId</code>, <code>tags[]</code>, <code>embedding</code>, <strong><code>region</code></strong>, <strong><code>storeId</code></strong>, <strong><code>locationId</code></strong> (warehouse), <strong><code>routeId</code></strong>.</p>
+<p>Channels: <code>region:</code> <code>store:</code> <code>loc:</code> <code>assetType:</code> — not <code>type:asset</code>.</p>
 <p>v1: <strong>pull catalog</strong>. Completing a move WO does <strong>not</strong> <code>save</code> the asset; backend applies location from the frozen outbound.</p>
 <p><strong>Indexes:</strong> <code>idx_ast_geo</code> (<code>geo.lat</code>, <code>geo.lon</code>); <code>idx_ast_type</code>; FTS <code>idx_ast_fts</code> (<code>name</code>, <code>code</code>, <code>assetType</code>).</p>
 <p><strong>Replication:</strong> PULL. Push filter false.</p>
@@ -204,6 +205,10 @@
 <span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
     </article>
     <aside class="toc" aria-label="On this page">
+      <div class="doc-actions">
+        <a class="doc-edit" href="https://github.com/Fujio-Turner/mobile_field_service/blob/main/docs/schema/SCHEMA_ASSETS.md" rel="noopener noreferrer">Edit on GitHub</a>
+        <a class="doc-issue" href="https://github.com/Fujio-Turner/mobile_field_service/issues/new?title=Docs%3A%20Schema%20%E2%80%94%20assets&amp;body=Page%3A%20https%3A//mobile.fuj.io/docs/schema/assets%0ASource%3A%20https%3A//github.com/Fujio-Turner/mobile_field_service/blob/main/docs/schema/SCHEMA_ASSETS.md%0A%0AWhat%20is%20wrong%20or%20missing%3F%0A" rel="noopener noreferrer">Open an issue</a>
+      </div>
       <p class="eyebrow">On this page</p>
 <ul>
 <li><a href="#schema--fieldassets" id="toc-schema--fieldassets">Schema — <code>field.assets</code></a>
@@ -216,7 +221,7 @@
   <footer class="site-footer">
     <div class="wrap">
       <p>© <span id="year">2026</span> Fujio-Turner. Apache License 2.0.</p>
-      <p><a href="https://mobile.fuj.io/">mobile.fuj.io</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service">Application</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_pages">Source</a></p>
+      <p><a href="https://mobile.fuj.io/">mobile.fuj.io</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service">App</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_pages">Docs site</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_deployment">Deployment</a></p>
     </div>
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>

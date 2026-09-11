@@ -2,7 +2,13 @@
 
 **Live:** [https://mobile.fuj.io](https://mobile.fuj.io)
 
-Static HTML for **Mobile Field Service**. No app server; `public/` is the site root. Application code stays in [Fujio-Turner/mobile_field_service](https://github.com/Fujio-Turner/mobile_field_service).
+Static HTML for **Mobile Field Service**. No app server; `public/` is the site root. Push to `main` rebuilds `public/` (GitHub Actions) and publishes.
+
+| Repo | What |
+| --- | --- |
+| [mobile_field_service](https://github.com/Fujio-Turner/mobile_field_service) | Phone app (markdown source of these docs) |
+| [mobile_field_service_pages](https://github.com/Fujio-Turner/mobile_field_service_pages) | This site |
+| [mobile_field_service_deployment](https://github.com/Fujio-Turner/mobile_field_service_deployment) | Capella cluster + App Services |
 
 ## Local preview
 
@@ -30,7 +36,9 @@ python3 -m http.server 4173 --directory public
 
 ## Live site
 
-[https://mobile.fuj.io](https://mobile.fuj.io) is connected to this repo. Push to `main` to publish `public/`. Live URLs drop `.html` (`/faq`, `/docs/architecture`); canonicals and `sitemap.xml` use those paths.
+[https://mobile.fuj.io](https://mobile.fuj.io) is connected to this repo. Push to `main` runs [`.github/workflows/build.yml`](.github/workflows/build.yml): rebuild `public/` from `content/` and commit if it changed. Live URLs drop `.html` (`/faq`, `/docs/architecture`); canonicals and `sitemap.xml` use those paths.
+
+Doc pages have **Edit on GitHub** (app markdown) and **Open an issue** (pre-filled against the app repo).
 
 Optional S3 + CloudFront (same `public/` root):
 
