@@ -4,6 +4,7 @@
 
 Live: https://mobile.fuj.io/
 Application: https://github.com/Fujio-Turner/mobile_field_service
+Deployment (Capella + App Services): https://github.com/Fujio-Turner/mobile_field_service_deployment
 Site source: https://github.com/Fujio-Turner/mobile_field_service_pages
 License: Apache-2.0
 
@@ -15,7 +16,10 @@ Three modes (`users.workModes[]`): assets (Jon Hale), customer (Maya Chen), sale
 
 ## Docs
 
+Start here: https://mobile.fuj.io/docs/getting-started
+
 - Home: https://mobile.fuj.io/
+- Getting started (demo → Capella free tier → deploy → wss): https://mobile.fuj.io/docs/getting-started
 - FAQ: https://mobile.fuj.io/faq
 - Docs hub: https://mobile.fuj.io/docs/
 - Architecture: https://mobile.fuj.io/docs/architecture
@@ -25,3 +29,5 @@ Three modes (`users.workModes[]`): assets (Jon Hale), customer (Maya Chen), sale
 - Settings: https://mobile.fuj.io/docs/settings
 - JSON Schema: https://mobile.fuj.io/docs/schema/
 - Roadmap: https://mobile.fuj.io/docs/roadmap
+- Agent rules: https://github.com/Fujio-Turner/mobile_field_service/blob/main/AGENT.md
+- Capella deploy: https://github.com/Fujio-Turner/mobile_field_service_deployment

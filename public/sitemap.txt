@@ -1,6 +1,7 @@
 https://mobile.fuj.io/
 https://mobile.fuj.io/faq
 https://mobile.fuj.io/docs/
+https://mobile.fuj.io/docs/getting-started
 https://mobile.fuj.io/docs/architecture
 https://mobile.fuj.io/docs/day-in-the-life
 https://mobile.fuj.io/docs/day-assets

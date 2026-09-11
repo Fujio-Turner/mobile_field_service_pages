@@ -202,6 +202,7 @@ pre code { font-size: inherit; color: inherit; }
 }
 .tech-badge.react { color: #0f172a; }
 .tech-badge.couchbase { color: #0f172a; }
+.tech-badge.apache { color: #0f172a; }
 .hero-note { margin-top: 12px; color: var(--muted); font-size: 14px; }
 
 .hero-visual {
@@ -656,6 +657,22 @@ mark.faq-hit {
 .db-tree .scope { color: #94a3b8; }
 .db-tree .meta { color: #64748b; font-size: 12px; }
 .db-tree .id { color: #64748b; }
+
+.start-banner {
+  background: var(--accent-soft);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  margin: 0 0 40px;
+}
+.start-banner h2 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  letter-spacing: -0.03em;
+}
+.start-banner p { margin: 0 0 16px; max-width: 42em; }
+.start-banner .kicker { margin-bottom: 4px; }
+.start-path h2 { scroll-margin-top: 80px; }
+.start-path .lede { margin-bottom: 20px; }
 
 .modes-dev {
   display: grid;

@@ -23,6 +23,7 @@ python3 -m http.server 4173 --directory public
 | Path | What |
 | --- | --- |
 | `public/` | **Site root** (what [mobile.fuj.io](https://mobile.fuj.io) serves). `index.html`, `faq.html`, `css/`, `js/`, `images/`, `docs/` |
+| `public/docs/getting-started.html` | Ordered path: demo → Capella free tier → deploy → `wss`. Hand-authored (not pandoc). |
 | `public/videos/hero-sync.mp4` | Homepage hero loop (15s, 688×464). Poster: `images/hero-sync-poster.jpg` |
 | `public/hero-sync.html` | Older HTML film (noindex). Not embedded on the homepage. |
 | `public/docs/schema/*.json` | JSON Schema 2020-12 files (`$schema` → json-schema.org) |

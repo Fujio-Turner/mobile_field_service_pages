@@ -308,6 +308,12 @@ HAND_PAGES: list[dict[str, str]] = [
         "priority": "0.8",
         "changefreq": "weekly",
     },
+    {
+        "path": "/docs/getting-started",
+        "file": "docs/getting-started.html",
+        "priority": "0.9",
+        "changefreq": "weekly",
+    },
 ]
 
 BASENAME_HREF = {

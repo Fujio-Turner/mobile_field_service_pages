@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Getting started — Mobile Field Service</title>
+  <meta name="description" content="Run the phone in demo, create a Couchbase Capella free-tier account, deploy App Services, and point the replicator. The ordered path through the docs." />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <meta name="author" content="Fujio-Turner" />
+  <meta name="theme-color" content="#0f766e" />
+  <link rel="canonical" href="https://mobile.fuj.io/docs/getting-started" />
+  <link rel="sitemap" type="application/xml" title="Sitemap" href="https://mobile.fuj.io/sitemap.xml" />
+  <meta property="og:title" content="Getting started — Mobile Field Service" />
+  <meta property="og:description" content="Run the phone in demo, create a Couchbase Capella free-tier account, deploy App Services, and point the replicator." />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://mobile.fuj.io/docs/getting-started" />
+  <meta property="og:image" content="https://mobile.fuj.io/images/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Mobile Field Service: Today list of field jobs on a phone" />
+  <meta property="og:site_name" content="Mobile Field Service" />
+  <meta property="og:locale" content="en_US" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Getting started — Mobile Field Service" />
+  <meta name="twitter:description" content="Run the phone in demo, create a Couchbase Capella free-tier account, deploy App Services, and point the replicator." />
+  <meta name="twitter:image" content="https://mobile.fuj.io/images/og.png" />
+  <meta name="twitter:image:alt" content="Mobile Field Service: Today list of field jobs on a phone" />
+  <link rel="icon" type="image/svg+xml" href="../images/favicon.svg" />
+  <link rel="manifest" href="../site.webmanifest" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "HowTo",
+        "@id": "https://mobile.fuj.io/docs/getting-started#howto",
+        "name": "Get Mobile Field Service running and syncing",
+        "description": "Demo the phone with no cluster, then deploy Couchbase Capella App Services and point the replicator.",
+        "url": "https://mobile.fuj.io/docs/getting-started",
+        "inLanguage": "en-US",
+        "step": [
+          {
+            "@type": "HowToStep",
+            "position": 1,
+            "name": "See the three example field jobs",
+            "url": "https://mobile.fuj.io/docs/day-in-the-life",
+            "text": "A mobile developer turns on assets, customer, and/or sales with users.workModes[]. It is not one phone for all three jobs."
+          },
+          {
+            "@type": "HowToStep",
+            "position": 2,
+            "name": "Run the phone in demo",
+            "text": "Clone the app, copy .env.example, npm install, npx expo run:ios or run:android. Sign in as jon.hale@example.com. Expo Go cannot open Couchbase Lite."
+          },
+          {
+            "@type": "HowToStep",
+            "position": 3,
+            "name": "Create a Capella free-tier account",
+            "url": "https://cloud.couchbase.com/sign-up",
+            "text": "No credit card. One operational cluster per organization. It turns off after 72 hours idle."
+          },
+          {
+            "@type": "HowToStep",
+            "position": 4,
+            "name": "Deploy App Services",
+            "url": "https://github.com/Fujio-Turner/mobile_field_service_deployment",
+            "text": "Terraform or Ansible from the deployment repo creates bucket mfs, scope field, fourteen collections, and the App Endpoint."
+          },
+          {
+            "@type": "HowToStep",
+            "position": 5,
+            "name": "Point the replicator",
+            "url": "https://mobile.fuj.io/docs/replication",
+            "text": "Set EXPO_PUBLIC_AUTH_STRATEGY=basic, EXPO_PUBLIC_SG_URL to the App Endpoint wss URL, EXPO_PUBLIC_SG_DB=mfs. Login is jon.hale@example.com."
+          }
+        ]
+      },
+      {
+        "@type": "TechArticle",
+        "@id": "https://mobile.fuj.io/docs/getting-started#article",
+        "headline": "Getting started — Mobile Field Service",
+        "name": "Getting started — Mobile Field Service",
+        "description": "Run the phone in demo, create a Couchbase Capella free-tier account, deploy App Services, and point the replicator.",
+        "url": "https://mobile.fuj.io/docs/getting-started",
+        "image": "https://mobile.fuj.io/images/og.png",
+        "inLanguage": "en-US",
+        "isPartOf": { "@id": "https://mobile.fuj.io/#site" }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": "https://mobile.fuj.io/docs/getting-started#breadcrumb",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://mobile.fuj.io/" },
+          { "@type": "ListItem", "position": 2, "name": "Docs", "item": "https://mobile.fuj.io/docs/" },
+          { "@type": "ListItem", "position": 3, "name": "Getting started", "item": "https://mobile.fuj.io/docs/getting-started" }
+        ]
+      }
+    ]
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/site.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="../index.html">
+        <img src="../images/favicon.svg" alt="" width="32" height="32" />
+        Mobile Field Service
+      </a>
+      <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../index.html#features">Features</a></li>
+        <li><a href="../index.html#product">Modes</a></li>
+        <li><a href="../index.html#screens">Screens</a></li>
+        <li><a href="index.html" aria-current="page">Docs</a></li>
+        <li><a href="../faq.html">FAQ</a></li>
+      </ul>
+      <a class="btn btn-primary" href="https://github.com/Fujio-Turner/mobile_field_service" rel="noopener noreferrer">GitHub</a>
+    </div>
+  </header>
+  <main class="wrap section start-path">
+    <p class="crumb"><a href="../index.html">Home</a> · <a href="index.html">Docs</a> · Getting started</p>
+    <p class="eyebrow">Path</p>
+    <h1>Get the phone running. Then make it sync.</h1>
+    <p class="lede">One ordered path. Demo needs no cluster. Capella free tier is enough for App Services.</p>
+
+    <h2 id="see">1. Three common field jobs — you configure which ones ship</h2>
+    <p class="lede">This is not one phone doing field service, on-site work, and route delivery together. A mobile developer turns on the jobs a company needs with <code>users.workModes[]</code> (and related settings). Copy-on-write and freeze-on-complete stay the same. The three walkthroughs are example configs.</p>
+    <div class="modes-dev">
+      <article class="card">
+        <p class="kicker">Assets</p>
+        <h3>Field service</h3>
+        <p>Jon Hale — work orders, map pins, inventory txs.</p>
+        <p class="mt"><a href="day-assets.html">Walk a day →</a></p>
+      </article>
+      <article class="card">
+        <p class="kicker">Customer</p>
+        <h3>On-site service</h3>
+        <p>Maya Chen — finish the job, then write an order.</p>
+        <p class="mt"><a href="day-customer.html">Walk a day →</a></p>
+      </article>
+      <article class="card">
+        <p class="kicker">Sales</p>
+        <h3>Route delivery</h3>
+        <p>Priya Shah — catalog prices, deliver, next stop.</p>
+        <p class="mt"><a href="day-sales.html">Walk a day →</a></p>
+      </article>
+    </div>
+    <p class="mt"><a href="day-in-the-life.html">Index of all three</a> · <a href="../faq.html">FAQ</a></p>
+
+    <h2 id="demo" class="mt-xl">2. Run the phone in demo</h2>
+    <p class="lede">No Sync Gateway. Work stays on the device. Node ≥ 20. <strong>Not Expo Go</strong> — Couchbase Lite and MapLibre need a development build.</p>
+    <pre><code>git clone https://github.com/Fujio-Turner/mobile_field_service.git
+cd mobile_field_service
+cp .env.example .env
+npm install
+npm test
+npx expo run:ios -d "iPhone 16 Pro"
+# or: npx expo run:android</code></pre>
+    <p><code>.env.example</code> sets <code>EXPO_PUBLIC_AUTH_STRATEGY=demo</code>. Sign in:</p>
+    <table class="hud-table">
+      <thead>
+        <tr><th>Login</th><th>Mode</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>jon.hale@example.com</code></td><td><code>assets</code></td></tr>
+        <tr><td><code>maya.chen@example.com</code></td><td><code>customer</code></td></tr>
+        <tr><td><code>priya.shah@example.com</code></td><td><code>sales</code></td></tr>
+      </tbody>
+    </table>
+    <p class="mt">Any other non-empty id is treated as Jon. You land on Today with seed jobs once the database is open.</p>
+    <p class="mt"><a href="https://github.com/Fujio-Turner/mobile_field_service" rel="noopener noreferrer">App repo</a> · <a href="settings.html">Every env flag</a> · <a href="auth.html">Auth</a></p>
+
+    <h2 id="account" class="mt-xl">3. Create a Capella free-tier account</h2>
+    <p class="lede">App Services runs on a Couchbase Capella operational cluster. Free tier does not need a credit card. One cluster per organization. It turns off after 72 hours idle and is deleted after 30 days off.</p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="https://cloud.couchbase.com/sign-up" rel="noopener noreferrer">Capella free-tier account</a>
+      <a class="btn btn-ghost" href="https://docs.couchbase.com/cloud/get-started/create-account.html" rel="noopener noreferrer">How to create the cluster</a>
+    </div>
+    <p class="mt">In Capella, create a <strong>Management API v4</strong> key (Organization Owner or Project Owner). You will paste that token into Terraform or Ansible.</p>
+
+    <h2 id="deploy" class="mt-xl">4. Deploy bucket, collections, App Services</h2>
+    <p class="lede">The <a href="https://github.com/Fujio-Turner/mobile_field_service_deployment" rel="noopener noreferrer">deployment repo</a> is the source of truth for Capella. Shared model: <code>schema/mfs.yaml</code> + <code>sync_functions/*.json</code>. Do <strong>not</strong> create <code>local.tmp</code> on the server.</p>
+    <pre><code>git clone https://github.com/Fujio-Turner/mobile_field_service_deployment.git
+cd mobile_field_service_deployment
+
+# Terraform free tier
+cd terraform/free-tier
+cp terraform.tfvars.example terraform.tfvars
+# set auth_token, organization_id, database_credential_password
+terraform init
+terraform apply
+
+# or Ansible
+# cd ansible
+# cp group_vars/all.yml.example group_vars/all.yml
+# ansible-playbook playbooks/deploy-free-tier.yml</code></pre>
+    <p>Apply creates App User <code>jon.hale@example.com</code> (role <code>technician</code>) when the app-user password vars are set. Capella → App Services → <code>mfs-sync</code> → endpoint <code>mfs</code> → <strong>Connect</strong>. Copy the public URL:</p>
+    <pre><code>wss://&lt;id&gt;.apps.cloud.couchbase.com:4984/mfs</code></pre>
+    <p class="mt"><a href="https://github.com/Fujio-Turner/mobile_field_service_deployment" rel="noopener noreferrer">Deployment README</a> · <a href="architecture.html#database">Database tree</a></p>
+
+    <h2 id="connect" class="mt-xl">5. Point the phone at App Services</h2>
+    <p class="lede">Restart the development build after changing env. Login is still the email. The replicator uses a session cookie, not a password on every request.</p>
+    <pre><code>EXPO_PUBLIC_AUTH_STRATEGY=basic
+EXPO_PUBLIC_SG_URL=wss://&lt;host&gt;:4984/mfs
+EXPO_PUBLIC_SG_DB=mfs</code></pre>
+    <p>Sign in as <code>jon.hale@example.com</code> with the App User password from deploy. Today’s HUD turns green when the replicator is connected.</p>
+    <p class="mt"><a href="replication.html">Replication</a> · <a href="auth.html">Session + 401</a> · <a href="settings.html">Settings catalog</a></p>
+
+    <h2 id="next" class="mt-xl">6. Then read, in this order</h2>
+    <div class="doc-grid">
+      <a href="architecture.html#database"><strong>Architecture</strong><span>Collections, copy-on-write, freeze, queries.</span></a>
+      <a href="schema/index.html"><strong>Schemas</strong><span>JSON Schema 2020-12 per collection. Do not invent field names.</span></a>
+      <a href="replication.html"><strong>Replication</strong><span>Allow-list, push filters, channels, simple vs oneshot.</span></a>
+      <a href="auth.html"><strong>Auth</strong><span>Email is the SG username. Session TTL, Keychain.</span></a>
+      <a href="https://github.com/Fujio-Turner/mobile_field_service/blob/main/AGENT.md"><strong>AGENT.md</strong><span>Product rules an implementer must not regress.</span></a>
+      <a href="roadmap.html"><strong>Roadmap</strong><span>What shipped. Vector / CLIP is still off.</span></a>
+    </div>
+
+    <h2 id="ai" class="mt-xl">Canonical URLs</h2>
+    <p class="lede">For coding assistants. <code>llms.txt</code>, this page, architecture, schema JSON, <code>AGENT.md</code>. Prefer these over scraping GitHub HTML. Three repos; do not mix them. Never put <code>local.tmp</code> in the replicator. Never invent schema fields.</p>
+    <pre><code>https://mobile.fuj.io/llms.txt
+https://mobile.fuj.io/docs/getting-started
+https://mobile.fuj.io/docs/architecture
+https://mobile.fuj.io/docs/schema/
+https://mobile.fuj.io/docs/schema/common.json
+https://github.com/Fujio-Turner/mobile_field_service
+https://github.com/Fujio-Turner/mobile_field_service/blob/main/AGENT.md
+https://github.com/Fujio-Turner/mobile_field_service_deployment
+https://github.com/Fujio-Turner/mobile_field_service_pages</code></pre>
+    <p>App code is <code>mobile_field_service</code>. Capella IaC is <code>mobile_field_service_deployment</code>. This site is <code>mobile_field_service_pages</code> (<code>public/</code> is the live root). Markdown for most doc pages is copied from the app’s <code>docs/</code> and <code>guides/</code>.</p>
+    <p class="mt"><a href="index.html">All documentation</a></p>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>© <span id="year">2026</span> Fujio-Turner. Apache License 2.0.</p>
+      <p><a href="https://mobile.fuj.io/">mobile.fuj.io</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service">App</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_pages">Docs site</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_deployment">Deployment</a></p>
+    </div>
+  </footer>
+  <script src="../js/site.js"></script>
+</body>
+</html>

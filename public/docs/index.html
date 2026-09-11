@@ -77,8 +77,15 @@
   <main class="wrap section">
     <p class="crumb"><a href="../index.html">Home</a> · Docs</p>
     <p class="eyebrow">Developers</p>
-    <h1>Three modes, one phone</h1>
-    <p class="lede"><code>users.workModes[]</code> changes Today and which collections you write. Copy-on-write and freeze-on-complete do not change.</p>
+    <h1>Start here. Then the rest of the docs make sense.</h1>
+    <p class="lede">Demo the phone with no cluster. Capella free tier is enough to sync. Architecture, schemas, and replication are reference after that.</p>
+
+    <div class="start-banner">
+      <p class="kicker">Path</p>
+      <h2>Getting started</h2>
+      <p>See the example field jobs → run the app in demo → Capella account → Terraform or Ansible → point <code>wss</code>. Modes are developer config, not one phone for all three jobs.</p>
+      <a class="btn btn-primary" href="getting-started.html">Open getting started</a>
+    </div>
 
     <h2>Three modes</h2>
     <div class="modes-dev">
@@ -111,8 +118,10 @@
 
     <h2 class="mt-xl">Guides</h2>
     <div class="doc-grid">
+      <a href="getting-started.html"><strong>Getting started</strong><span>Demo, Capella free tier, deploy, point the replicator.</span></a>
       <a href="day-in-the-life.html"><strong>Day in the life</strong><span>Index of the three walkthroughs.</span></a>
       <a href="architecture.html#database"><strong>Architecture</strong><span>Database tree, copy-on-write, queries, freeze.</span></a>
+      <a href="https://github.com/Fujio-Turner/mobile_field_service_deployment"><strong>Deployment</strong><span>Capella cluster + App Services. Terraform or Ansible.</span></a>
       <a href="schema/index.html"><strong>Schemas</strong><span>JSON Schema 2020-12 per collection.</span></a>
       <a href="auth.html"><strong>Auth</strong><span>Email, session, Keychain, 401.</span></a>
       <a href="replication.html"><strong>Replication</strong><span>Allow-list, filters, simple vs oneshot.</span></a>
