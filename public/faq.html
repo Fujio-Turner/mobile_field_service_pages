@@ -86,7 +86,7 @@
           "name": "What are the three modes?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "users.workModes[] changes Today and which collections you write — not a second binary. Assets (Jon Hale) — inspect / repair / move company kit. Walkthrough Customer (Maya Chen) — finish a job, then a new order. Walkthrough Sales (Priya Shah) — catalog, deliver, next stop. Map tab hidden. Walkthrough"
+            "text": "users.workModes[] changes Today and which collections you write — not a second binary. Assets (Jon Hale) — inspect / repair / move company kit. Walkthrough Customer (Maya Chen) — finish a job, then a new order. Walkthrough Sales (Priya Shah) — catalog, deliver, next stop. Map plots customers and order sites. Walkthrough"
           }
         },
         {
@@ -150,7 +150,7 @@
           "name": "What does Reassigned mean?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Inbound went to someone else, and you already have a local copy. Keep the row. Your paper still completes and pushes. Chat still works. Job rules in Settings / debug choose keep-editing vs lock."
+            "text": "Inbound went to someone else, and you already have a local copy scheduled for today. Keep the row. Your paper still completes and pushes. A leftover from an earlier day does not stay on Today. Job rules in Settings / debug choose keep-editing vs lock."
           }
         },
         {
@@ -163,10 +163,18 @@
         },
         {
           "@type": "Question",
+          "name": "What does Search find?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "It follows workModes. Jon (assets): notes and assets. Priya (sales): notes, products, and customers. Maya (customer): notes, products, and customers; assets only when the open job is kit. Product and customer hits open. There is no hardcoded Hartford history on Search."
+          }
+        },
+        {
+          "@type": "Question",
           "name": "How do walk-up jobs work?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Today’s Walk-up job creates a field inbound ticket (origin: field) assigned to you. It is still a ticket, not labor. Labor starts after Start work on that inbound screen."
+            "text": "Depends on workModes. Assets and customer get Walk-up job: a field inbound ticket (origin: field). It is still a ticket, not labor — labor starts after Start work. Sales does not show that card; Priya’s walk-up is New field order (customer + order). Customer mode keeps both."
           }
         },
         {
@@ -174,7 +182,7 @@
           "name": "Will overnight jobs disappear at midnight?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "No. Active outbound (assigned / in progress / blocked) is listed without a scheduled.day filter, so overnight work stays on Today until you complete it."
+            "text": "Your own in-progress copy can stay on Today overnight. Reassigned leftovers only show when scheduled.day is today."
           }
         },
         {
@@ -480,7 +488,7 @@
           <ul>
             <li><strong>Assets</strong> (Jon Hale) — inspect / repair / move company kit. <a href="docs/day-assets.html">Walkthrough</a></li>
             <li><strong>Customer</strong> (Maya Chen) — finish a job, then a new order. <a href="docs/day-customer.html">Walkthrough</a></li>
-            <li><strong>Sales</strong> (Priya Shah) — catalog, deliver, next stop. Map tab hidden. <a href="docs/day-sales.html">Walkthrough</a></li>
+            <li><strong>Sales</strong> (Priya Shah) — catalog, deliver, next stop. Map plots customers and order sites. <a href="docs/day-sales.html">Walkthrough</a></li>
           </ul>
         </div>
       </details>
@@ -535,7 +543,7 @@
       <details class="faq-item">
         <summary>What does Reassigned mean?</summary>
         <div class="faq-a">
-          <p>Inbound went to someone else, and you already have a local copy. Keep the row. Your paper still completes and pushes. Chat still works. Job rules in Settings / debug choose keep-editing vs lock.</p>
+          <p>Inbound went to someone else, and you already have a local copy scheduled for <strong>today</strong>. Keep the row. Your paper still completes and pushes. A leftover from an earlier day does not stay on Today. Job rules in Settings / debug choose keep-editing vs lock.</p>
         </div>
       </details>
       <details class="faq-item">
@@ -545,15 +553,21 @@
         </div>
       </details>
       <details class="faq-item">
+        <summary>What does Search find?</summary>
+        <div class="faq-a">
+          <p>It follows <code>workModes</code>. Jon (assets): notes and assets. Priya (sales): notes, products, and customers. Maya (customer): notes, products, and customers; assets only when the open job is kit. Product and customer hits open. There is no hardcoded Hartford history on Search.</p>
+        </div>
+      </details>
+      <details class="faq-item">
         <summary>How do walk-up jobs work?</summary>
         <div class="faq-a">
-          <p>Today’s Walk-up job creates a <strong>field inbound</strong> ticket (<code>origin: field</code>) assigned to you. It is still a ticket, not labor. Labor starts after Start work on that inbound screen.</p>
+          <p>Depends on <code>workModes</code>. <strong>Assets</strong> and <strong>customer</strong> get Walk-up job: a <strong>field inbound</strong> ticket (<code>origin: field</code>). It is still a ticket, not labor — labor starts after Start work. <strong>Sales</strong> does not show that card; Priya’s walk-up is New field order (customer + order). Customer mode keeps both.</p>
         </div>
       </details>
       <details class="faq-item">
         <summary>Will overnight jobs disappear at midnight?</summary>
         <div class="faq-a">
-          <p>No. Active outbound (assigned / in progress / blocked) is listed without a <code>scheduled.day</code> filter, so overnight work stays on Today until you complete it.</p>
+          <p>Your own in-progress copy can stay on Today overnight. <strong>Reassigned</strong> leftovers only show when <code>scheduled.day</code> is today.</p>
         </div>
       </details>
       <details class="faq-item">

@@ -7,6 +7,7 @@
 | Repo | [Fujio-Turner/mobile_field_service](https://github.com/Fujio-Turner/mobile_field_service) |
 | Author | Fujio-Turner / mobile_field_service |
 | Date | 2026-09-06 |
+| Version | 0.1.0 ([RELEASE_NOTES.md](../RELEASE_NOTES.md)) |
 | Status | Demo seed: Jon Hale `E-4412`, inspect/repair/move + WO-10460 reassigned leftover. Login `jon.hale@example.com`. |
 | Index | [DAY_IN_LIFE.md](./DAY_IN_LIFE.md) |
 | Architecture | [DESIGN.md](./DESIGN.md) |
@@ -44,7 +45,7 @@ Not the center of this day: `orders`, `rates`, `taxes` (those are customer/sales
 | Chat | `app/(tabs)/chat.tsx` | `messages` | `SendMessage` |
 | Notes | `app/(tabs)/notes.tsx` | `notes` | `CreateNote` (general) |
 | Profile | `app/(tabs)/profile.tsx` | — | Thumb zone, crumbs count, Settings / debug |
-| Search | `app/search/index.tsx` | notes / products / assets FTS | |
+| Search | `app/search/index.tsx` | notes + assets FTS | |
 
 ---
 

@@ -60,7 +60,7 @@ PAGES: list[dict[str, str]] = [
         "dest": "day-sales.html",
         "title": "Sales walkthrough",
         "prefix": "../",
-        "description": "Priya Shah sales walkthrough: doorstep orders, field customers, catalog, rates, and taxes. Map tab hidden.",
+        "description": "Priya Shah sales walkthrough: doorstep orders, field customers, catalog, rates, and taxes. Map plots customers and order sites.",
         "priority": "0.5",
     },
     {
@@ -116,8 +116,16 @@ PAGES: list[dict[str, str]] = [
         "dest": "release.html",
         "title": "Release",
         "prefix": "../",
-        "description": "Version source of truth in main.go, release cadence, and what to bump when you ship.",
+        "description": "Version source of truth, release cadence, and what to bump when you ship.",
         "priority": "0.3",
+    },
+    {
+        "src": "docs/RELEASE_NOTES.md",
+        "dest": "release-notes.html",
+        "title": "Release notes",
+        "prefix": "../",
+        "description": "What shipped in Mobile Field Service, newest first. Phase 12 mode-aware Search, Map, and Today.",
+        "priority": "0.5",
     },
     {
         "src": "docs/schema/README.md",

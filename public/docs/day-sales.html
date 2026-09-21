@@ -4,13 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Sales walkthrough — Mobile Field Service</title>
-  <meta name="description" content="Priya Shah sales walkthrough: doorstep orders, field customers, catalog, rates, and taxes. Map tab hidden." />
+  <meta name="description" content="Priya Shah sales walkthrough: doorstep orders, field customers, catalog, rates, and taxes. Map plots customers and order sites." />
   <meta name="robots" content="index, follow, max-image-preview:large" />
   <meta name="author" content="Fujio-Turner" />
   <meta name="theme-color" content="#0f766e" />
   <link rel="canonical" href="https://mobile.fuj.io/docs/day-sales" />
   <meta property="og:title" content="Sales walkthrough — Mobile Field Service" />
-  <meta property="og:description" content="Priya Shah sales walkthrough: doorstep orders, field customers, catalog, rates, and taxes. Map tab hidden." />
+  <meta property="og:description" content="Priya Shah sales walkthrough: doorstep orders, field customers, catalog, rates, and taxes. Map plots customers and order sites." />
   <meta property="og:type" content="article" />
   <meta property="og:url" content="https://mobile.fuj.io/docs/day-sales" />
   <meta property="og:image" content="https://mobile.fuj.io/images/og.png" />
@@ -21,7 +21,7 @@
   <meta property="og:locale" content="en_US" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Sales walkthrough — Mobile Field Service" />
-  <meta name="twitter:description" content="Priya Shah sales walkthrough: doorstep orders, field customers, catalog, rates, and taxes. Map tab hidden." />
+  <meta name="twitter:description" content="Priya Shah sales walkthrough: doorstep orders, field customers, catalog, rates, and taxes. Map plots customers and order sites." />
   <meta name="twitter:image" content="https://mobile.fuj.io/images/og.png" />
   <meta name="twitter:image:alt" content="Mobile Field Service: Today list of field jobs on a phone" />
   <link rel="icon" type="image/svg+xml" href="../images/favicon.svg" />
@@ -40,7 +40,7 @@
       "@id": "https://mobile.fuj.io/docs/day-sales#article",
       "headline": "Sales walkthrough — Mobile Field Service",
       "name": "Sales walkthrough — Mobile Field Service",
-      "description": "Priya Shah sales walkthrough: doorstep orders, field customers, catalog, rates, and taxes. Map tab hidden.",
+      "description": "Priya Shah sales walkthrough: doorstep orders, field customers, catalog, rates, and taxes. Map plots customers and order sites.",
       "url": "https://mobile.fuj.io/docs/day-sales",
       "image": "https://mobile.fuj.io/images/og.png",
       "inLanguage": "en-US",
@@ -133,8 +133,12 @@
 <td>2026-09-06</td>
 </tr>
 <tr>
+<td>Version</td>
+<td>0.1.0 (<a href="../RELEASE_NOTES.md">RELEASE_NOTES.md</a>)</td>
+</tr>
+<tr>
 <td>Status</td>
-<td>Demo login <code>priya.shah@example.com</code> (<code>E-8801</code>). Today is orders (ORD-3301). Map tab hidden.</td>
+<td>Demo login <code>priya.shah@example.com</code> (<code>E-8801</code>). Today is orders (ORD-3301). Map plots customers / order sites.</td>
 </tr>
 <tr>
 <td>Index</td>
@@ -217,7 +221,19 @@ Work orders are <strong>optional</strong> here. Pure sales is: quote/order → d
 <td>Customer</td>
 <td><code>app/customer/[id].tsx</code></td>
 <td><code>customers</code></td>
-<td><code>GetCustomer</code>, <code>CreateCustomer</code></td>
+<td><code>GetCustomer</code>, <code>CreateCustomer</code> (address / geo)</td>
+</tr>
+<tr>
+<td>Map</td>
+<td><code>app/(tabs)/map.tsx</code></td>
+<td><code>customers</code>, <code>orders</code></td>
+<td><code>QueryCustomersInBBox</code>, order <code>site.geo</code></td>
+</tr>
+<tr>
+<td>Search</td>
+<td><code>app/search/index.tsx</code></td>
+<td>notes / products / customers FTS</td>
+<td></td>
 </tr>
 <tr>
 <td>Deliver</td>
@@ -264,7 +280,7 @@ Work orders are <strong>optional</strong> here. Pure sales is: quote/order → d
 </ol>
 <h2 id="beat-sheet">Beat sheet</h2>
 <ol type="1">
-<li>Login Priya, <code>workModes: ["sales"]</code>, Today is orders not WOs.</li>
+<li>Login Priya, <code>workModes: ["sales"]</code>, Today is orders not WOs. Map tab is on (customers / stops, not pumps).</li>
 <li>StartOrder copy; inbound JSON unchanged.</li>
 <li>Deliver + POD + CompleteOrder + SubmitOrder.</li>
 <li>Field <code>CreateOrder</code> priced from rates/taxes.</li>

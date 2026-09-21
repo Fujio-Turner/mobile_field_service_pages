@@ -105,6 +105,7 @@
       <p class="crumb"><a href="../index.html">Home</a> · <a href="../docs/index.html">Docs</a> · Settings</p>
 <h1 id="settings--where-they-live-and-what-they-mean">Settings — where they live and what they mean</h1>
 <p>One page for <strong>developers</strong>. Operators and field users only see Profile + <strong>Settings / debug</strong>.</p>
+<p><strong>App version</strong> on the phone is <code>appVersion()</code> (<code>0.1.0+1</code> for v0.1.0). Ship notes: <a href="../RELEASE_NOTES.md">RELEASE_NOTES.md</a>.</p>
 <p>Restart Expo (and rebuild a native binary) after changing <code>EXPO_PUBLIC_*</code>. Device toggles persist in <strong>SecureStore</strong> (Keychain / Keystore) until you change them or wipe the app.</p>
 <table>
 <thead>
@@ -262,7 +263,7 @@
 </tbody>
 </table>
 <p>Also on Profile (read-only): username, email, <code>employeeId</code>, <code>workModes</code>, auth strategy, encrypted DB name, app version, <strong>Crumbs today</strong> (point count, not a map), sync activity.</p>
-<p><strong>Search</strong> (Profile button) is FTS over notes, products, and assets — not a setting.</p>
+<p><strong>Search</strong> (Profile button) is FTS whose collections follow <code>workModes</code> (assets → notes + assets; sales/customer → notes + products + customers). Not a setting.</p>
 <hr />
 <h2 id="3-settings--debug-lab">3. Settings / debug (lab)</h2>
 <p>Route: <code>/debug</code>. Do <strong>not</strong> show session cookies or the DB encryption string.</p>
@@ -395,6 +396,10 @@
 </tr>
 </thead>
 <tbody>
+<tr>
+<td><code>mfs://expo-development-client/?url=http://127.0.0.1:8081</code></td>
+<td>Load Metro (simulator). Use after <code>npm run start:ios</code>. Not a product route.</td>
+</tr>
 <tr>
 <td><code>mfs://</code></td>
 <td>Today</td>

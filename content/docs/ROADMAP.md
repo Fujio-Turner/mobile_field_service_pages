@@ -5,8 +5,9 @@
 | Title | Product and engineering roadmap |
 | Repo | [Fujio-Turner/mobile_field_service](https://github.com/Fujio-Turner/mobile_field_service) |
 | Author | Fujio-Turner / mobile_field_service |
-| Date | 2026-09-06 |
-| Status | S01–S16 except S15 (vector) implemented. Demo three modes on iOS. |
+| Date | 2026-09-16 |
+| Version | 0.1.0 ([RELEASE_NOTES.md](../RELEASE_NOTES.md)) |
+| Status | S01–S16 except S15 (vector) implemented. Phase 12 mode-aware device UX (Search / Map / customer geo / catalog picker / Today chrome). |
 | Architecture | [DESIGN.md](./DESIGN.md) |
 | Use cases | [DAY_IN_LIFE.md](./DAY_IN_LIFE.md) |
 
@@ -80,7 +81,7 @@ PRs **00–05 are a linear spine**. After that, photos / tasks / map / inventory
 
 - [x] `ListTodayWork`: inbound `assignedTo.employeeId = $employeeId`, `status != 'cancelled' AND status != 'superseded'`, `scheduled.day = $day`, `ORDER BY scheduled.startDt DESC` with **numeric** `LIMIT`/`OFFSET` (CBL Mobile rejects `IN [...]` and `$limit`)
 - [x] **Reassigned** / **Assignment changed** badge when inbound assignee ≠ session but local outbound exists
-- [x] Page 0 merge of active outbound: `workordersout` `status = 'assigned' OR status = 'in_progress' OR status = 'blocked'` — **no** `day` filter; unpaged; collapse one row per `source.id` preferring outbound
+- [x] Page 0 merge of active outbound: `workordersout` `status = 'assigned' OR status = 'in_progress' OR status = 'blocked'` — unpaged; collapse one row per `source.id` preferring outbound. **Reassigned** rows only when `scheduled.day` is Today (same span as inbound)
 - [x] Infinite scroll (offset += 20) on inbound only
 - [x] Live query on inbound **and** active outbound page 0; coalesce (~50 ms); skip `FindOutboundForSources` for sources already in the active-outbound set
 - [x] Empty / error / stale-sync states (stale-sync waits on replicator)
@@ -179,6 +180,7 @@ PRs **00–05 are a linear spine**. After that, photos / tasks / map / inventory
 - [x] “Use asset on this job” writes `assetIds` on `woout` (needs PR-05+)
 - [x] Location permission
 - [ ] Follow-up (not this phase): region MBTiles pack
+- [x] Mode-aware map (Phase 12): sales/customer plot **customers / order sites**, not only `field.assets`
 
 **Exit:** map shows seed pumps/sites; pin opens KV detail; airplane mode still shows pins.
 
@@ -221,6 +223,7 @@ PRs **00–05 are a linear spine**. After that, photos / tasks / map / inventory
 - [x] `CreateCustomer` `origin: field` (do not patch pulled customers)
 - [x] Optional `orderId` on delivery WOs; `workOrderOutId` on orders taken on site
 - [x] Seed: one inbound order, two rates, one tax, Hartford customer
+- [x] Customer **lookup** (not a dump of `listCustomers` buttons) and catalog **picker** — Phase 12
 
 **Exit:** sales-mode Today lists an inbound order; copy + complete does not change inbound JSON; walk-up creates `cus:` + `ord:`.
 
@@ -256,6 +259,87 @@ PRs **00–05 are a linear spine**. After that, photos / tasks / map / inventory
 - [x] Metrics: query latency, copy-on-write, blob bytes, replicator
 - [x] Database compact on idle after photo deletes
 - [x] Customer history (local complete `workordersout`)
+
+Search chrome follows `workModes` (Phase 12a). Product and customer hits open. Hartford complete-jobs is no longer hardcoded onto Search.
+
+---
+
+## Phase 12 — Mode-aware device UX
+
+Review 2026-09-21. Device chrome follows `users.workModes[]` on the session (seed employeeId is fallback only).
+
+Gating (`src/session/workModes.ts`):
+
+| Surface | Assets (Jon) | Customer (Maya) | Sales (Priya) |
+| --- | --- | --- | --- |
+| Today jobs | yes | yes | no |
+| Today orders | no | yes | yes |
+| Map tab | yes (**assets**) | yes (**customers / sites**; kit filter) | yes (**customers / sites**) |
+| Search (Profile) | notes + **assets** | notes + products + customers | notes + products + customers |
+| Stock | van + catalog picker | same | same |
+| Walk-up **job** | yes | yes | **no** (customer + order) |
+
+Sales finds SKUs and customers/stops near them. Customer mode keeps jobs **and** orders; map/search default to site/customer, with a kit filter for assets. Assets mode stays as built, with quieter commercial search.
+
+Tracking: [#12](https://github.com/Fujio-Turner/mobile_field_service/issues/12). PRs **17–21**.
+
+### 12a — Mode-aware Search
+
+Issue [#7](https://github.com/Fujio-Turner/mobile_field_service/issues/7).
+
+- [x] Search collections follow `workModes`: assets → notes + **assets**; sales → notes + **products** + **customers**; customer → notes + products + customers (+ assets when the open job is kit)
+- [x] Product hits **open** (or add-to-current-order); today they list and do nothing
+- [x] Customer FTS (`idx_cus_name` / account) — not in Search today
+- [x] Drop hardcoded Hartford complete-jobs history on Search for every login
+
+**Exit:** Priya’s Search never returns pumps. Jon’s Search does not lead with catalog SKUs.
+
+### 12b — Map by mode
+
+Issue [#8](https://github.com/Fujio-Turner/mobile_field_service/issues/8).
+
+- [x] Assets mode: keep current Assets map (bbox, near job / near me, type chips, link to `woout`)
+- [x] Sales (and customer default): plot **customers / order `site.geo`**, chips Area / Near stop / Near me — **not** pump/valve
+- [x] Customer mode: site/customer default; optional **kit** filter for `assets.ownership`
+- [x] Do not “fix” sales by leaving Map hidden
+
+**Exit:** Priya sees customers/stops near her. Maya’s map is not “closest company pump” unless she asks. Jon unchanged.
+
+### 12c — Customer lookup and field-create with geo
+
+Issue [#9](https://github.com/Fujio-Turner/mobile_field_service/issues/9).
+
+- [x] Lookup UI (typeahead / Search) over `listCustomers` — stop dumping every name as a button on `/order/new`
+- [x] `CreateCustomer` takes more than a name (site address and/or lat/lon)
+- [x] Persist geo so 12b can query it (`customers.sites[].geo` or a first-class geo field + index). Schema `sites[]` is untyped today; no `idx_cus_geo`
+- [x] Never patch `origin: dispatch` customers
+
+**Exit:** walk-up has a place on the map; find Hartford by name without scrolling a flat list.
+
+### 12d — Product catalog as a picker
+
+Issue [#10](https://github.com/Fujio-Turner/mobile_field_service/issues/10).
+
+- [x] Typeahead / FTS on the order editor (not an unfiltered `Add {name}` dump, LIMIT 50)
+- [x] Stock “Search catalog” can **add a line** when an order (or job) is in context
+- [x] Profile Search product hits are tappable (see 12a)
+- [x] No barcode / reservation / card capture (still non-goals)
+
+**Exit:** add a SKU to ORD-3301 without scanning a full catalog list.
+
+### 12e — Today chrome by mode
+
+Issue [#11](https://github.com/Fujio-Turner/mobile_field_service/issues/11).
+
+- [x] Read `workModes` from the user doc / session, not `workModesForEmployee(employeeId)` seed switch
+- [x] Sales Today: walk-up is **customer + order**, not `CreateWorkOrderIn`. Hide or demote Walk-up job
+- [x] Customer Today: keep Walk-up job **and** New field order
+- [x] Assets Today: Walk-up job only (orders card already hidden)
+- [ ] Optional later: `scheduled.day` + `needsWorkOrder` on the order editor (Maya “come back Tuesday”)
+
+**Exit:** Priya’s Today does not create a labor ticket as the default walk-up.
+
+**Exit (phase):** a sales login can look up a product and a nearby customer without seeing company assets. A customer login’s map/search default to site/customer. An assets login is unchanged aside from quieter commercial search.
 
 ---
 
@@ -457,12 +541,63 @@ Ordered, independently reviewable PRs. Each PR should build, typecheck, and leav
 | Deps | PR-07, PR-12; **blocked** on vector API **and** native CLIP runtime |
 | Description | Persist `embedding.clip512` (512 floats, never `[]`) on commit photo when the model exists. Create vector index only when the API exists. Similarity UI behind `VECTOR_SEARCH_ENABLED && nativeVectorApi`. Do not fake ANN. |
 
+### PR-17 — Mode-aware Search
+
+| | |
+| --- | --- |
+| Title | `feat: search collections follow workModes` |
+| Files | `app/search/index.tsx`, `src/ops/ftsSearch.ts`, `src/session/workModes.ts` |
+| Deps | PR-12 (FTS chrome), PR-15 (customers/products) |
+| Issue | [#7](https://github.com/Fujio-Turner/mobile_field_service/issues/7) |
+| Description | Assets search notes+assets. Sales search notes+products+customers. Customer search notes+products+customers (assets optional). Product hits open. Drop hardcoded Hartford history. |
+
+### PR-18 — Map by mode
+
+| | |
+| --- | --- |
+| Title | `feat: map plots customers/sites in sales and customer modes` |
+| Files | `app/(tabs)/map.tsx`, `src/ui/LibreAssetMap.tsx` (or a shared map), `src/ops/customers.ts`, `src/session/workModes.ts` |
+| Deps | PR-09, PR-19 (geo on customers) |
+| Issue | [#8](https://github.com/Fujio-Turner/mobile_field_service/issues/8) |
+| Description | Keep the assets map for `assets` mode. Sales/customer default to customers and order `site.geo` with Area / Near stop / Near me. Do not leave Map hidden for sales. |
+
+### PR-19 — Customer lookup and geo
+
+| | |
+| --- | --- |
+| Title | `feat: customer typeahead and field-create with geo` |
+| Files | `src/ops/customers.ts`, `app/customer/[id].tsx`, `app/order/[id].tsx`, `src/db/indexes.ts`, `docs/schema/SCHEMA_CUSTOMERS.md` |
+| Deps | PR-15 |
+| Issue | [#9](https://github.com/Fujio-Turner/mobile_field_service/issues/9) |
+| Description | Replace `listCustomers` dump with lookup. `CreateCustomer` records site geo. Index it. Never patch `origin: dispatch`. |
+
+### PR-20 — Product catalog picker
+
+| | |
+| --- | --- |
+| Title | `feat: product FTS picker on orders and stock` |
+| Files | `app/order/[id].tsx`, `app/(tabs)/inventory.tsx`, `src/ops/products.ts` |
+| Deps | PR-10, PR-15 |
+| Issue | [#10](https://github.com/Fujio-Turner/mobile_field_service/issues/10) |
+| Description | Typeahead on the order editor. Stock catalog search can add a line when an order/job is in context. No barcode, reservation, or card capture. |
+
+### PR-21 — Today chrome by mode
+
+| | |
+| --- | --- |
+| Title | `feat: workModes from user doc; walk-up matches the day` |
+| Files | `src/session/workModes.ts`, `app/(tabs)/index.tsx`, `src/session/AuthContext.tsx` |
+| Deps | PR-01, PR-15 |
+| Issue | [#11](https://github.com/Fujio-Turner/mobile_field_service/issues/11) |
+| Description | Read `users.workModes[]` from the signed-in user, not a seed `employeeId` switch. Sales walk-up is customer+order. Customer keeps job + order. Assets keeps job only. |
+
 ### Merge notes
 
 - Spine: 00 → 01 → 02 → 03 → 04 → 05.
 - After 05: **06** (editor + freeze + amendment) then **07** (photos). **08** (tasks/notes) can parallel 07. **09** (map) depends on **05**, not 04. **16** (tracking) after **09** location permission (collection exists from **02**). **10** (inventory) depends on **06**. **14** (chat) can parallel 06+ after 02/05.
 - **11** (sync) after **07 + 08 + 10 + 14 + 15**. If filters must land incrementally, extend `src/sync/filters.ts` — but prefer 11 last among them.
 - **15** (orders) after **02**; reuse freeze UX from **06**.
+- **17–21** (mode-aware chrome) after **09 + 12 + 15**. **18** (map) after **19** (customer geo). **17** and **20** can overlap. **21** can land first (gating) without waiting on geo.
 - PR-06 CompleteWork ships without the required-task predicate; PR-08 adds it in the same operation.
 - No PR may add Web or Windows runtime targets.
 - No PR may write passwords into CBL, mutate **dispatch** inbound WOs/orders, reopen a completed outbound/order id, nest blobs in arrays, or replicate `tmp`.
