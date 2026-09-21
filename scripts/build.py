@@ -18,6 +18,7 @@ PUBLIC = ROOT / "public"
 TEMPLATE = ROOT / "templates" / "doc.html"
 SITE = "https://mobile.fuj.io"
 APP_REPO = "https://github.com/Fujio-Turner/mobile_field_service"
+PAGES_REPO = "https://github.com/Fujio-Turner/mobile_field_service_pages"
 OG_IMAGE = f"{SITE}/images/og.png"
 OG_ALT = "Mobile Field Service: Today list of field jobs on a phone"
 
@@ -447,8 +448,8 @@ def inject_toc_item(html: str, href: str, label: str) -> str:
 
 
 def github_edit_url(src: str) -> str:
-    """Canonical markdown lives in the app repo (content/ is a copy)."""
-    return f"{APP_REPO}/blob/main/{src}"
+    """Site markdown lives in this repo under content/."""
+    return f"{PAGES_REPO}/blob/main/content/{src}"
 
 
 def github_issue_url(title: str, page_url: str, src: str) -> str:
