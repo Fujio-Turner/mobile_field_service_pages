@@ -39,7 +39,7 @@ python3 -m http.server 4173 --directory public
 
 [https://mobile.fuj.io](https://mobile.fuj.io) is connected to this repo. Push to `main` runs [`.github/workflows/build.yml`](.github/workflows/build.yml): rebuild `public/` from `content/` and commit if it changed. Live URLs drop `.html` (`/faq`, `/docs/architecture`); canonicals and `sitemap.xml` use those paths.
 
-Doc pages have **Edit on GitHub** (app markdown) and **Open an issue** (pre-filled against the app repo).
+Doc pages have **Edit on GitHub** (markdown in this repo under `content/`) and **Open an issue** (pre-filled against the app repo).
 
 Optional S3 + CloudFront (same `public/` root):
 
