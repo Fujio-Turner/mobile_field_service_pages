@@ -18,7 +18,28 @@
     "origin": { "type": "string", "enum": ["dispatch", "field"] },
     "accountNumber": { "type": "string" },
     "contacts": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
-    "sites": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+    "geo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lat", "lon"],
+      "properties": { "lat": { "type": "number" }, "lon": { "type": "number" } }
+    },
+    "sites": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "name": { "type": "string" },
+          "address": { "type": "object", "additionalProperties": true },
+          "geo": {
+            "type": "object",
+            "required": ["lat", "lon"],
+            "properties": { "lat": { "type": "number" }, "lon": { "type": "number" } }
+          }
+        }
+      }
+    },
     "readyToPush": { "type": "boolean" },
     "assignedTo": { "$ref": "#/$defs/assignedTo" }
   },

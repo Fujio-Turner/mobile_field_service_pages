@@ -133,6 +133,10 @@
 <td>2026-09-06</td>
 </tr>
 <tr>
+<td>Version</td>
+<td>0.1.0 (<a href="../RELEASE_NOTES.md">RELEASE_NOTES.md</a>)</td>
+</tr>
+<tr>
 <td>Status</td>
 <td>Demo login <code>maya.chen@example.com</code> (<code>E-7703</code>). Seed delivery WO-2201 + ORD-2201. Walk-up customer at <code>/customer/new</code>.</td>
 </tr>
@@ -217,7 +221,19 @@
 <td>New / existing customer</td>
 <td><code>app/customer/[id].tsx</code> (<code>new</code> or KV)</td>
 <td><code>customers</code></td>
-<td><code>GetCustomer</code>, <code>CreateCustomer</code></td>
+<td><code>GetCustomer</code>, <code>CreateCustomer</code> (address / geo)</td>
+</tr>
+<tr>
+<td>Map</td>
+<td><code>app/(tabs)/map.tsx</code></td>
+<td><code>customers</code>, <code>orders</code>; <strong>Kit</strong> → <code>assets</code></td>
+<td>customers / order sites</td>
+</tr>
+<tr>
+<td>Search</td>
+<td><code>app/search/index.tsx</code></td>
+<td>notes / products / customers FTS</td>
+<td></td>
 </tr>
 <tr>
 <td>New order</td>

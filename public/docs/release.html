@@ -4,13 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Release — Mobile Field Service</title>
-  <meta name="description" content="Version source of truth in main.go, release cadence, and what to bump when you ship." />
+  <meta name="description" content="Version source of truth, release cadence, and what to bump when you ship." />
   <meta name="robots" content="index, follow, max-image-preview:large" />
   <meta name="author" content="Fujio-Turner" />
   <meta name="theme-color" content="#0f766e" />
   <link rel="canonical" href="https://mobile.fuj.io/docs/release" />
   <meta property="og:title" content="Release — Mobile Field Service" />
-  <meta property="og:description" content="Version source of truth in main.go, release cadence, and what to bump when you ship." />
+  <meta property="og:description" content="Version source of truth, release cadence, and what to bump when you ship." />
   <meta property="og:type" content="article" />
   <meta property="og:url" content="https://mobile.fuj.io/docs/release" />
   <meta property="og:image" content="https://mobile.fuj.io/images/og.png" />
@@ -21,7 +21,7 @@
   <meta property="og:locale" content="en_US" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Release — Mobile Field Service" />
-  <meta name="twitter:description" content="Version source of truth in main.go, release cadence, and what to bump when you ship." />
+  <meta name="twitter:description" content="Version source of truth, release cadence, and what to bump when you ship." />
   <meta name="twitter:image" content="https://mobile.fuj.io/images/og.png" />
   <meta name="twitter:image:alt" content="Mobile Field Service: Today list of field jobs on a phone" />
   <link rel="icon" type="image/svg+xml" href="../images/favicon.svg" />
@@ -40,7 +40,7 @@
       "@id": "https://mobile.fuj.io/docs/release#article",
       "headline": "Release — Mobile Field Service",
       "name": "Release — Mobile Field Service",
-      "description": "Version source of truth in main.go, release cadence, and what to bump when you ship.",
+      "description": "Version source of truth, release cadence, and what to bump when you ship.",
       "url": "https://mobile.fuj.io/docs/release",
       "image": "https://mobile.fuj.io/images/og.png",
       "inLanguage": "en-US",
@@ -186,8 +186,13 @@
 </tr>
 <tr>
 <td><code>README.md</code></td>
-<td>Badge / “current version” if present</td>
-<td>Match</td>
+<td><strong>Version</strong> line</td>
+<td>Match <code>expo.version</code></td>
+</tr>
+<tr>
+<td>Product docs <code>Version</code></td>
+<td>DESIGN, ROADMAP, DAY_IN_LIFE*, AUTH</td>
+<td>Same semver as <code>expo.version</code></td>
 </tr>
 </tbody>
 </table>
@@ -241,6 +246,7 @@
 <h2 id="4-docs-sweep">4. Docs sweep</h2>
 <ul class="task-list">
 <li><label><input type="checkbox" />README version / SG example still true</label></li>
+<li><label><input type="checkbox" />Product-doc <code>Version</code> fields (DESIGN, ROADMAP, DAY_IN_LIFE*, AUTH) match <code>expo.version</code></label></li>
 <li><label><input type="checkbox" /><code>docs/DESIGN.md</code> / <code>docs/AUTH.md</code> / <code>guides/*</code> not contradicting the binary</label></li>
 <li><label><input type="checkbox" />Replication allow-list still excludes <code>local.tmp</code></label></li>
 </ul>
@@ -260,7 +266,11 @@
 <p>Lab/testing <strong>does not require</strong> a CBL EE license. Store production with encryption + vector <strong>does</strong>.</p>
 <hr />
 <h2 id="6-build-artifacts">6. Build artifacts</h2>
-<p><strong>Development:</strong> <code>npx expo run:ios</code> / <code>run:android</code> (dev client, not Expo Go).</p>
+<p><strong>Development:</strong> <code>npx expo run:ios</code> / <code>run:android</code> (dev client, not Expo Go). After the first native install, <code>npm run start:ios</code> (simulator, Metro on localhost) or <code>npm start</code> (LAN / device). If the sim shows <strong>Development servers</strong> / a gray Connect, Metro is down — do not type a stale <code>10.*</code> packager URL.</p>
+<ul>
+<li>Xcode 26.4+: <code>plugin.fmt.js</code> must stay in <code>app.json</code> until Expo SDK 56 (fmt 11.0.2 <code>consteval</code>).</li>
+<li>First iOS build needs <code>scripts/fetch-cbl-native.sh</code> (<code>node_modules/cbl-reactnative/ios/cbl-js-swift/DatabaseManager.swift</code>). Skip that and compile fails with <code>cannot find 'DatabaseManager' in scope</code>.</li>
+</ul>
 <p><strong>Release:</strong> EAS or local archive.</p>
 <table>
 <thead>
@@ -305,6 +315,7 @@
 <li><label><input type="checkbox" />iOS <code>buildNumber</code></label></li>
 <li><label><input type="checkbox" />Android <code>versionCode</code></label></li>
 <li><label><input type="checkbox" /><code>RELEASE_NOTES.md</code></label></li>
+<li><label><input type="checkbox" />README + product-doc <code>Version</code> fields</label></li>
 <li><label><input type="checkbox" /><code>cbl-reactnative</code> git pin</label></li>
 <li><label><input type="checkbox" />Tests + tsc</label></li>
 <li><label><input type="checkbox" />Auth + replication smoke</label></li>

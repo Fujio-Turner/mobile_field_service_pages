@@ -174,6 +174,10 @@ const body = doc.toDictionary(); // JSON Schema 2020-12</code></pre>
 <td>2026-09-06</td>
 </tr>
 <tr>
+<td>Version</td>
+<td>0.1.0 (<a href="../RELEASE_NOTES.md">RELEASE_NOTES.md</a>)</td>
+</tr>
+<tr>
 <td>Status</td>
 <td>Implemented S01–S16 except vector (S15). Three demo modes walk on iOS.</td>
 </tr>
@@ -222,7 +226,7 @@ const body = doc.toDictionary(); // JSON Schema 2020-12</code></pre>
 <hr />
 <h2 id="background--motivation">Background &amp; Motivation</h2>
 <h3 id="current-state">Current state</h3>
-<p>This repository is an Expo SDK <strong>52</strong> / RN <strong>0.76.9</strong> field app (<code>app/</code>, <code>src/ops/*</code>, <code>src/db/*</code>, <code>src/sync/*</code>) plus docs. Git <strong>origin</strong> is <code>Fujio-Turner/mobile_field_service</code> (not koten-ai). Demo login (<code>EXPO_PUBLIC_AUTH_STRATEGY=demo</code>) maps Jon / Maya Chen / Priya (or any other non-empty id as Jon). Development builds only — Expo Go cannot load CBL or MapLibre.</p>
+<p>This repository is an Expo SDK <strong>52</strong> / RN <strong>0.76.9</strong> field app (<code>app/</code>, <code>src/ops/*</code>, <code>src/db/*</code>, <code>src/sync/*</code>) plus docs. Git <strong>origin</strong> is <code>Fujio-Turner/mobile_field_service</code> (not koten-ai). Demo login (<code>EXPO_PUBLIC_AUTH_STRATEGY=demo</code>) maps Jon / Maya Chen / Priya (or any other non-empty id as Jon). Development builds only — Expo Go cannot load CBL or MapLibre. <code>ios/</code> is prebuild output (gitignored). <code>plugin.fmt.js</code> disables <code>{fmt}</code> 11.0.2 consteval on Xcode 26.4+ until SDK 56. <code>npm install</code> must fetch <code>cbl-js-swift</code> or the iOS target fails (<code>DatabaseManager</code> not in scope).</p>
 <p>A sibling repo (<code>utility_field_service</code>) demonstrates field-ops UX with a <strong>mock</strong> <code>WorkRepository</code> and a stub <code>CblWorkRepository</code>. It targets a UtilityCo/SAP day-in-the-life demo, not this product’s collection contract or copy-on-write rule.</p>
 <h3 id="pain-points-this-design-addresses">Pain points this design addresses</h3>
 <ol type="1">
@@ -1916,7 +1920,7 @@ src/metrics/                  counters + timings</code></pre>
 <span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
 <span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span></span>
 <span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
-<p><strong>Indexes:</strong> <code>idx_cus_name</code> (<code>name</code>); <code>idx_cus_account</code> (<code>accountNumber</code>); <code>idx_cus_origin</code> (<code>origin</code>).</p>
+<p><strong>Indexes:</strong> <code>idx_cus_name</code> (<code>name</code>); <code>idx_cus_account</code> (<code>accountNumber</code>); <code>idx_cus_origin</code> (<code>origin</code>); <code>idx_cus_geo</code> (<code>geo.lat</code>, <code>geo.lon</code>); FTS <code>idx_cus_fts</code> (<code>name</code>, <code>accountNumber</code>). Primary map pin is first-class <code>geo</code> (copy of <code>sites[0].geo</code>).</p>
 <p><strong>Replication:</strong> PULL for <code>origin !== 'field'</code>. PUSH_AND_PULL for <code>origin === 'field' &amp;&amp; readyToPush</code> (push filter).</p>
 <h3 id="tasks--types-task--task_template"><code>tasks</code> — types <code>task</code> | <code>task_template</code></h3>
 <p>Instance required: <code>type</code>, <code>audit</code>, <code>title</code>, <code>status</code>, <code>workOrderOutId</code> (instances).</p>
@@ -2903,7 +2907,7 @@ src/metrics/                  counters + timings</code></pre>
 <tr>
 <td>Inbound auto-purge orphans outbound</td>
 <td>Low</td>
-<td>Keep outbound; active-outbound query (no day filter)</td>
+<td>Keep outbound; active-outbound query. Reassigned rows only if <code>scheduled.day</code> is Today.</td>
 </tr>
 <tr>
 <td>Tracking map logged / leaked</td>

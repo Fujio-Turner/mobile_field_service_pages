@@ -126,11 +126,15 @@
 </tr>
 <tr>
 <td>Date</td>
-<td>2026-09-06</td>
+<td>2026-09-16</td>
+</tr>
+<tr>
+<td>Version</td>
+<td>0.1.0 (<a href="../RELEASE_NOTES.md">RELEASE_NOTES.md</a>)</td>
 </tr>
 <tr>
 <td>Status</td>
-<td>S01–S16 except S15 (vector) implemented. Demo three modes on iOS.</td>
+<td>S01–S16 except S15 (vector) implemented. Phase 12 mode-aware device UX (Search / Map / customer geo / catalog picker / Today chrome).</td>
 </tr>
 <tr>
 <td>Architecture</td>
@@ -214,7 +218,7 @@
 <ul class="task-list">
 <li><label><input type="checkbox" checked="" /><code>ListTodayWork</code>: inbound <code>assignedTo.employeeId = $employeeId</code>, <code>status != 'cancelled' AND status != 'superseded'</code>, <code>scheduled.day = $day</code>, <code>ORDER BY scheduled.startDt DESC</code> with <strong>numeric</strong> <code>LIMIT</code>/<code>OFFSET</code> (CBL Mobile rejects <code>IN [...]</code> and <code>$limit</code>)</label></li>
 <li><label><input type="checkbox" checked="" /><strong>Reassigned</strong> / <strong>Assignment changed</strong> badge when inbound assignee ≠ session but local outbound exists</label></li>
-<li><label><input type="checkbox" checked="" />Page 0 merge of active outbound: <code>workordersout</code> <code>status = 'assigned' OR status = 'in_progress' OR status = 'blocked'</code> — <strong>no</strong> <code>day</code> filter; unpaged; collapse one row per <code>source.id</code> preferring outbound</label></li>
+<li><label><input type="checkbox" checked="" />Page 0 merge of active outbound: <code>workordersout</code> <code>status = 'assigned' OR status = 'in_progress' OR status = 'blocked'</code> — unpaged; collapse one row per <code>source.id</code> preferring outbound. <strong>Reassigned</strong> rows only when <code>scheduled.day</code> is Today (same span as inbound)</label></li>
 <li><label><input type="checkbox" checked="" />Infinite scroll (offset += 20) on inbound only</label></li>
 <li><label><input type="checkbox" checked="" />Live query on inbound <strong>and</strong> active outbound page 0; coalesce (~50 ms); skip <code>FindOutboundForSources</code> for sources already in the active-outbound set</label></li>
 <li><label><input type="checkbox" checked="" />Empty / error / stale-sync states (stale-sync waits on replicator)</label></li>
@@ -299,6 +303,7 @@
 <li><label><input type="checkbox" checked="" />“Use asset on this job” writes <code>assetIds</code> on <code>woout</code> (needs PR-05+)</label></li>
 <li><label><input type="checkbox" checked="" />Location permission</label></li>
 <li><label><input type="checkbox" />Follow-up (not this phase): region MBTiles pack</label></li>
+<li><label><input type="checkbox" checked="" />Mode-aware map (Phase 12): sales/customer plot <strong>customers / order sites</strong>, not only <code>field.assets</code></label></li>
 </ul>
 <p><strong>Exit:</strong> map shows seed pumps/sites; pin opens KV detail; airplane mode still shows pins.</p>
 <hr />
@@ -335,6 +340,7 @@
 <li><label><input type="checkbox" checked="" /><code>CreateCustomer</code> <code>origin: field</code> (do not patch pulled customers)</label></li>
 <li><label><input type="checkbox" checked="" />Optional <code>orderId</code> on delivery WOs; <code>workOrderOutId</code> on orders taken on site</label></li>
 <li><label><input type="checkbox" checked="" />Seed: one inbound order, two rates, one tax, Hartford customer</label></li>
+<li><label><input type="checkbox" checked="" />Customer <strong>lookup</strong> (not a dump of <code>listCustomers</code> buttons) and catalog <strong>picker</strong> — Phase 12</label></li>
 </ul>
 <p><strong>Exit:</strong> sales-mode Today lists an inbound order; copy + complete does not change inbound JSON; walk-up creates <code>cus:</code> + <code>ord:</code>.</p>
 <hr />
@@ -367,6 +373,108 @@
 <li><label><input type="checkbox" checked="" />Database compact on idle after photo deletes</label></li>
 <li><label><input type="checkbox" checked="" />Customer history (local complete <code>workordersout</code>)</label></li>
 </ul>
+<p>Search chrome follows <code>workModes</code> (Phase 12a). Product and customer hits open. Hartford complete-jobs is no longer hardcoded onto Search.</p>
+<hr />
+<h2 id="phase-12--mode-aware-device-ux">Phase 12 — Mode-aware device UX</h2>
+<p>Review 2026-09-21. Device chrome follows <code>users.workModes[]</code> on the session (seed employeeId is fallback only).</p>
+<p>Gating (<code>src/session/workModes.ts</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Surface</th>
+<th>Assets (Jon)</th>
+<th>Customer (Maya)</th>
+<th>Sales (Priya)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Today jobs</td>
+<td>yes</td>
+<td>yes</td>
+<td>no</td>
+</tr>
+<tr>
+<td>Today orders</td>
+<td>no</td>
+<td>yes</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Map tab</td>
+<td>yes (<strong>assets</strong>)</td>
+<td>yes (<strong>customers / sites</strong>; kit filter)</td>
+<td>yes (<strong>customers / sites</strong>)</td>
+</tr>
+<tr>
+<td>Search (Profile)</td>
+<td>notes + <strong>assets</strong></td>
+<td>notes + products + customers</td>
+<td>notes + products + customers</td>
+</tr>
+<tr>
+<td>Stock</td>
+<td>van + catalog picker</td>
+<td>same</td>
+<td>same</td>
+</tr>
+<tr>
+<td>Walk-up <strong>job</strong></td>
+<td>yes</td>
+<td>yes</td>
+<td><strong>no</strong> (customer + order)</td>
+</tr>
+</tbody>
+</table>
+<p>Sales finds SKUs and customers/stops near them. Customer mode keeps jobs <strong>and</strong> orders; map/search default to site/customer, with a kit filter for assets. Assets mode stays as built, with quieter commercial search.</p>
+<p>Tracking: <a href="https://github.com/Fujio-Turner/mobile_field_service/issues/12">#12</a>. PRs <strong>17–21</strong>.</p>
+<h3 id="12a--mode-aware-search">12a — Mode-aware Search</h3>
+<p>Issue <a href="https://github.com/Fujio-Turner/mobile_field_service/issues/7">#7</a>.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" />Search collections follow <code>workModes</code>: assets → notes + <strong>assets</strong>; sales → notes + <strong>products</strong> + <strong>customers</strong>; customer → notes + products + customers (+ assets when the open job is kit)</label></li>
+<li><label><input type="checkbox" checked="" />Product hits <strong>open</strong> (or add-to-current-order); today they list and do nothing</label></li>
+<li><label><input type="checkbox" checked="" />Customer FTS (<code>idx_cus_name</code> / account) — not in Search today</label></li>
+<li><label><input type="checkbox" checked="" />Drop hardcoded Hartford complete-jobs history on Search for every login</label></li>
+</ul>
+<p><strong>Exit:</strong> Priya’s Search never returns pumps. Jon’s Search does not lead with catalog SKUs.</p>
+<h3 id="12b--map-by-mode">12b — Map by mode</h3>
+<p>Issue <a href="https://github.com/Fujio-Turner/mobile_field_service/issues/8">#8</a>.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" />Assets mode: keep current Assets map (bbox, near job / near me, type chips, link to <code>woout</code>)</label></li>
+<li><label><input type="checkbox" checked="" />Sales (and customer default): plot <strong>customers / order <code>site.geo</code></strong>, chips Area / Near stop / Near me — <strong>not</strong> pump/valve</label></li>
+<li><label><input type="checkbox" checked="" />Customer mode: site/customer default; optional <strong>kit</strong> filter for <code>assets.ownership</code></label></li>
+<li><label><input type="checkbox" checked="" />Do not “fix” sales by leaving Map hidden</label></li>
+</ul>
+<p><strong>Exit:</strong> Priya sees customers/stops near her. Maya’s map is not “closest company pump” unless she asks. Jon unchanged.</p>
+<h3 id="12c--customer-lookup-and-field-create-with-geo">12c — Customer lookup and field-create with geo</h3>
+<p>Issue <a href="https://github.com/Fujio-Turner/mobile_field_service/issues/9">#9</a>.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" />Lookup UI (typeahead / Search) over <code>listCustomers</code> — stop dumping every name as a button on <code>/order/new</code></label></li>
+<li><label><input type="checkbox" checked="" /><code>CreateCustomer</code> takes more than a name (site address and/or lat/lon)</label></li>
+<li><label><input type="checkbox" checked="" />Persist geo so 12b can query it (<code>customers.sites[].geo</code> or a first-class geo field + index). Schema <code>sites[]</code> is untyped today; no <code>idx_cus_geo</code></label></li>
+<li><label><input type="checkbox" checked="" />Never patch <code>origin: dispatch</code> customers</label></li>
+</ul>
+<p><strong>Exit:</strong> walk-up has a place on the map; find Hartford by name without scrolling a flat list.</p>
+<h3 id="12d--product-catalog-as-a-picker">12d — Product catalog as a picker</h3>
+<p>Issue <a href="https://github.com/Fujio-Turner/mobile_field_service/issues/10">#10</a>.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" />Typeahead / FTS on the order editor (not an unfiltered <code>Add {name}</code> dump, LIMIT 50)</label></li>
+<li><label><input type="checkbox" checked="" />Stock “Search catalog” can <strong>add a line</strong> when an order (or job) is in context</label></li>
+<li><label><input type="checkbox" checked="" />Profile Search product hits are tappable (see 12a)</label></li>
+<li><label><input type="checkbox" checked="" />No barcode / reservation / card capture (still non-goals)</label></li>
+</ul>
+<p><strong>Exit:</strong> add a SKU to ORD-3301 without scanning a full catalog list.</p>
+<h3 id="12e--today-chrome-by-mode">12e — Today chrome by mode</h3>
+<p>Issue <a href="https://github.com/Fujio-Turner/mobile_field_service/issues/11">#11</a>.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" />Read <code>workModes</code> from the user doc / session, not <code>workModesForEmployee(employeeId)</code> seed switch</label></li>
+<li><label><input type="checkbox" checked="" />Sales Today: walk-up is <strong>customer + order</strong>, not <code>CreateWorkOrderIn</code>. Hide or demote Walk-up job</label></li>
+<li><label><input type="checkbox" checked="" />Customer Today: keep Walk-up job <strong>and</strong> New field order</label></li>
+<li><label><input type="checkbox" checked="" />Assets Today: Walk-up job only (orders card already hidden)</label></li>
+<li><label><input type="checkbox" />Optional later: <code>scheduled.day</code> + <code>needsWorkOrder</code> on the order editor (Maya “come back Tuesday”)</label></li>
+</ul>
+<p><strong>Exit:</strong> Priya’s Today does not create a labor ticket as the default walk-up.</p>
+<p><strong>Exit (phase):</strong> a sales login can look up a product and a nearby customer without seeing company assets. A customer login’s map/search default to site/customer. An assets login is unchanged aside from quieter commercial search.</p>
 <hr />
 <h2 id="phase-ee--vector-similarity-gated">Phase EE — Vector similarity (gated)</h2>
 <p><strong>Binding:</strong> <a href="https://github.com/Fujio-Turner/cbl-reactnative">Fujio-Turner/cbl-reactnative</a> <code>feat/vector-search-support</code> (<code>VectorIndexConfiguration</code>). Official <code>@couchbase/couchbase-lite-react-native</code> 1.1 does <strong>not</strong> expose vector search — do not use it.</p>
@@ -763,12 +871,138 @@
 </tr>
 </tbody>
 </table>
+<h3 id="pr-17--mode-aware-search">PR-17 — Mode-aware Search</h3>
+<table>
+<tbody>
+<tr>
+<td>Title</td>
+<td><code>feat: search collections follow workModes</code></td>
+</tr>
+<tr>
+<td>Files</td>
+<td><code>app/search/index.tsx</code>, <code>src/ops/ftsSearch.ts</code>, <code>src/session/workModes.ts</code></td>
+</tr>
+<tr>
+<td>Deps</td>
+<td>PR-12 (FTS chrome), PR-15 (customers/products)</td>
+</tr>
+<tr>
+<td>Issue</td>
+<td><a href="https://github.com/Fujio-Turner/mobile_field_service/issues/7">#7</a></td>
+</tr>
+<tr>
+<td>Description</td>
+<td>Assets search notes+assets. Sales search notes+products+customers. Customer search notes+products+customers (assets optional). Product hits open. Drop hardcoded Hartford history.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pr-18--map-by-mode">PR-18 — Map by mode</h3>
+<table>
+<tbody>
+<tr>
+<td>Title</td>
+<td><code>feat: map plots customers/sites in sales and customer modes</code></td>
+</tr>
+<tr>
+<td>Files</td>
+<td><code>app/(tabs)/map.tsx</code>, <code>src/ui/LibreAssetMap.tsx</code> (or a shared map), <code>src/ops/customers.ts</code>, <code>src/session/workModes.ts</code></td>
+</tr>
+<tr>
+<td>Deps</td>
+<td>PR-09, PR-19 (geo on customers)</td>
+</tr>
+<tr>
+<td>Issue</td>
+<td><a href="https://github.com/Fujio-Turner/mobile_field_service/issues/8">#8</a></td>
+</tr>
+<tr>
+<td>Description</td>
+<td>Keep the assets map for <code>assets</code> mode. Sales/customer default to customers and order <code>site.geo</code> with Area / Near stop / Near me. Do not leave Map hidden for sales.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pr-19--customer-lookup-and-geo">PR-19 — Customer lookup and geo</h3>
+<table>
+<tbody>
+<tr>
+<td>Title</td>
+<td><code>feat: customer typeahead and field-create with geo</code></td>
+</tr>
+<tr>
+<td>Files</td>
+<td><code>src/ops/customers.ts</code>, <code>app/customer/[id].tsx</code>, <code>app/order/[id].tsx</code>, <code>src/db/indexes.ts</code>, <code>docs/schema/SCHEMA_CUSTOMERS.md</code></td>
+</tr>
+<tr>
+<td>Deps</td>
+<td>PR-15</td>
+</tr>
+<tr>
+<td>Issue</td>
+<td><a href="https://github.com/Fujio-Turner/mobile_field_service/issues/9">#9</a></td>
+</tr>
+<tr>
+<td>Description</td>
+<td>Replace <code>listCustomers</code> dump with lookup. <code>CreateCustomer</code> records site geo. Index it. Never patch <code>origin: dispatch</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pr-20--product-catalog-picker">PR-20 — Product catalog picker</h3>
+<table>
+<tbody>
+<tr>
+<td>Title</td>
+<td><code>feat: product FTS picker on orders and stock</code></td>
+</tr>
+<tr>
+<td>Files</td>
+<td><code>app/order/[id].tsx</code>, <code>app/(tabs)/inventory.tsx</code>, <code>src/ops/products.ts</code></td>
+</tr>
+<tr>
+<td>Deps</td>
+<td>PR-10, PR-15</td>
+</tr>
+<tr>
+<td>Issue</td>
+<td><a href="https://github.com/Fujio-Turner/mobile_field_service/issues/10">#10</a></td>
+</tr>
+<tr>
+<td>Description</td>
+<td>Typeahead on the order editor. Stock catalog search can add a line when an order/job is in context. No barcode, reservation, or card capture.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pr-21--today-chrome-by-mode">PR-21 — Today chrome by mode</h3>
+<table>
+<tbody>
+<tr>
+<td>Title</td>
+<td><code>feat: workModes from user doc; walk-up matches the day</code></td>
+</tr>
+<tr>
+<td>Files</td>
+<td><code>src/session/workModes.ts</code>, <code>app/(tabs)/index.tsx</code>, <code>src/session/AuthContext.tsx</code></td>
+</tr>
+<tr>
+<td>Deps</td>
+<td>PR-01, PR-15</td>
+</tr>
+<tr>
+<td>Issue</td>
+<td><a href="https://github.com/Fujio-Turner/mobile_field_service/issues/11">#11</a></td>
+</tr>
+<tr>
+<td>Description</td>
+<td>Read <code>users.workModes[]</code> from the signed-in user, not a seed <code>employeeId</code> switch. Sales walk-up is customer+order. Customer keeps job + order. Assets keeps job only.</td>
+</tr>
+</tbody>
+</table>
 <h3 id="merge-notes">Merge notes</h3>
 <ul>
 <li>Spine: 00 → 01 → 02 → 03 → 04 → 05.</li>
 <li>After 05: <strong>06</strong> (editor + freeze + amendment) then <strong>07</strong> (photos). <strong>08</strong> (tasks/notes) can parallel 07. <strong>09</strong> (map) depends on <strong>05</strong>, not 04. <strong>16</strong> (tracking) after <strong>09</strong> location permission (collection exists from <strong>02</strong>). <strong>10</strong> (inventory) depends on <strong>06</strong>. <strong>14</strong> (chat) can parallel 06+ after 02/05.</li>
 <li><strong>11</strong> (sync) after <strong>07 + 08 + 10 + 14 + 15</strong>. If filters must land incrementally, extend <code>src/sync/filters.ts</code> — but prefer 11 last among them.</li>
 <li><strong>15</strong> (orders) after <strong>02</strong>; reuse freeze UX from <strong>06</strong>.</li>
+<li><strong>17–21</strong> (mode-aware chrome) after <strong>09 + 12 + 15</strong>. <strong>18</strong> (map) after <strong>19</strong> (customer geo). <strong>17</strong> and <strong>20</strong> can overlap. <strong>21</strong> can land first (gating) without waiting on geo.</li>
 <li>PR-06 CompleteWork ships without the required-task predicate; PR-08 adds it in the same operation.</li>
 <li>No PR may add Web or Windows runtime targets.</li>
 <li>No PR may write passwords into CBL, mutate <strong>dispatch</strong> inbound WOs/orders, reopen a completed outbound/order id, nest blobs in arrays, or replicate <code>tmp</code>.</li>
@@ -800,6 +1034,7 @@
 <li><a href="#phase-9b--orders-rates-taxes-field-customers" id="toc-phase-9b--orders-rates-taxes-field-customers">Phase 9b — Orders, rates, taxes, field customers</a></li>
 <li><a href="#phase-10--sync" id="toc-phase-10--sync">Phase 10 — Sync</a></li>
 <li><a href="#phase-11--search-polish-observability" id="toc-phase-11--search-polish-observability">Phase 11 — Search, polish, observability</a></li>
+<li><a href="#phase-12--mode-aware-device-ux" id="toc-phase-12--mode-aware-device-ux">Phase 12 — Mode-aware device UX</a></li>
 <li><a href="#phase-ee--vector-similarity-gated" id="toc-phase-ee--vector-similarity-gated">Phase EE — Vector similarity (gated)</a></li>
 <li><a href="#phase-future--pod-signature" id="toc-phase-future--pod-signature">Phase future — POD signature</a></li>
 <li><a href="#non-goals-on-this-roadmap" id="toc-non-goals-on-this-roadmap">Non-goals on this roadmap</a></li>

@@ -12,7 +12,7 @@ License: Apache-2.0
 
 Sync today’s jobs or orders, chat with the team, write notes, find assets or customers on a map, and search a local catalog — including with no signal. Copy-on-write: inbound dispatch tickets are never patched; the field app writes outbound copies. No credit card payment in this version.
 
-Three modes (`users.workModes[]`): assets (Jon Hale), customer (Maya Chen), sales (Priya Shah).
+Three modes (`users.workModes[]`): assets (Jon Hale), customer (Maya Chen), sales (Priya Shah). Search, Map, and Today follow the mode: Jon gets jobs + assets map + asset search; Priya gets orders + customer/site map + product/customer search; Maya keeps jobs and orders, with a Kit chip on the map.
 
 ## Docs
 
@@ -29,5 +29,6 @@ Start here: https://mobile.fuj.io/docs/getting-started
 - Settings: https://mobile.fuj.io/docs/settings
 - JSON Schema: https://mobile.fuj.io/docs/schema/
 - Roadmap: https://mobile.fuj.io/docs/roadmap
+- Release notes: https://mobile.fuj.io/docs/release-notes
 - Agent rules: https://github.com/Fujio-Turner/mobile_field_service/blob/main/AGENT.md
 - Capella deploy: https://github.com/Fujio-Turner/mobile_field_service_deployment

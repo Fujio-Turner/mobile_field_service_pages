@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Release notes — Mobile Field Service</title>
+  <meta name="description" content="What shipped in Mobile Field Service, newest first. Phase 12 mode-aware Search, Map, and Today." />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <meta name="author" content="Fujio-Turner" />
+  <meta name="theme-color" content="#0f766e" />
+  <link rel="canonical" href="https://mobile.fuj.io/docs/release-notes" />
+  <meta property="og:title" content="Release notes — Mobile Field Service" />
+  <meta property="og:description" content="What shipped in Mobile Field Service, newest first. Phase 12 mode-aware Search, Map, and Today." />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://mobile.fuj.io/docs/release-notes" />
+  <meta property="og:image" content="https://mobile.fuj.io/images/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Mobile Field Service: Today list of field jobs on a phone" />
+  <meta property="og:site_name" content="Mobile Field Service" />
+  <meta property="og:locale" content="en_US" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Release notes — Mobile Field Service" />
+  <meta name="twitter:description" content="What shipped in Mobile Field Service, newest first. Phase 12 mode-aware Search, Map, and Today." />
+  <meta name="twitter:image" content="https://mobile.fuj.io/images/og.png" />
+  <meta name="twitter:image:alt" content="Mobile Field Service: Today list of field jobs on a phone" />
+  <link rel="icon" type="image/svg+xml" href="../images/favicon.svg" />
+  <link rel="manifest" href="../site.webmanifest" />
+  <link rel="sitemap" type="application/xml" title="Sitemap" href="https://mobile.fuj.io/sitemap.xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/site.css" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://mobile.fuj.io/docs/release-notes#article",
+      "headline": "Release notes — Mobile Field Service",
+      "name": "Release notes — Mobile Field Service",
+      "description": "What shipped in Mobile Field Service, newest first. Phase 12 mode-aware Search, Map, and Today.",
+      "url": "https://mobile.fuj.io/docs/release-notes",
+      "image": "https://mobile.fuj.io/images/og.png",
+      "inLanguage": "en-US",
+      "isPartOf": {
+        "@id": "https://mobile.fuj.io/#site"
+      },
+      "author": {
+        "@id": "https://mobile.fuj.io/#org"
+      },
+      "publisher": {
+        "@id": "https://mobile.fuj.io/#org"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://mobile.fuj.io/docs/release-notes#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://mobile.fuj.io/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Docs",
+          "item": "https://mobile.fuj.io/docs/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Release notes",
+          "item": "https://mobile.fuj.io/docs/release-notes"
+        }
+      ]
+    }
+  ]
+}
+</script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="../index.html">
+        <img src="../images/favicon.svg" alt="" width="32" height="32" />
+        Mobile Field Service
+      </a>
+      <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <ul class="nav-links">
+        <li><a href="../index.html#features">Features</a></li>
+        <li><a href="../index.html#product">Modes</a></li>
+        <li><a href="../index.html#screens">Screens</a></li>
+        <li><a href="../docs/index.html" aria-current="page">Docs</a></li>
+        <li><a href="../faq.html">FAQ</a></li>
+      </ul>
+      <a class="btn btn-primary" href="https://github.com/Fujio-Turner/mobile_field_service" rel="noopener noreferrer">GitHub</a>
+    </div>
+  </header>
+  <main class="wrap doc-layout">
+    <article class="prose">
+      <p class="crumb"><a href="../index.html">Home</a> · <a href="../docs/index.html">Docs</a> · Release notes</p>
+<h1 id="release-notes--mobile_field_service">Release notes — mobile_field_service</h1>
+<p>Newest first. User-visible string on the phone is <code>{expo.version}+{ios.buildNumber|android.versionCode}</code> (login footer, Profile, Settings / debug). Do not hard-code that string in UI — <code>appVersion()</code> reads Expo Application APIs.</p>
+<p>How to bump: <a href="release.html">guides/RELEASE.md</a>.</p>
+<hr />
+<h2 id="2026-09-21--phase-12-mode-aware-chrome">2026-09-21 — Phase 12 (mode-aware chrome)</h2>
+<p>Shipped on app <strong><code>0.1.0+1</code></strong> in <a href="https://github.com/Fujio-Turner/mobile_field_service/pull/25">PR #25</a> (<code>issue/12</code>). Closes <a href="https://github.com/Fujio-Turner/mobile_field_service/issues/7">#7</a>–<a href="https://github.com/Fujio-Turner/mobile_field_service/issues/12">#12</a>. Device chrome now follows <code>users.workModes[]</code> on the session (seed employeeId is fallback only).</p>
+<h3 id="new-features">New Features</h3>
+<ul>
+<li><strong>Today</strong> — sales hides Walk-up job (customer + order instead); customer keeps job <strong>and</strong> order walk-ups; assets keeps Walk-up job only. Live queries skip lists the login does not show.</li>
+<li><strong>Search</strong> — collections follow the day: assets → notes + assets; sales/customer → notes + products + customers (Maya also gets assets when the open job is kit). Product and customer hits open. Hartford complete-jobs dump removed.</li>
+<li><strong>Map</strong> — tab visible for sales. Jon keeps the assets map. Priya and Maya plot <strong>customers</strong> and order <code>site.geo</code> (Area / Near stop / Near me). Maya has a <strong>Kit</strong> chip for company assets.</li>
+<li><strong>Customers</strong> — typeahead lookup (no button dump). Field create records address and/or lat/lon. First-class <code>geo</code> + <code>idx_cus_geo</code> / <code>idx_cus_fts</code>. Dispatch customers stay pull-only.</li>
+<li><strong>Catalog picker</strong> — type a SKU on the order editor; Stock can add a line when an order or job is in context.</li>
+</ul>
+<h3 id="bug-fixes">Bug Fixes</h3>
+<ul>
+<li><strong>Reassigned</strong> leftovers (e.g. WO-10460) only appear on Today when <code>scheduled.day</code> is today. Your own in-progress copy can still stay overnight.</li>
+</ul>
+<h3 id="changes">Changes</h3>
+<ul>
+<li>Session stores <code>workModes</code> in Keychain; after the DB opens, <code>field.users.workModes</code> wins.</li>
+<li>Live Today queries no longer <code>execute()</code> the same SQL++ on attach (the listener’s first snapshot is the paint).</li>
+<li>Van stock names load by product id, not a 50-row catalog dump.</li>
+<li>Memory/demo seed is once per process.</li>
+</ul>
+<h3 id="known">Known</h3>
+<ul>
+<li>Vector / CLIP (S15) is off</li>
+<li>POD is a photo; signature pad later</li>
+<li>No credit card payment</li>
+<li>Order editor still has no “come back Tuesday” <code>scheduled.day</code> / <code>needsWorkOrder</code> (called out on #11)</li>
+</ul>
+<hr />
+<h2 id="v010--2026-09-16">v0.1.0 — 2026-09-16</h2>
+<p>First tracked build. App <strong><code>0.1.0+1</code></strong>. Expo SDK 52 / React Native 0.76.9. Development builds only (not Expo Go).</p>
+<h3 id="new-features-1">New Features</h3>
+<ul>
+<li>Three demo modes on one binary: <strong>assets</strong> (Jon), <strong>customer</strong> (Maya), <strong>sales</strong> (Priya)</li>
+<li>Copy-on-write jobs and orders; freeze on complete; amendments; Reassigned</li>
+<li>Today list + live clock + sync HUD</li>
+<li>Assets map (bbox, near job / near me); van stock; notes; employee chat</li>
+<li>Field customers and orders with snapshotted rates/taxes (no card capture)</li>
+<li>Encrypted Couchbase Lite <code>field.*</code> + replicator; tracking crumbs (TTL 30 days)</li>
+<li>Profile Settings / debug (versions, DB path, replicator, counts)</li>
+</ul>
+<h3 id="bug-fixes-1">Bug Fixes</h3>
+<ul>
+<li>iOS compile on Xcode 26.4+ (<code>plugin.fmt.js</code> disables <code>{fmt}</code> 11.0.2 consteval)</li>
+<li>First iOS build needs <code>scripts/fetch-cbl-native.sh</code> (<code>cbl-js-swift</code>); skip it and Swift types are missing</li>
+</ul>
+<h3 id="changes-1">Changes</h3>
+<ul>
+<li>Version bump — app <code>0.1.0</code> (build 1)</li>
+<li>cbl-reactnative @ <code>feat/vector-search-support</code> (<code>af459d16a4ff7fe93cdf1a3b1c0c4d46253c6aa2</code>)</li>
+</ul>
+<h3 id="known-1">Known</h3>
+<ul>
+<li>Vector / CLIP (S15) is off</li>
+<li>POD is a photo; signature pad later</li>
+<li>No credit card payment</li>
+<li>Mode-aware Search / Map / Today shipped 2026-09-21 — see the Phase 12 section above</li>
+</ul>
+    </article>
+    <aside class="toc" aria-label="On this page">
+      <div class="doc-actions">
+        <a class="doc-edit" href="https://github.com/Fujio-Turner/mobile_field_service/blob/main/docs/RELEASE_NOTES.md" rel="noopener noreferrer">Edit on GitHub</a>
+        <a class="doc-issue" href="https://github.com/Fujio-Turner/mobile_field_service/issues/new?title=Docs%3A%20Release%20notes&amp;body=Page%3A%20https%3A//mobile.fuj.io/docs/release-notes%0ASource%3A%20https%3A//github.com/Fujio-Turner/mobile_field_service/blob/main/docs/RELEASE_NOTES.md%0A%0AWhat%20is%20wrong%20or%20missing%3F%0A" rel="noopener noreferrer">Open an issue</a>
+      </div>
+      <p class="eyebrow">On this page</p>
+<ul>
+<li><a href="#release-notes--mobile_field_service" id="toc-release-notes--mobile_field_service">Release notes — mobile_field_service</a>
+<ul>
+<li><a href="#2026-09-21--phase-12-mode-aware-chrome" id="toc-2026-09-21--phase-12-mode-aware-chrome">2026-09-21 — Phase 12 (mode-aware chrome)</a></li>
+<li><a href="#v010--2026-09-16" id="toc-v010--2026-09-16">v0.1.0 — 2026-09-16</a></li>
+</ul></li>
+</ul>
+    </aside>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>© <span id="year">2026</span> Fujio-Turner. Apache License 2.0.</p>
+      <p><a href="https://mobile.fuj.io/">mobile.fuj.io</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service">App</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_pages">Docs site</a> · <a href="https://github.com/Fujio-Turner/mobile_field_service_deployment">Deployment</a></p>
+    </div>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="../js/site.js"></script>
+</body>
+</html>

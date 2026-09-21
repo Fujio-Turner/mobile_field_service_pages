@@ -7,6 +7,7 @@
 | Repo | [Fujio-Turner/mobile_field_service](https://github.com/Fujio-Turner/mobile_field_service) |
 | Author | Fujio-Turner / mobile_field_service |
 | Date | 2026-09-06 |
+| Version | 0.1.0 ([RELEASE_NOTES.md](../RELEASE_NOTES.md)) |
 | Status | Demo login `maya.chen@example.com` (`E-7703`). Seed delivery WO-2201 + ORD-2201. Walk-up customer at `/customer/new`. |
 | Index | [DAY_IN_LIFE.md](./DAY_IN_LIFE.md) |
 | Orders schema | [schema/SCHEMA_ORDERS.md](./schema/SCHEMA_ORDERS.md) |
@@ -40,7 +41,9 @@ Channel `emp:E-7703`. Dispatch sends **delivery / service** work orders that poi
 | Today | `app/(tabs)/index.tsx` | workorders + working orders | `ListTodayWork`, `ListTodayOrders` |
 | Delivery WO | `app/wo/out/[id]` | `workordersout` | `StartWork`, `CompleteWork` |
 | Catalog | `app/(tabs)/inventory.tsx` / products | `products`, `rates`, `taxes` | `SearchProducts`, `PriceLines` |
-| New / existing customer | `app/customer/[id].tsx` (`new` or KV) | `customers` | `GetCustomer`, `CreateCustomer` |
+| New / existing customer | `app/customer/[id].tsx` (`new` or KV) | `customers` | `GetCustomer`, `CreateCustomer` (address / geo) |
+| Map | `app/(tabs)/map.tsx` | `customers`, `orders`; **Kit** → `assets` | customers / order sites |
+| Search | `app/search/index.tsx` | notes / products / customers FTS | |
 | New order | `app/order/[id].tsx` | `orders` | `CreateOrder`, `AddOrderLine`, `SubmitOrder` |
 
 ---

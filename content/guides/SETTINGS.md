@@ -2,6 +2,8 @@
 
 One page for **developers**. Operators and field users only see Profile + **Settings / debug**.
 
+**App version** on the phone is `appVersion()` (`0.1.0+1` for v0.1.0). Ship notes: [RELEASE_NOTES.md](../RELEASE_NOTES.md).
+
 Restart Expo (and rebuild a native binary) after changing `EXPO_PUBLIC_*`. Device toggles persist in **SecureStore** (Keychain / Keystore) until you change them or wipe the app.
 
 | Layer | When it applies | Where |
@@ -62,7 +64,7 @@ Persisted in SecureStore. Sign-out does **not** clear these (or the DB encryptio
 
 Also on Profile (read-only): username, email, `employeeId`, `workModes`, auth strategy, encrypted DB name, app version, **Crumbs today** (point count, not a map), sync activity.
 
-**Search** (Profile button) is FTS over notes, products, and assets — not a setting.
+**Search** (Profile button) is FTS whose collections follow `workModes` (assets → notes + assets; sales/customer → notes + products + customers). Not a setting.
 
 ---
 
@@ -129,6 +131,7 @@ Useful in the simulator: `xcrun simctl openurl booted 'mfs://…'`.
 
 | URL | Screen |
 | --- | --- |
+| `mfs://expo-development-client/?url=http://127.0.0.1:8081` | Load Metro (simulator). Use after `npm run start:ios`. Not a product route. |
 | `mfs://` | Today |
 | `mfs://notes` `map` `inventory` `chat` `profile` | Tabs |
 | `mfs://search` | FTS |

@@ -8,6 +8,7 @@ Public HTML: [https://mobile.fuj.io/docs/architecture.html](https://mobile.fuj.i
 | Repo | [Fujio-Turner/mobile_field_service](https://github.com/Fujio-Turner/mobile_field_service) |
 | Author | Fujio-Turner / mobile_field_service |
 | Date | 2026-09-06 |
+| Version | 0.1.0 ([RELEASE_NOTES.md](../RELEASE_NOTES.md)) |
 | Status | Implemented S01–S16 except vector (S15). Three demo modes walk on iOS. |
 | Audience | Senior engineers implementing the Expo + Couchbase Lite RN app |
 
@@ -43,7 +44,7 @@ Vector similarity (on-device **mobile-CLIP** embeddings + CBL vector index) is a
 
 ### Current state
 
-This repository is an Expo SDK **52** / RN **0.76.9** field app (`app/`, `src/ops/*`, `src/db/*`, `src/sync/*`) plus docs. Git **origin** is `Fujio-Turner/mobile_field_service` (not koten-ai). Demo login (`EXPO_PUBLIC_AUTH_STRATEGY=demo`) maps Jon / Maya Chen / Priya (or any other non-empty id as Jon). Development builds only — Expo Go cannot load CBL or MapLibre.
+This repository is an Expo SDK **52** / RN **0.76.9** field app (`app/`, `src/ops/*`, `src/db/*`, `src/sync/*`) plus docs. Git **origin** is `Fujio-Turner/mobile_field_service` (not koten-ai). Demo login (`EXPO_PUBLIC_AUTH_STRATEGY=demo`) maps Jon / Maya Chen / Priya (or any other non-empty id as Jon). Development builds only — Expo Go cannot load CBL or MapLibre. `ios/` is prebuild output (gitignored). `plugin.fmt.js` disables `{fmt}` 11.0.2 consteval on Xcode 26.4+ until SDK 56. `npm install` must fetch `cbl-js-swift` or the iOS target fails (`DatabaseManager` not in scope).
 
 A sibling repo (`utility_field_service`) demonstrates field-ops UX with a **mock** `WorkRepository` and a stub `CblWorkRepository`. It targets a UtilityCo/SAP day-in-the-life demo, not this product’s collection contract or copy-on-write rule.
 
@@ -1422,7 +1423,7 @@ Movement required: `type`, `audit`, `productId`, `locationId`, `qtyDelta`, `reas
 }
 ```
 
-**Indexes:** `idx_cus_name` (`name`); `idx_cus_account` (`accountNumber`); `idx_cus_origin` (`origin`).
+**Indexes:** `idx_cus_name` (`name`); `idx_cus_account` (`accountNumber`); `idx_cus_origin` (`origin`); `idx_cus_geo` (`geo.lat`, `geo.lon`); FTS `idx_cus_fts` (`name`, `accountNumber`). Primary map pin is first-class `geo` (copy of `sites[0].geo`).
 
 **Replication:** PULL for `origin !== 'field'`. PUSH_AND_PULL for `origin === 'field' && readyToPush` (push filter).
 
@@ -2230,7 +2231,7 @@ Reopening `complete` → `in_progress` on the same id fights the backend that no
 | Inventory qty conflicts on shared vans | Medium | 1:1 van in v1 |
 | iOS background replicator killed | Medium | Restart replicator on foreground |
 | Expo Go used by mistake | Low | Missing native module screen |
-| Inbound auto-purge orphans outbound | Low | Keep outbound; active-outbound query (no day filter) |
+| Inbound auto-purge orphans outbound | Low | Keep outbound; active-outbound query. Reassigned rows only if `scheduled.day` is Today. |
 | Tracking map logged / leaked | High | Never log `tracking`; channel `emp:` only; no email in the id |
 | Location permission denied | Low | History still saves without lat/lon; crumbs simply skip |
 

@@ -104,6 +104,7 @@
     <article class="prose">
       <p class="crumb"><a href="../../index.html">Home</a> · <a href="../../docs/index.html">Docs</a> · Schemas</p>
 <h1 id="schemas">Schemas</h1>
+<p><strong>App version:</strong> <strong>0.1.0</strong> — <a href="../../RELEASE_NOTES.md">RELEASE_NOTES.md</a></p>
 <p>One file per collection (or pair). Shared envelope: <a href="common.html">SCHEMA_COMMON.md</a> (<code>audit</code> + <code>history[]</code> on user/device docs; <strong>no</strong> <code>lastAction</code>). Movement crumbs: <a href="tracking.html">SCHEMA_TRACKING.md</a> (<strong>TTL 30 days</strong>). Architecture: <a href="../architecture.html">DESIGN.md</a>. Settings: <a href="../settings.html">guides/SETTINGS.md</a>.</p>
 <p>Each file includes a <strong><a href="https://json-schema.org/draft/2020-12/schema">JSON Schema 2020-12</a></strong> (<code>"$schema": "https://json-schema.org/draft/2020-12/schema"</code>) for the document body. Copy a block into a <a href="https://json-schema.org">JSON Schema</a> validator. <code>$defs</code> for <code>audit</code> / <code>history[]</code> / <code>assignedTo</code> / <code>geo</code> live in <a href="common.html">SCHEMA_COMMON.md</a>; collection files repeat a copy so each schema is self-contained.</p>
 <table>
